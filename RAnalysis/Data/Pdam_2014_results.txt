@@ -1,0 +1,14 @@
+
+	Two-sample Kolmogorov-Smirnov test
+
+data:  june.amb$mean and june.high$mean
+D = 0.4286, p-value = 0.5752
+alternative hypothesis: two-sided
+
+
+	Two-sample Kolmogorov-Smirnov test
+
+data:  july.amb$mean and july.high$mean
+D = 0.625, p-value = 0.08702
+alternative hypothesis: two-sided
+
