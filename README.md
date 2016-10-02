@@ -1,6 +1,6 @@
 
 
-#Adult preconditining to ocean acidification induces positive offspring response  
+#Adult preconditioning to ocean acidification induces positive offspring response  
 
 This repository includes data and analysis scripts to accompany: Nurtured by Nature:Adult preconditining to ocean acidification induces positive offspring response 
 
