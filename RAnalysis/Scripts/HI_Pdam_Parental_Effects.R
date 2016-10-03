@@ -3,24 +3,23 @@
 #Title: 
 #Contact: Hollie Putnam hollieputnam@gmail.com
 #Supported by: NSF Ocean Sciencs Postdoctoral Research Fellowship (NSF OCE PRF-1323822) and NSF EPSCOR (NSF EPS-0903833)
-#last modified 2016911
+#last modified 20161002
 #See Readme file for details on data files and metadata
 
 rm(list=ls()) # removes all prior objects
 
 #Read in required libraries
-##### Include Versions of libraries
-library("ggplot2")
-library("plotrix")
-library("reshape")
-library("gridExtra")
-library("seacarb")
-library("plyr")
-library("car")
-library("lsmeans")
-library("nlme")
-library("multcomp")
-
+library(car) #version 2.0-21 Date: 2014/08/09 Title: Companion to Applied Regression Depends: R (>= 2.14.0), stats, graphics
+library(ggplot2) #version 1.0.1 Date/Publication: 2015-03-17 Title: An Implementation of the Grammar of Graphics Depends: R (>= 2.14), stats, methods
+library(gridExtra) #version: 0.9.1 Date/Publication: 2012-08-09 Title: functions in Grid graphics Depends: R(>= 2.5.0), grid
+library(lsmeans)  #version: 2.17 Date: 2015-04-15 Title: Least-Squares Means Depends: estimability, methods, R (>= 3.0)
+library(multcomp) #version: 1.4-0 Date: 2015-03-05 Title: Simultaneous Inference in General Parametric Models Depends: stats, graphics, mvtnorm (>= 0.8-0), survival (>= 2.35-7), TH.data (>= 1.0-2)
+library(nlme) #version: 3.1-118 Date: 2014-10-07 Title: Linear and Nonlinear Mixed Effects Models Depends: graphics, stats, R (>= 3.0.0)
+library(plotrix) #version: 3.5-7 Date: 2014-05-26 Title: Various plotting functions Depends:NA
+library(plyr) #version: 1.8.1 Date/Publication: 2014-02-26 Title: Tools for splitting, applying and combining data Depends: R (>= 2.11.0)
+library(reshape) #version: 0.8.5 Date/Publication: 2014-04-23 Title: Flexibly reshape data. Depends: R (>= 2.6.1)
+library(seacarb) #version: 3.0 Date/Publication: 2014-04-05 Title: seawater carbonate chemistry with R Depends: NA
+ 
 #Required Data files
 #Light_Calibration_Data.csv
 #Temperature_Calibration_Data.csv
@@ -32,7 +31,7 @@ library("multcomp")
 #Month1_Tank_Light.csv
 #Month6_Tank_Temp.csv
 #Month6_Tank_Light.csv
-#/Users/hputnam/MyProjects/HI_Pdam_Parental/RAnalysis/Data/pH_Calibration_Files/
+#~/MyProjects/HI_Pdam_Parental/RAnalysis/Data/pH_Calibration_Files/
 #Daily_Temp_pH_Sal.csv
 #TA_mass_data.csv
 #CRM_TA_Data.csv
@@ -41,9 +40,8 @@ library("multcomp")
 #august.larval.release.data.csv
 
 #############################################################
-setwd("/Users/hputnam/MyProjects/HI_Pdam_Parental/RAnalysis/Data") #set working directory
-mainDir<-'/Users/hputnam/MyProjects/HI_Pdam_Parental/RAnalysis/' #set main directory
-
+setwd("~/MyProjects/HI_Pdam_Parental/RAnalysis/Data") #set working directory
+mainDir<-'~/MyProjects/HI_Pdam_Parental/RAnalysis/' #set main directory
 #############################################################
 
 ##### CALIBRATIONS #####
@@ -53,12 +51,13 @@ mainDir<-'/Users/hputnam/MyProjects/HI_Pdam_Parental/RAnalysis/' #set main direc
 #Tank4 Odyssey PAR Logger Serial Number = 2486
 #Tank5 Odyssey PAR Logger Serial Number = 2487
 Cal.L.data <- read.csv("Light_Calibration_Data.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
+#Convert light from counts to instantaneous PAR
 Cal.L.data$Licor.quanta <- (Cal.L.data$Licor.mol.m2*10^6)/(15*60) #convert 15 min integrated data to instantaneous µmol m-2 s-1
 Cal.L.data$Tank2.quanta <- Cal.L.data$Tank2/(15*60) #convert 15 min integrated data to instantaneous µmol m-2 s-1
 Cal.L.data$Tank3.quanta <- Cal.L.data$Tank3/(15*60) #convert 15 min integrated data to instantaneous µmol m-2 s-1
 Cal.L.data$Tank4.quanta <- Cal.L.data$Tank4/(15*60) #convert 15 min integrated data to instantaneous µmol m-2 s-1
 Cal.L.data$Tank5.quanta <- Cal.L.data$Tank5/(15*60) #convert 15 min integrated data to instantaneous µmol m-2 s-1
-
+#Run linear models of loggers against standard and extract model coeffecients to be applied to raw data
 L2.lm <- coef(lm(Licor.quanta ~ Tank2.quanta, data=Cal.L.data)) #extract model coefficients
 L3.lm <- coef(lm(Licor.quanta ~ Tank3.quanta, data=Cal.L.data)) #extract model coefficients
 L4.lm <- coef(lm(Licor.quanta ~ Tank4.quanta, data=Cal.L.data)) #extract model coefficients
@@ -71,6 +70,7 @@ L5.lm <- coef(lm(Licor.quanta ~ Tank5.quanta, data=Cal.L.data)) #extract model c
 #Tank4 Hobo Water Temp Pro Logger Serial Number = 10487934
 #Tank5 Hobo Water Temp Pro Logger Serial Number = 10487935
 Cal.T.data <- read.csv("Temperature_Calibration_Data.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
+#Run linear models of loggers against standard and extract model coeffecients to be applied to raw data
 T2.lm <- coef(lm(Tank1 ~ Tank2, data=Cal.T.data)) #extract model coefficients
 T3.lm <- coef(lm(Tank1 ~ Tank3, data=Cal.T.data)) #extract model coefficients
 T4.lm <- coef(lm(Tank1 ~ Tank4, data=Cal.T.data)) #extract model coefficients
@@ -89,7 +89,7 @@ min(Field.data$Temperature) #view minimum
 max(Field.data$Temperature) #view maximum
 quarterly.temp.mean2 <- aggregate(Temperature ~ quarterhours2, data=Field.data, mean, na.rm=TRUE) #calculate mean of temperature for every 15 min interval
 quarterly.temp.se2 <- aggregate(Temperature ~ quarterhours2, data=Field.data, std.error, na.rm=TRUE)  #calculate standard error of the mean of temperature for every 15 min interval
-Field.temp.N <- sum(!is.na(Field.data$Temperature)) #Count sample size
+Field.temp.N <- sum(!is.na(Field.data$Temperature)) #Count sample size without NA values
 field.temp.means <- data.frame(quarterly.temp.mean2, quarterly.temp.se2$Temperature) #combine mean and standard error results
 colnames(field.temp.means) <- c("Time", "mean", "se")  #rename columns to describe contents
 
@@ -128,7 +128,7 @@ Acc.data #View data
 #Tank Temperature Data for Acclimation Period (02April14 - 05May14)
 quarterly.temp.mean <- aggregate(temp ~ quarterhours, data=Acc.data, mean, na.rm=TRUE) #calculate mean of temperature for every 15 min interval
 quarterly.temp.se <- aggregate(temp ~ quarterhours, data=Acc.data, std.error, na.rm=TRUE) #calculate standard error of the mean of temperature for every 15 min interval
-Acc.temp.N <- sum(!is.na(Acc.data$temp)) #Count sample size
+Acc.temp.N <- sum(!is.na(Acc.data$temp)) #Count sample size without NA values
 Acc.temp.N #View data
 temp.means <- data.frame(quarterly.temp.mean, quarterly.temp.se$temp) #combine mean and standard error results
 colnames(temp.means) <- c("Time", "mean", "se")  #rename columns to describe contents
@@ -155,19 +155,19 @@ Fig2 #View figure
 Acc.light.N <- sum(!is.na(Acc.data$light)) #Count sample size
 Acc.light.N #View data
 quarterly.light.mean <- aggregate(light ~ quarterhours, data=Acc.data, mean, na.rm=TRUE) #calculate mean of light for every 15 min interval
-quarterly.light.mean <- rbind(c("05:45","NA"), quarterly.light.mean)
-quarterly.light.mean[56,c(1,2)] <- c("19:30", "NA")
-quarterly.light.mean[57,c(1,2)] <- c("19:45", "NA")
-quarterly.light.mean[58,c(1,2)] <- c("20:00", "NA")
-quarterly.light.mean[59,c(1,2)] <- c("20:15", "NA")
+quarterly.light.mean <- rbind(c("05:45","NA"), quarterly.light.mean) #combine data 
+quarterly.light.mean[56,c(1,2)] <- c("19:30", "NA") #add row of time to complete data frame
+quarterly.light.mean[57,c(1,2)] <- c("19:45", "NA") #add row of time to complete data frame
+quarterly.light.mean[58,c(1,2)] <- c("20:00", "NA") #add row of time to complete data frame
+quarterly.light.mean[59,c(1,2)] <- c("20:15", "NA") #add row of time to complete data frame
 quarterly.light.mean$light <- as.numeric(quarterly.light.mean$light)
 quarterly.light.se <- aggregate(light ~ quarterhours, data=Acc.data, std.error, na.rm=TRUE) #calculate standard error of the mean of light for every 15 min interval
-quarterly.light.se <- rbind(c("05:45","NA"), quarterly.light.se)
-quarterly.light.se[56,c(1,2)] <- c("19:30", "NA")
-quarterly.light.se[57,c(1,2)] <- c("19:45", "NA")
-quarterly.light.se[58,c(1,2)] <- c("20:00", "NA")
-quarterly.light.se[59,c(1,2)] <- c("20:15", "NA")
-quarterly.light.se$light <- as.numeric(quarterly.light.se$light)
+quarterly.light.se <- rbind(c("05:45","NA"), quarterly.light.se) #combine data 
+quarterly.light.se[56,c(1,2)] <- c("19:30", "NA") #add row of time to complete data frame
+quarterly.light.se[57,c(1,2)] <- c("19:45", "NA") #add row of time to complete data frame
+quarterly.light.se[58,c(1,2)] <- c("20:00", "NA") #add row of time to complete data frame
+quarterly.light.se[59,c(1,2)] <- c("20:15", "NA") #add row of time to complete data frame
+quarterly.light.se$light <- as.numeric(quarterly.light.se$light) #set column as numeric
 light.means <- data.frame(quarterly.light.mean, quarterly.light.se$light) #combine mean and standard error results
 colnames(light.means) <- c("Time", "mean", "se")  #rename columns to describe contents
 
@@ -266,17 +266,17 @@ Fig5 #View figure
 tank.light.data <- read.csv("Adult_Tank_Light.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
 tank.light.data[tank.light.data == 0] <- NA
 mydate.tanks <- strptime(tank.light.data$Date.Time, format="%m/%d/%y %H:%M") #convert date format to characters
-
+#Convert into instantaneous PAR
 tank.light.data$Tank3.quanta <-(tank.light.data$Tank3)/(15*60) #Assign light column in dataframe and convert to units of µmol m-2 s-1
 tank.light.data$Tank4.quanta <-(tank.light.data$Tank4)/(15*60) #Assign light column in dataframe and convert to units of µmol m-2 s-1
 tank.light.data$Tank5.quanta <-(tank.light.data$Tank5)/(15*60) #Assign light column in dataframe and convert to units of µmol m-2 s-1
-
+#apply calibration models
 tank.light.data$Tank3.cal <-(tank.light.data$Tank3.quanta*L3.lm[2])+L3.lm[1] #Apply the cross calibration of temperature to standard logger #1
 tank.light.data$Tank4.cal <-(tank.light.data$Tank4.quanta*L4.lm[2])+L4.lm[1] #Apply the cross calibration of temperature to standard logger #1
 tank.light.data$Tank5.cal <-(tank.light.data$Tank5.quanta*L5.lm[2])+L5.lm[1] #Apply the cross calibration of temperature to standard logger #1
 tank.light.data$Tank5.cal[is.na(tank.light.data$Tank5.cal)] <- tank.light.data$Tank3.cal[is.na(tank.light.data$Tank5.cal)] #merge tanks 3 and 5 into one column so the data from first 3 days when corals were in tank 3 is now showing in tank 5
 tank.lightdata <-data.frame(mydate.tanks, tank.light.data$Tank4.cal, tank.light.data$Tank5.cal) #make a dataframe of temperature and time
-colnames(tank.lightdata) <- c("Date.Time", "Tank4", "Tank5")
+colnames(tank.lightdata) <- c("Date.Time", "Tank4", "Tank5") #rename columns
 
 Tank4.light.N <- sum(!is.na(tank.lightdata$Tank4)) #Count sample size
 Tank5.light.N <- sum(!is.na(tank.lightdata$Tank5)) #Count sample size
@@ -313,11 +313,11 @@ tank.lights #View Data
 quarterly.tank.light.mean4 <- aggregate(Tank4 ~ Time, data=tank.lights, mean, na.rm=TRUE) #calculate mean of temperature for every 15 min interval
 quarterly.tank.light.se4 <- aggregate(Tank4 ~ Time, data=tank.lights, std.error, na.rm=TRUE)  #calculate standard error of the mean of temperature for every 15 min interval
 quarterly.tank.light.mean5 <- aggregate(Tank5 ~ Time, data=tank.lights, mean, na.rm=TRUE) #calculate mean of temperature for every 15 min interval
-quarterly.tank.light.mean5[58,1] <- "20:00"
-quarterly.tank.light.mean5[59,1] <- "20:15"
+quarterly.tank.light.mean5[58,1] <- "20:00" #add empty row 
+quarterly.tank.light.mean5[59,1] <- "20:15" #add empty row
 quarterly.tank.light.se5 <- aggregate(Tank5 ~ Time, data=tank.lights, std.error, na.rm=TRUE)  #calculate standard error of the mean of temperature for every 15 min interval
-quarterly.tank.light.se5[58,1] <- "20:00"
-quarterly.tank.light.se5[59,1] <- "20:15"
+quarterly.tank.light.se5[58,1] <- "20:00" #add empty row
+quarterly.tank.light.se5[59,1] <- "20:15" #add empty row
 tank.light.means <- data.frame(quarterly.tank.light.mean4, quarterly.tank.light.se4$Tank4, quarterly.tank.light.mean5$Tank5, quarterly.tank.light.se5$Tank5) #combine mean and standard error results
 colnames(tank.light.means) <- c("Time", "Tank4.mean", "Tank4.se", "Tank5.mean", "Tank5.se")  #Rename columns to describe contents
 
@@ -455,35 +455,35 @@ M1.tank.lights <- cbind(M1.tank.lightdata, M1.tank.time) #create a dataframe
 colnames(M1.tank.lights) <- c("Date", "Tank4", "Tank5", "Time") #Rename columns to describe contents
 M1.tank.lights #View Data
 
-quarterly.M1.tank.light.mean4 <- aggregate(Tank4 ~ Time, data=M1.tank.lights, mean, na.rm=TRUE) #calculate mean of temperature for every 15 min interval
+quarterly.M1.tank.light.mean4 <- aggregate(Tank4 ~ Time, data=M1.tank.lights, mean, na.rm=TRUE) #calculate mean for every 15 min interval
 quarterly.M1.tank.light.mean4 <- rbind(c("06:00","NA"), quarterly.M1.tank.light.mean4)
 quarterly.M1.tank.light.mean4 <- rbind(c("05:45","NA"), quarterly.M1.tank.light.mean4)
-quarterly.M1.tank.light.mean4[56,c(1,2)] <- c("19:30", "NA")
-quarterly.M1.tank.light.mean4[57,c(1,2)] <- c("19:45", "NA")
-quarterly.M1.tank.light.mean4[58,c(1,2)] <- c("20:00", "NA")
-quarterly.M1.tank.light.mean4[59,c(1,2)] <- c("20:15", "NA")
-quarterly.M1.tank.light.mean4$Tank4 <- as.numeric(quarterly.M1.tank.light.mean4$Tank4)
-quarterly.M1.tank.light.se4 <- aggregate(Tank4 ~ Time, data=M1.tank.lights, std.error, na.rm=TRUE)  #calculate standard error of the mean of temperature for every 15 min interval
-quarterly.M1.tank.light.se4 <- rbind(c("06:00","NA"), quarterly.M1.tank.light.se4)
-quarterly.M1.tank.light.se4 <- rbind(c("05:45","NA"), quarterly.M1.tank.light.se4)
-quarterly.M1.tank.light.se4[56,c(1,2)] <- c("19:30", "NA")
-quarterly.M1.tank.light.se4[57,c(1,2)] <- c("19:45", "NA")
-quarterly.M1.tank.light.se4[58,c(1,2)] <- c("20:00", "NA")
-quarterly.M1.tank.light.se4[59,c(1,2)] <- c("20:15", "NA")
-quarterly.M1.tank.light.se4$Tank4 <- as.numeric(quarterly.M1.tank.light.se4$Tank4)
-quarterly.M1.tank.light.mean5 <- aggregate(Tank5 ~ Time, data=M1.tank.lights, mean, na.rm=TRUE) #calculate mean of temperature for every 15 min interval
-quarterly.M1.tank.light.mean5 <- rbind(c("05:45","NA"), quarterly.M1.tank.light.mean5)
-quarterly.M1.tank.light.mean5[57,c(1,2)] <- c("19:45", "NA")
-quarterly.M1.tank.light.mean5[58,c(1,2)] <- c("20:00", "NA")
-quarterly.M1.tank.light.mean5[59,c(1,2)] <- c("20:15", "NA")
-quarterly.M1.tank.light.mean5$Tank5 <- as.numeric(quarterly.M1.tank.light.mean5$Tank5)
-quarterly.M1.tank.light.se5 <- aggregate(Tank5 ~ Time, data=M1.tank.lights, std.error, na.rm=TRUE)  #calculate standard error of the mean of temperature for every 15 min interval
-quarterly.M1.tank.light.se5 <- rbind(c("05:45","NA"), quarterly.M1.tank.light.se5)
-quarterly.M1.tank.light.se5[57,c(1,2)] <- c("19:45", "NA")
-quarterly.M1.tank.light.se5[58,c(1,2)] <- c("20:00", "NA")
-quarterly.M1.tank.light.se5[59,c(1,2)] <- c("20:15", "NA")
-quarterly.M1.tank.light.se5$Tank5 <- as.numeric(quarterly.M1.tank.light.se5$Tank5)
-M1.tank.light.means <-data.frame(quarterly.M1.tank.light.mean4,quarterly.M1.tank.light.se4$Tank4,quarterly.M1.tank.light.mean5$Tank5,quarterly.M1.tank.light.se5$Tank5) #make a dataframe of temperature and time
+quarterly.M1.tank.light.mean4[56,c(1,2)] <- c("19:30", "NA") #add empty row
+quarterly.M1.tank.light.mean4[57,c(1,2)] <- c("19:45", "NA") #add empty row
+quarterly.M1.tank.light.mean4[58,c(1,2)] <- c("20:00", "NA") #add empty row
+quarterly.M1.tank.light.mean4[59,c(1,2)] <- c("20:15", "NA") #add empty row
+quarterly.M1.tank.light.mean4$Tank4 <- as.numeric(quarterly.M1.tank.light.mean4$Tank4) #set as numeric
+quarterly.M1.tank.light.se4 <- aggregate(Tank4 ~ Time, data=M1.tank.lights, std.error, na.rm=TRUE)  #calculate standard error of the mean for every 15 min interval
+quarterly.M1.tank.light.se4 <- rbind(c("06:00","NA"), quarterly.M1.tank.light.se4) #combine rows 
+quarterly.M1.tank.light.se4 <- rbind(c("05:45","NA"), quarterly.M1.tank.light.se4) #combine rows
+quarterly.M1.tank.light.se4[56,c(1,2)] <- c("19:30", "NA") #add empty row
+quarterly.M1.tank.light.se4[57,c(1,2)] <- c("19:45", "NA") #add empty row
+quarterly.M1.tank.light.se4[58,c(1,2)] <- c("20:00", "NA") #add empty row
+quarterly.M1.tank.light.se4[59,c(1,2)] <- c("20:15", "NA") #add empty row
+quarterly.M1.tank.light.se4$Tank4 <- as.numeric(quarterly.M1.tank.light.se4$Tank4) #set as numeric
+quarterly.M1.tank.light.mean5 <- aggregate(Tank5 ~ Time, data=M1.tank.lights, mean, na.rm=TRUE) #calculate mean for every 15 min interval
+quarterly.M1.tank.light.mean5 <- rbind(c("05:45","NA"), quarterly.M1.tank.light.mean5) #combine rows
+quarterly.M1.tank.light.mean5[57,c(1,2)] <- c("19:45", "NA") #add empty row
+quarterly.M1.tank.light.mean5[58,c(1,2)] <- c("20:00", "NA") #add empty row
+quarterly.M1.tank.light.mean5[59,c(1,2)] <- c("20:15", "NA") #add empty row
+quarterly.M1.tank.light.mean5$Tank5 <- as.numeric(quarterly.M1.tank.light.mean5$Tank5) #set as numeric
+quarterly.M1.tank.light.se5 <- aggregate(Tank5 ~ Time, data=M1.tank.lights, std.error, na.rm=TRUE)  #calculate standard error of the mean  for every 15 min interval
+quarterly.M1.tank.light.se5 <- rbind(c("05:45","NA"), quarterly.M1.tank.light.se5) #combine rows
+quarterly.M1.tank.light.se5[57,c(1,2)] <- c("19:45", "NA") #add empty row
+quarterly.M1.tank.light.se5[58,c(1,2)] <- c("20:00", "NA") #add empty row
+quarterly.M1.tank.light.se5[59,c(1,2)] <- c("20:15", "NA") #add empty row
+quarterly.M1.tank.light.se5$Tank5 <- as.numeric(quarterly.M1.tank.light.se5$Tank5) #set as numeric
+M1.tank.light.means <-data.frame(quarterly.M1.tank.light.mean4,quarterly.M1.tank.light.se4$Tank4,quarterly.M1.tank.light.mean5$Tank5,quarterly.M1.tank.light.se5$Tank5) #make a dataframe 
 colnames(M1.tank.light.means) <- c("Time", "Tank4.mean", "Tank4.se", "Tank5.mean", "Tank5.se")  #Rename columns to describe contents
 
 Fig11 <- ggplot(M1.tank.light.means, aes(Time)) + # plot mean temp by tank
@@ -621,35 +621,35 @@ M6.tank.lights <- cbind(M6.tank.lightdata, M6.tank.time) #create a dataframe
 colnames(M6.tank.lights) <- c("Date", "Tank4", "Tank5", "Time") #Rename columns to describe contents
 M6.tank.lights #View Data
 
-quarterly.M6.tank.light.mean4 <- aggregate(Tank4 ~ Time, data=M6.tank.lights, mean, na.rm=TRUE) #calculate mean of temperature for every 15 min interval
-quarterly.M6.tank.light.mean4 <- rbind(c("06:00","NA"), quarterly.M6.tank.light.mean4)
-quarterly.M6.tank.light.mean4 <- rbind(c("05:45","NA"), quarterly.M6.tank.light.mean4)
-quarterly.M6.tank.light.mean4[56,c(1,2)] <- c("19:30", "NA")
-quarterly.M6.tank.light.mean4[57,c(1,2)] <- c("19:45", "NA")
-quarterly.M6.tank.light.mean4[58,c(1,2)] <- c("20:00", "NA")
-quarterly.M6.tank.light.mean4[59,c(1,2)] <- c("20:15", "NA")
-quarterly.M6.tank.light.mean4$Tank4 <- as.numeric(quarterly.M6.tank.light.mean4$Tank4)
-quarterly.M6.tank.light.se4 <- aggregate(Tank4 ~ Time, data=M6.tank.lights, std.error, na.rm=TRUE)  #calculate standard error of the mean of temperature for every 15 min interval
-quarterly.M6.tank.light.se4 <- rbind(c("06:00","NA"), quarterly.M6.tank.light.se4)
-quarterly.M6.tank.light.se4 <- rbind(c("05:45","NA"), quarterly.M6.tank.light.se4)
-quarterly.M6.tank.light.se4[56,c(1,2)] <- c("19:30", "NA")
-quarterly.M6.tank.light.se4[57,c(1,2)] <- c("19:45", "NA")
-quarterly.M6.tank.light.se4[58,c(1,2)] <- c("20:00", "NA")
-quarterly.M6.tank.light.se4[59,c(1,2)] <- c("20:15", "NA")
-quarterly.M6.tank.light.se4$Tank4 <- as.numeric(quarterly.M6.tank.light.se4$Tank4)
-quarterly.M6.tank.light.mean5 <- aggregate(Tank5 ~ Time, data=M6.tank.lights, mean, na.rm=TRUE) #calculate mean of temperature for every 15 min interval
-quarterly.M6.tank.light.mean5 <- rbind(c("05:45","NA"), quarterly.M6.tank.light.mean5)
-quarterly.M6.tank.light.mean5[57,c(1,2)] <- c("19:45", "NA")
-quarterly.M6.tank.light.mean5[58,c(1,2)] <- c("20:00", "NA")
-quarterly.M6.tank.light.mean5[59,c(1,2)] <- c("20:15", "NA")
-quarterly.M6.tank.light.mean5$Tank5 <- as.numeric(quarterly.M6.tank.light.mean5$Tank5)
-quarterly.M6.tank.light.se5 <- aggregate(Tank5 ~ Time, data=M6.tank.lights, std.error, na.rm=TRUE)  #calculate standard error of the mean of temperature for every 15 min interval
-quarterly.M6.tank.light.se5 <- rbind(c("05:45","NA"), quarterly.M6.tank.light.se5)
-quarterly.M6.tank.light.se5[57,c(1,2)] <- c("19:45", "NA")
-quarterly.M6.tank.light.se5[58,c(1,2)] <- c("20:00", "NA")
-quarterly.M6.tank.light.se5[59,c(1,2)] <- c("20:15", "NA")
-quarterly.M6.tank.light.se5$Tank5 <- as.numeric(quarterly.M6.tank.light.se5$Tank5)
-M6.tank.light.means <-data.frame(quarterly.M6.tank.light.mean4,quarterly.M6.tank.light.se4$Tank4,quarterly.M6.tank.light.mean5$Tank5,quarterly.M6.tank.light.se5$Tank5) #make a dataframe of temperature and time
+quarterly.M6.tank.light.mean4 <- aggregate(Tank4 ~ Time, data=M6.tank.lights, mean, na.rm=TRUE) #calculate mean for every 15 min interval
+quarterly.M6.tank.light.mean4 <- rbind(c("06:00","NA"), quarterly.M6.tank.light.mean4) #combine rows 
+quarterly.M6.tank.light.mean4 <- rbind(c("05:45","NA"), quarterly.M6.tank.light.mean4) #combine rows 
+quarterly.M6.tank.light.mean4[56,c(1,2)] <- c("19:30", "NA") #add empty row
+quarterly.M6.tank.light.mean4[57,c(1,2)] <- c("19:45", "NA") #add empty row
+quarterly.M6.tank.light.mean4[58,c(1,2)] <- c("20:00", "NA") #add empty row
+quarterly.M6.tank.light.mean4[59,c(1,2)] <- c("20:15", "NA") #add empty row
+quarterly.M6.tank.light.mean4$Tank4 <- as.numeric(quarterly.M6.tank.light.mean4$Tank4) #set as numeric
+quarterly.M6.tank.light.se4 <- aggregate(Tank4 ~ Time, data=M6.tank.lights, std.error, na.rm=TRUE)  #calculate standard error of the mean for every 15 min interval
+quarterly.M6.tank.light.se4 <- rbind(c("06:00","NA"), quarterly.M6.tank.light.se4) #combine rows 
+quarterly.M6.tank.light.se4 <- rbind(c("05:45","NA"), quarterly.M6.tank.light.se4) #combine rows 
+quarterly.M6.tank.light.se4[56,c(1,2)] <- c("19:30", "NA") #add empty row
+quarterly.M6.tank.light.se4[57,c(1,2)] <- c("19:45", "NA") #add empty row
+quarterly.M6.tank.light.se4[58,c(1,2)] <- c("20:00", "NA") #add empty row
+quarterly.M6.tank.light.se4[59,c(1,2)] <- c("20:15", "NA") #add empty row
+quarterly.M6.tank.light.se4$Tank4 <- as.numeric(quarterly.M6.tank.light.se4$Tank4) #set as numeric
+quarterly.M6.tank.light.mean5 <- aggregate(Tank5 ~ Time, data=M6.tank.lights, mean, na.rm=TRUE) #calculate mean  for every 15 min interval
+quarterly.M6.tank.light.mean5 <- rbind(c("05:45","NA"), quarterly.M6.tank.light.mean5) #combine rows 
+quarterly.M6.tank.light.mean5[57,c(1,2)] <- c("19:45", "NA") #add empty row
+quarterly.M6.tank.light.mean5[58,c(1,2)] <- c("20:00", "NA") #add empty row
+quarterly.M6.tank.light.mean5[59,c(1,2)] <- c("20:15", "NA") #add empty row
+quarterly.M6.tank.light.mean5$Tank5 <- as.numeric(quarterly.M6.tank.light.mean5$Tank5) #set as numeric
+quarterly.M6.tank.light.se5 <- aggregate(Tank5 ~ Time, data=M6.tank.lights, std.error, na.rm=TRUE)  #calculate standard error of the mean for every 15 min interval
+quarterly.M6.tank.light.se5 <- rbind(c("05:45","NA"), quarterly.M6.tank.light.se5) #combine rows 
+quarterly.M6.tank.light.se5[57,c(1,2)] <- c("19:45", "NA") #add empty row
+quarterly.M6.tank.light.se5[58,c(1,2)] <- c("20:00", "NA") #add empty row
+quarterly.M6.tank.light.se5[59,c(1,2)] <- c("20:15", "NA") #add empty row
+quarterly.M6.tank.light.se5$Tank5 <- as.numeric(quarterly.M6.tank.light.se5$Tank5) #set as numeric
+M6.tank.light.means <-data.frame(quarterly.M6.tank.light.mean4,quarterly.M6.tank.light.se4$Tank4,quarterly.M6.tank.light.mean5$Tank5,quarterly.M6.tank.light.se5$Tank5) #make a dataframe
 colnames(M6.tank.light.means) <- c("Time", "Tank4.mean", "Tank4.se", "Tank5.mean", "Tank5.se")  #Rename columns to describe contents
 
 Fig15 <- ggplot(M6.tank.light.means, aes(Time)) + # plot mean temp by tank
@@ -676,7 +676,7 @@ Fig15 <- ggplot(M6.tank.light.means, aes(Time)) + # plot mean temp by tank
 Fig15 #View figure
 
 ##### DISCRETE pH CALCULATIONS #####
-path <-("/Users/hputnam/MyProjects/HI_Pdam_Parental/RAnalysis/Data/pH_Calibration_Files/")
+path <-("~/MyProjects/HI_Pdam_Parental/RAnalysis/Data/pH_Calibration_Files/")
 #list all the file names in the folder to get only get the csv files
 file.names<-list.files(path = path, pattern = "csv$")
 pH.cals <- data.frame(matrix(NA, nrow=length(file.names), ncol=3, dimnames=list(file.names,c("Date", "Intercept", "Slope")))) #generate a 3 column dataframe with specific column names
@@ -709,9 +709,9 @@ SW.chem$pH.Total<-phTris+(mvTris/1000-SW.chem$pH.MV/1000)/(R*(SW.chem$Temperatur
 ##### DISCRETE TA CALCULATIONS #####
 setwd(file.path(mainDir, 'Data'))
 massfile<-"TA_mass_data.csv" # name of your file with masses
-path<-"/Users/hputnam/MyProjects/HI_Pdam_Parental/RAnalysis/Data/TA" #the location of all your titration files
+path<-"~/MyProjects/HI_Pdam_Parental/RAnalysis/Data/TA" #the location of all your titration files
 #date<-"TA" #set date of measurement
-Sample.Info <- read.csv("TA_mass_data.csv", header=T, sep=",", na.string="NA", as.is=T) 
+Sample.Info <- read.csv("TA_mass_data.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
 Mass<-read.csv(massfile, header=T, sep=",", na.string="NA", as.is=T, row.names=1)  #load Sample Info Data
 
 # Select the mV for pH=3 and pH=3.5 based on your probe calibration
@@ -778,8 +778,8 @@ d <- if(Mass[name,4] =="d1") {
 TA <- data.frame(TA) #make a dataframe from the TA results
 setwd(file.path(mainDir, 'Output')) #set output location
 write.table(TA,paste("TA", "output",".csv"),sep=",")#exports your data as a CSV file
-
 setwd(file.path(mainDir, 'Data'))
+
 #load CRM standard Info
 CRMs <- read.csv("CRM_TA_Data.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
 Refs <- merge(CRMs, TA, by="Sample.ID") #merge the TA calculations with the Reference metadata
@@ -797,12 +797,12 @@ CRM.res #view the resolution of TA assay according to tests againsts Dickson CRM
 #merge calculated pH and daily measures with TA data and run seacarb
 SW.chem$Sample.ID <- paste(SW.chem$Date, SW.chem$Tank, sep='_') #generate new row with concatenated sample id
 SW.chem <- merge(SW.chem,TA, by="Sample.ID", all = TRUE, sort = T) #merge seawater chemistry with total alkalinity
-SW.chem <- na.omit(SW.chem)
+SW.chem <- na.omit(SW.chem) #remove NA
 SW.chem <- merge(SW.chem, Refs[c("Date", "TA.Corr")], by="Date", all = F, sort = F) #merge seawater chemistry with total alkalinity
-SW.chem$TA.Mes <- as.numeric(paste(SW.chem$TA.Mes))
-SW.chem$TA.Corr <- as.numeric(paste(SW.chem$TA.Corr))
+SW.chem$TA.Mes <- as.numeric(paste(SW.chem$TA.Mes)) #set as numeric
+SW.chem$TA.Corr <- as.numeric(paste(SW.chem$TA.Corr)) #set as numeric
 SW.chem$Corrected.TA <- SW.chem$TA.Mes - SW.chem$TA.Corr #correct for offset from CRM
-SW.chem <- na.omit(SW.chem)
+SW.chem <- na.omit(SW.chem) #remove NA
 
 #Calculate CO2 parameters using seacarb
 carb.ouptput <- carb(flag=8, var1=SW.chem$pH.Total, var2=SW.chem$Corrected.TA/1000000, S= SW.chem$Salinity, T=SW.chem$Temperature, P=0, Pt=0, Sit=0, pHscale="T", kf="pf", k1k2="l", ks="d") #calculate seawater chemistry parameters using seacarb
@@ -814,14 +814,14 @@ carb.ouptput$DIC <- carb.ouptput$DIC*1000000 #convert to µmol kg-1
 carb.ouptput <- cbind(SW.chem$Date,  SW.chem$Tank,  SW.chem$Treatment, SW.chem$Period1,SW.chem$Period2, SW.chem$Period3, carb.ouptput) #combine the sample information with the seacarb output
 colnames(carb.ouptput) <- c("Date",  "Tank",  "Treatment",	"Period1", "Period2", "Period3",  "flag",	"Salinity",	"Temperature",	"Pressure",	"pH",	"CO2",	"pCO2",	"fCO2",	"HCO3",	"CO3",	"DIC", "TA",	"Aragonite.Sat", 	"Calcite.Sat") #Rename columns to describe contents
 
-carb.ouptput.Acc <- subset(carb.ouptput, Period1 == "Acc")
-carb.ouptput.Adult <- subset(carb.ouptput, Period1 == "Adult")
-carb.ouptput.M1 <- subset(carb.ouptput, Period2 == "Month1")
-carb.ouptput.M6 <- subset(carb.ouptput, Period3 == "Month6")
+carb.ouptput.Acc <- subset(carb.ouptput, Period1 == "Acc") #subset data
+carb.ouptput.Adult <- subset(carb.ouptput, Period1 == "Adult") #subset data
+carb.ouptput.M1 <- subset(carb.ouptput, Period2 == "Month1") #subset data
+carb.ouptput.M6 <- subset(carb.ouptput, Period3 == "Month6") #subset data
 
 carbo.melted.Adult <- melt(carb.ouptput.Adult) #reshape the dataframe to more easily summarize all output parameters
 mean.carb.output.Adult <-ddply(carbo.melted.Adult, .(Treatment, variable), summarize, #For each subset of a data frame, apply function then combine results into a data frame.
-                         N = length(na.omit(value)),
+                         N = length(na.omit(value)), #number of records
                          mean = (mean(value)),       #take the average of the parameters (variables) summarized by treatments
                          sem = (sd(value)/sqrt(N))) #calculate the SEM as the sd/sqrt of the count or data length
 mean.carb.output.Adult # display mean and sem 
@@ -832,7 +832,7 @@ write.table (mean.carb.output.Adult, "Seawater_chemistry_table_Output_Adult.csv"
 
 carbo.melted.M1 <- melt(carb.ouptput.M1) #reshape the dataframe to more easily summarize all output parameters
 mean.carb.output.M1 <-ddply(carbo.melted.M1, .(Treatment, variable), summarize, #For each subset of a data frame, apply function then combine results into a data frame.
-                               N = length(na.omit(value)),
+                               N = length(na.omit(value)), #number of records
                                mean = (mean(value)),       #take the average of the parameters (variables) summarized by treatments
                                sem = (sd(value)/sqrt(N))) #calculate the SEM as the sd/sqrt of the count or data length
 mean.carb.output.M1 # display mean and sem 
@@ -1408,186 +1408,198 @@ Fig24 #View figure
 
 ##### LARVAL RELEASE #####
 #June
-june.release.data <- read.csv("june.larval.release.data.csv", header=T, sep=",", na.string="NA", as.is=T)
-june.release.data <- na.omit(june.release.data)
-june.mean_larvae <- aggregate(numb.larvae ~ Lunar.Day * Treatment, data=june.release.data, FUN=mean)
-june.se_larvae <- aggregate(numb.larvae ~ Lunar.Day * Treatment, data=june.release.data, FUN=std.error)
-june.larvae <- cbind(june.mean_larvae,june.se_larvae$numb.larvae)
-colnames(june.larvae) <- c("Lunar.Day", "Treatment", "mean", "se")
-june.larvae
+june.release.data <- read.csv("june.larval.release.data.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
+june.release.data <- na.omit(june.release.data) #remove NA
+june.mean_larvae <- aggregate(numb.larvae ~ Lunar.Day * Treatment, data=june.release.data, FUN=mean) #calculate mean of Day * treatment
+june.se_larvae <- aggregate(numb.larvae ~ Lunar.Day * Treatment, data=june.release.data, FUN=std.error) #calculate se of Day * treatment
+june.larvae <- cbind(june.mean_larvae,june.se_larvae$numb.larvae) #make dataframe
+colnames(june.larvae) <- c("Lunar.Day", "Treatment", "mean", "se") #rename columns
+june.larvae #view data
 
-Fig25 <- ggplot(june.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + 
-  geom_bar() +
-  geom_bar(position=position_dodge(), stat="identity", show_guide=FALSE) +
-  scale_fill_manual(values=c("gray", "black")) +
-  geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
+Fig25 <- ggplot(june.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
+  geom_bar() + #use bars
+  geom_bar(position=position_dodge(), stat="identity", show_guide=FALSE) + #assign bar id and position
+  scale_fill_manual(values=c("gray", "black")) + #bar fill color
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, size = 0.4,                   # Width of the error bars
-                position=position_dodge(.9)) +
-  ylim(0,400) +
-  ggtitle("A) June") + 
-  xlab("Lunar Day") +
-  ylab("Number of Planulae Released") +
-  theme_bw() +
-  guides(fill = guide_legend(keywidth = 0.5, keyheight = 0.5))+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-        panel.border = element_blank(), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), 
-        axis.line = element_line(colour = "black"),
-        legend.title=element_blank(),
-        legend.position=c(0.2,0.9),
+                position=position_dodge(.9)) + #set bar position
+  ylim(0,400) + #set y limits
+  ggtitle("A) June") + #plot title
+  xlab("Lunar Day") + #x axis title
+  ylab("Number of Planulae Released") + #y axis title
+  theme_bw() + #theme black and white 
+  guides(fill = guide_legend(keywidth = 0.5, keyheight = 0.5))+ #legend guides
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #x axis text characteristics
+        panel.border = element_blank(), #remove border
+        panel.grid.major = element_blank(), #remove grids
+        panel.grid.minor = element_blank(), #remove grids
+        axis.line = element_line(colour = "black"), #axis line black
+        legend.title=element_blank(), #remove legend title
+        legend.position=c(0.2,0.9), #set legend position
         plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.text = element_text(size = 8))
-Fig25
+        legend.text = element_text(size = 8)) #set legend text size
+Fig25 #view plot
 
-june.amb <- subset(june.larvae, Treatment=="Ambient")
-june.high <- subset(june.larvae, Treatment=="High")
-june.ks <-ks.test(june.amb$mean, june.high$mean)
-june.ks
+june.amb <- subset(june.larvae, Treatment=="Ambient") #subset data
+june.high <- subset(june.larvae, Treatment=="High") #subset data
+june.ks <-ks.test(june.amb$mean, june.high$mean) #Kolmogorov-Smirnov Test Ho: differences in distribution
+june.ks #view results
 
 #July
-july.release.data <- read.csv("july.larval.release.data.csv", header=T, sep=",", na.string="NA", as.is=T)
-july.release.data <- na.omit(july.release.data)
-july.mean_larvae <- aggregate(numb.larvae ~ Lunar.Day * Treatment, data=july.release.data, FUN=mean)
-july.se_larvae <- aggregate(numb.larvae ~ Lunar.Day * Treatment, data=july.release.data, FUN=std.error)
-july.larvae <- cbind(july.mean_larvae,july.se_larvae$numb.larvae)
-colnames(july.larvae) <- c("Lunar.Day", "Treatment", "mean", "se")
-july.larvae
+july.release.data <- read.csv("july.larval.release.data.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
+july.release.data <- na.omit(july.release.data) #remove NA
+july.mean_larvae <- aggregate(numb.larvae ~ Lunar.Day * Treatment, data=july.release.data, FUN=mean) #calculate mean of Day * treatment
+july.se_larvae <- aggregate(numb.larvae ~ Lunar.Day * Treatment, data=july.release.data, FUN=std.error) #calculate se of Day * treatment
+july.larvae <- cbind(july.mean_larvae,july.se_larvae$numb.larvae) #make dataframe
+colnames(july.larvae) <- c("Lunar.Day", "Treatment", "mean", "se") #rename columns
+july.larvae #view data
 
-Fig26 <- ggplot(july.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + 
-  geom_bar() +
-  geom_bar(position=position_dodge(), stat="identity", show_guide=FALSE) +
-  scale_fill_manual(values=c("gray", "black")) +
-  geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
+Fig26 <- ggplot(july.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
+  geom_bar() + #use bars
+  geom_bar(position=position_dodge(), stat="identity", show_guide=FALSE) + #assign bar id and position
+  scale_fill_manual(values=c("gray", "black")) + #bar fill color
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, size = 0.4,                    # Width of the error bars
-                position=position_dodge(.9)) +
-  ylim(0,400) +
-  ggtitle("B) July") + 
-  xlab("Lunar Day") +
-  ylab("Number of Planulae Released") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-        axis.title.y=element_blank(),
-        panel.border = element_blank(), panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
-        legend.title=element_blank(),
-        legend.position="none",
+                position=position_dodge(.9)) + #set bar position
+  ylim(0,400) + #set y limits
+  ggtitle("B) July") + #plot title
+  xlab("Lunar Day") + #x axis title
+  ylab("Number of Planulae Released") + #y axis title
+  theme_bw() + #theme black and white 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #x axis text characteristics
+        panel.border = element_blank(), #remove border
+        panel.grid.major = element_blank(), #remove grids
+        panel.grid.minor = element_blank(), #remove grids
+        axis.line = element_line(colour = "black"), #axis line black
+        legend.title=element_blank(), #remove legend title
+        legend.position="none", #set legend position
         plot.title=element_text(hjust=0)) #Justify the title to the top left
 Fig26
 
-july.amb <- subset(july.larvae, Treatment=="Ambient")
-july.high <- subset(july.larvae, Treatment=="High")
-july.ks <-ks.test(july.amb$mean, july.high$mean)
-july.ks
+july.amb <- subset(july.larvae, Treatment=="Ambient") #subset data
+july.high <- subset(july.larvae, Treatment=="High") #subset data
+july.ks <-ks.test(july.amb$mean, july.high$mean) #Kolmogorov-Smirnov Test Ho: differences in distribution
+july.ks #view results
 
 #august
-august.release.data <- read.csv("august.larval.release.data.csv", header=T, sep=",", na.string="NA", as.is=T)
-august.release.data <- na.omit(august.release.data)
-august.mean_larvae <- aggregate(numb.larvae ~ Lunar.Day * Treatment, data=august.release.data, FUN=mean)
-august.se_larvae <- aggregate(numb.larvae ~ Lunar.Day * Treatment, data=august.release.data, FUN=std.error)
-august.larvae <- cbind(august.mean_larvae,august.se_larvae$numb.larvae)
-colnames(august.larvae) <- c("Lunar.Day", "Treatment", "mean", "se")
-august.larvae
+august.release.data <- read.csv("august.larval.release.data.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
+august.release.data <- na.omit(august.release.data) #remove NA
+august.mean_larvae <- aggregate(numb.larvae ~ Lunar.Day * Treatment, data=august.release.data, FUN=mean) #calculate mean of Day * treatment
+august.se_larvae <- aggregate(numb.larvae ~ Lunar.Day * Treatment, data=august.release.data, FUN=std.error) #calculate se of Day * treatment
+august.larvae <- cbind(august.mean_larvae,august.se_larvae$numb.larvae) #make dataframe
+colnames(august.larvae) <- c("Lunar.Day", "Treatment", "mean", "se") #rename columns
+august.larvae #view data
 
-Fig27 <- ggplot(august.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + 
-  geom_bar() +
-  geom_bar(position=position_dodge(), stat="identity", show_guide=FALSE) +
-  scale_fill_manual(values=c("gray", "black")) +
-  geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
+Fig27 <- ggplot(august.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
+  geom_bar() + #use bars
+  geom_bar(position=position_dodge(), stat="identity", show_guide=FALSE) + #assign bar id and position
+  scale_fill_manual(values=c("gray", "black")) + #bar fill color
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, size = 0.4,                 # Width of the error bars
-                position=position_dodge(.9)) +
-  ylim(0,400) +
-  ggtitle("C) August") + 
-  xlab("Lunar Day") +
-  ylab("Number of Planulae Released") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-        axis.title.y=element_blank(),
-        panel.border = element_blank(), panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
-        legend.title=element_blank(),
-        legend.position="none",
+                position=position_dodge(.9)) + #set bar position
+  ylim(0,400) + #set y limits
+  ggtitle("C) August") +  #plot title
+  xlab("Lunar Day") + #x axis title
+  ylab("Number of Planulae Released") + #y axis title
+  theme_bw() + #theme black and white 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #x axis text characteristics
+        panel.border = element_blank(), #remove border
+        panel.grid.major = element_blank(), #remove grids
+        panel.grid.minor = element_blank(), #remove grids
+        axis.line = element_line(colour = "black"), #axis line black
+        legend.title=element_blank(), #remove legend title
+        legend.position="none", #set legend position
         plot.title=element_text(hjust=0)) #Justify the title to the top left
 Fig27
 
-august.amb <- subset(august.larvae, Treatment=="Ambient")
-august.high <- subset(august.larvae, Treatment=="High")
-august.ks <-ks.test(august.amb$mean, august.high$mean)
-august.ks
+august.amb <- subset(august.larvae, Treatment=="Ambient") #subset data
+august.high <- subset(august.larvae, Treatment=="High") #subset data
+august.ks <-ks.test(august.amb$mean, august.high$mean) #Kolmogorov-Smirnov Test Ho: differences in distribution
+august.ks #view results
 
+## Total release as a function of both treatment and time
+RM.release.data <- read.csv("RM_Release_Data.csv", header=T, sep=",", na.string="NA", as.is=T) #read in data in long format
+all.release.mean <- aggregate(Total.Release ~ Treatment + Time, data=RM.release.data, mean) #calculate mean by treatment and time
+all.release.se <- aggregate(Total.Release ~ Treatment + Time, data=RM.release.data, std.error)  #calculate se by treatment and time
+all.release <- cbind(all.release.mean, all.release.se$Total.Release) #make dataframe
+colnames(all.release) <- c("Treatment", "Time", "mean", "se") #rename columns
 
-## Repeated Measures
-RM.release.data <- read.csv("RM_Release_Data.csv", header=T, sep=",", na.string="NA", as.is=T)
-all.release.mean <- aggregate(Total.Release ~ Treatment + Time, data=RM.release.data, mean)
-all.release.se <- aggregate(Total.Release ~ Treatment + Time, data=RM.release.data, std.error)  
-all.release <- cbind(all.release.mean, all.release.se$Total.Release)
-colnames(all.release) <- c("Treatment", "Time", "mean", "se")
-
-Fig28 <- ggplot(all.release, aes(x=Time, y=mean, colour=Treatment, group=Treatment), position=position_dodge(width=0.5)) + 
-  geom_errorbar(aes(ymin=all.release$mean - all.release$se, ymax=all.release$mean + all.release$se), colour="black", width=0, size = 0.4, position=position_dodge(width=0.5)) +
+Fig28 <- ggplot(all.release, aes(x=Time, y=mean, colour=Treatment, group=Treatment), position=position_dodge(width=0.5)) +  #plot mean as a function of Time
+  geom_errorbar(aes(ymin=all.release$mean - all.release$se, ymax=all.release$mean + all.release$se), #plot error bars
+                colour="black", width=0, size = 0.4, # Width of the error bars
+                position=position_dodge(width=0.5)) + #set bar position
   geom_point(position=position_dodge(width=0.5), size=2, shape=15) +
-  scale_colour_manual(values = c("gray","black")) +
-  scale_x_discrete(limits=c("June","July","August")) +
-  ylab(" Total Release") +
-  ylim(0,1700) +
-  ggtitle("D) Total") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-        axis.title.x=element_blank(),
-        panel.border = element_blank(), panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
-        legend.title=element_blank(),
-        legend.position="none",
+  scale_colour_manual(values = c("gray","black")) + #set point fill color
+  scale_x_discrete(limits=c("June","July","August")) + #label x axis in order
+  ylab(" Total Release") + #y axis label
+  ylim(0,1700) + #y axis limits
+  ggtitle("D) Total") + #plot title
+  theme_bw() + #theme black and white 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #x axis text characteristics
+        panel.border = element_blank(), #remove border
+        panel.grid.major = element_blank(), #remove grids
+        panel.grid.minor = element_blank(), #remove grids
+        axis.line = element_line(colour = "black"), #axis line black
+        legend.title=element_blank(), #remove legend title
+        legend.position="none", #set legend position
         plot.title=element_text(hjust=0)) #Justify the title to the top left
 Fig28
 
 #GLM release by treatment and time
-RM.release.data
-RM.release.data <- na.omit(RM.release.data)
-Interaction <- glm(log10(Total.Release+1) ~ Treatment * Time, data=RM.release.data)
-summary(Interaction)
+RM.release.data #view data
+RM.release.data <- na.omit(RM.release.data) #remove NA
+Interaction <- glm(log10(Total.Release+1) ~ Treatment * Time, data=RM.release.data) #run generalized linear model 
+summary(Interaction) #view summary
 release.resid <-resid(Interaction)
 release.shapiro <- shapiro.test(release.resid) #runs a normality test using shapiro-wilk test on the residuals
-release.shapiro
+release.shapiro #view results
 release.qqnorm <- qqnorm(release.resid) # normal quantile plot
 release.qqline <- qqline(release.resid) # adding a qline of comparison
-hist(release.resid)
+hist(release.resid) #plot histogram of residuals
+plot(Interaction$fitted.values, Interaction$residuals) #plot residuals as a function of fitted data
+
+release.posthoc <- lsmeans(Interaction, specs=c("Time")) #calculate MS means
+release.posthoc #view results
+release.posthoc.p <- contrast(release.posthoc, method="pairwise") #contrast treatment groups within a species at each time point
+release.posthoc.p #view results
+release.posthoc.lett <- cld(release.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
+release.posthoc.lett #view results
 
 ##### SURVIVORSHIP #####
-larval.data.M0 <- read.csv("Larval_Data_M0.csv", header=T, sep=",", na.string="NA", as.is=T)
-proportion.alive.M0 <- (larval.data.M0$Plastic + larval.data.M0$Top.Tile + larval.data.M0$Bottom.Tile +  larval.data.M0$Edge +	larval.data.M0$Swimming)/larval.data.M0$larvae.added
-proportion.dead.M0 <- 1-proportion.alive.M0
-survive.M0 <- data.frame (larval.data.M0$Chamber.num, larval.data.M0$Timepoint, larval.data.M0$Origin, larval.data.M0$Secondary, proportion.alive.M0)
-colnames(survive.M0) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Alive")
-mean.survive.M0 <- aggregate(Alive ~ Origin + Secondary, data = survive.M0, FUN= "mean")
-se.survive.M0 <- aggregate(Alive ~ Origin + Secondary, data = survive.M0, FUN= "std.error")
-survivorship.M0 <- cbind(mean.survive.M0,se.survive.M0$Alive)
-colnames(survivorship.M0) <- c("Origin", "Secondary", "mean", "se")
+larval.data.M0 <- read.csv("Larval_Data_M0.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
+proportion.alive.M0 <- (larval.data.M0$Plastic + larval.data.M0$Top.Tile + larval.data.M0$Bottom.Tile +  larval.data.M0$Edge +	larval.data.M0$Swimming)/larval.data.M0$larvae.added #calculate survivorship
+proportion.dead.M0 <- 1-proportion.alive.M0 #calculate mortality
+survive.M0 <- data.frame (larval.data.M0$Chamber.num, larval.data.M0$Timepoint, larval.data.M0$Origin, larval.data.M0$Secondary, proportion.alive.M0) #make dataframe
+colnames(survive.M0) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Alive") #rename columns
+mean.survive.M0 <- aggregate(Alive ~ Origin * Secondary, data = survive.M0, FUN= "mean") #calculate mean by origin and secondary treatments
+se.survive.M0 <- aggregate(Alive ~ Origin * Secondary, data = survive.M0, FUN= "std.error")  #calculate se by origin and secondary treatments
+survivorship.M0 <- cbind(mean.survive.M0,se.survive.M0$Alive) #view data
+colnames(survivorship.M0) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
-Fig29 <- ggplot(data=survivorship.M0, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) +
-  geom_line(size=0.7, position=position_dodge(.1)) +
-  scale_colour_manual(values=c("gray", "black")) +
-  geom_point(size=3, position=position_dodge(.1), colour="black") +
-  scale_shape_manual(values=c(1,18)) +
-  geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
-                width=0, position=position_dodge(.1), colour="black") +
-  ggtitle("A)") + 
-  ylab("Survivorship") +
-  ylim(0,1) +
-  theme_bw() + 
-  theme(axis.title.x=element_blank(),
-        panel.border = element_blank(), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
+Fig29 <- ggplot(data=survivorship.M0, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+  geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
+  scale_colour_manual(values=c("gray", "black")) + #set line color
+  geom_point(size=3, position=position_dodge(.1), colour="black") + #set point characteristics
+  scale_shape_manual(values=c(1,18)) + #set shapes
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
+                width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
+  ggtitle("A)") + #plot title
+  ylab("Survivorship") + #Y axis label
+  ylim(0,1) + #Y axis limits
+  theme_bw() + #theme black and white 
+  theme(axis.title.x=element_blank(), #x axis text characteristics
+        panel.border = element_blank(), #remove border
+        panel.grid.major = element_blank(), #remove grids
+        panel.grid.minor = element_blank(), #remove grids
         plot.background =element_blank(), #Set the plot background
-        axis.line = element_line(colour = "black"),
-        legend.title=element_blank(),
-        legend.position="none",
+        axis.line = element_line(colour = "black"), #axis line black
+        legend.title=element_blank(), #remove legend title
+        legend.position="none", #set legend position
         plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.text = element_text(size = 8),
+        legend.text = element_text(size = 8), #set legend text size
         legend.key = element_blank()) #Set plot legend key
 
-Fig29
+Fig29 #view plot
 
 #Month1
 larval.data.M1 <- read.csv("Larval_Data_M1.csv", header=T, sep=",", na.string="NA", as.is=T)
@@ -1734,16 +1746,16 @@ data.M1 <- read.csv("Month1_Larval_Size.csv", header=T, sep=",", na.string="NA",
 data.M6 <- read.csv("Month6_Larval_Size.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
 growth.M1 <- aggregate(Polyp.Num.M1 ~ Date.M1 + Chamber.num, data = data.M1, FUN= "mean") #calculate size and survivorship per tile
 growth.M6 <- aggregate(Polyp.Num.M6 ~ Date.M6 + Chamber.num, data = data.M6, FUN= "mean") #calculate size and survivorship per tile
-growth.M6[growth.M6 == 0] <- NA 
-growth <- (cbind(growth.M1,growth.M6$Polyp.Num.M6, larval.data.M0$Origin, larval.data.M0$Secondary,larval.data.M0$Date, growth.M6$Date.M6))
-colnames(growth) <- c("Date.M1",  "Chamber.num",	"Polyp.Num.M1", "Polyp.Num.M6",	"Origin",	"Secondary",	"Date.M0", "Date.M6")
-growth$Date.M0<- as.Date(growth$Date.M0,format="%m/%d/%y")
-growth$Date.M1<- as.Date(growth$Date.M1,format="%m/%d/%y")
-growth$Date.M6<- as.Date(growth$Date.M6,format="%m/%d/%y")
-growth$Days.M1 <- difftime(growth$Date.M1, growth$Date.M0, units = c("days"))
-growth$Days.M6 <- difftime(growth$Date.M6, growth$Date.M1, units = c("days"))
-growth$growth.rate.M1 <- (growth$Polyp.Num.M1-1)/(as.numeric(growth$Days.M1))
-growth$growth.rate.M6 <- (growth$Polyp.Num.M6-growth$Polyp.Num.M1)/(as.numeric(growth$Days.M6))
+growth.M6[growth.M6 == 0] <- NA #set zeros equal to NA
+growth <- (cbind(growth.M1,growth.M6$Polyp.Num.M6, larval.data.M0$Origin, larval.data.M0$Secondary,larval.data.M0$Date, growth.M6$Date.M6)) #make dataframe
+colnames(growth) <- c("Date.M1",  "Chamber.num",	"Polyp.Num.M1", "Polyp.Num.M6",	"Origin",	"Secondary",	"Date.M0", "Date.M6") #rename columns
+growth$Date.M0<- as.Date(growth$Date.M0,format="%m/%d/%y") #set as date
+growth$Date.M1<- as.Date(growth$Date.M1,format="%m/%d/%y") #set as date
+growth$Date.M6<- as.Date(growth$Date.M6,format="%m/%d/%y") #set as date
+growth$Days.M1 <- difftime(growth$Date.M1, growth$Date.M0, units = c("days")) #calculate the time difference in days
+growth$Days.M6 <- difftime(growth$Date.M6, growth$Date.M1, units = c("days")) #calculate the time difference in days
+growth$growth.rate.M1 <- (growth$Polyp.Num.M1-1)/(as.numeric(growth$Days.M1)) #calculate growth rate per day
+growth$growth.rate.M6 <- (growth$Polyp.Num.M6-growth$Polyp.Num.M1)/(as.numeric(growth$Days.M6)) #calculate growth rate per day
 
 m1.mean.growth <- aggregate(growth.rate.M1 ~ Origin + Secondary, data = growth, FUN= "mean")
 m1.se.growth <- aggregate(growth.rate.M1 ~ Origin + Secondary, data = growth, FUN= "std.error")
