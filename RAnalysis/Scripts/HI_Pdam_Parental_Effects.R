@@ -8,6 +8,8 @@
 
 rm(list=ls()) # removes all prior objects
 
+#R Version:
+#RStudio Version:
 #Read in required libraries
 library(car) #version 2.0-21 Date: 2014/08/09 Title: Companion to Applied Regression Depends: R (>= 2.14.0), stats, graphics
 library(ggplot2) #version 1.0.1 Date/Publication: 2015-03-17 Title: An Implementation of the Grammar of Graphics Depends: R (>= 2.14), stats, methods
@@ -19,7 +21,9 @@ library(plotrix) #version: 3.5-7 Date: 2014-05-26 Title: Various plotting functi
 library(plyr) #version: 1.8.1 Date/Publication: 2014-02-26 Title: Tools for splitting, applying and combining data Depends: R (>= 2.11.0)
 library(reshape) #version: 0.8.5 Date/Publication: 2014-04-23 Title: Flexibly reshape data. Depends: R (>= 2.6.1)
 library(seacarb) #version: 3.0 Date/Publication: 2014-04-05 Title: seawater carbonate chemistry with R Depends: NA
- 
+library(grid) #version 3.3.1 Date/Publication: 2016-06-24 Title:grid
+library(xtable) #version 1.8-2 Date/Publication: 2016-01-08 Title: Export Tables to LaTeX or HTML Depends: R (>= 2.10.0)
+
 #Required Data files
 #Light_Calibration_Data.csv
 #Temperature_Calibration_Data.csv
@@ -724,7 +728,7 @@ file.names <- file.names[grep("[.]csv", file.names)] # select only get the csv f
 
 #create an empty dataframe to put the TA values in
 nrow<-length(file.names) #set number of rows to the number of samples
-TA <- matrix(nrow = nrow, ncol = 3) #set the dimensions of the datframe
+TA <- matrix(nrow = nrow, ncol = 3) #set the dimensions of the dataframe
 rownames(TA)<-file.names #identify row names
 colnames(TA)<-c('Sample.ID','Mass','TA.Mes') #identify column names
 
@@ -811,13 +815,17 @@ carb.ouptput$CO2 <- carb.ouptput$CO2*1000000 #convert to µmol kg-1
 carb.ouptput$HCO3 <- carb.ouptput$HCO3*1000000 #convert to µmol kg-1
 carb.ouptput$CO3 <- carb.ouptput$CO3*1000000 #convert to µmol kg-1
 carb.ouptput$DIC <- carb.ouptput$DIC*1000000 #convert to µmol kg-1
+carb.ouptput <- carb.ouptput[,-c(1,4,5,8,10:13,19)]
 carb.ouptput <- cbind(SW.chem$Date,  SW.chem$Tank,  SW.chem$Treatment, SW.chem$Period1,SW.chem$Period2, SW.chem$Period3, carb.ouptput) #combine the sample information with the seacarb output
-colnames(carb.ouptput) <- c("Date",  "Tank",  "Treatment",	"Period1", "Period2", "Period3",  "flag",	"Salinity",	"Temperature",	"Pressure",	"pH",	"CO2",	"pCO2",	"fCO2",	"HCO3",	"CO3",	"DIC", "TA",	"Aragonite.Sat", 	"Calcite.Sat") #Rename columns to describe contents
+colnames(carb.ouptput) <- c("Date",  "Tank",  "Treatment",	"Period1", "Period2", "Period3",	"Salinity",	"Temperature", "pH",	"CO2",	"pCO2","HCO3",	"CO3",	"DIC", "TA",	"Aragonite.Sat") #Rename columns to describe contents
 
 carb.ouptput.Acc <- subset(carb.ouptput, Period1 == "Acc") #subset data
 carb.ouptput.Adult <- subset(carb.ouptput, Period1 == "Adult") #subset data
+carb.ouptput.Adult <- carb.ouptput.Adult[,-c(1,5:6)] #subset data
 carb.ouptput.M1 <- subset(carb.ouptput, Period2 == "Month1") #subset data
+carb.ouptput.M1 <- carb.ouptput.M1[,-c(1,4,6)] #subset data
 carb.ouptput.M6 <- subset(carb.ouptput, Period3 == "Month6") #subset data
+carb.ouptput.M6 <- carb.ouptput.M6[,-c(1,4,5)] #subset data
 
 carbo.melted.Adult <- melt(carb.ouptput.Adult) #reshape the dataframe to more easily summarize all output parameters
 mean.carb.output.Adult <-ddply(carbo.melted.Adult, .(Treatment, variable), summarize, #For each subset of a data frame, apply function then combine results into a data frame.
@@ -826,9 +834,25 @@ mean.carb.output.Adult <-ddply(carbo.melted.Adult, .(Treatment, variable), summa
                          sem = (sd(value)/sqrt(N))) #calculate the SEM as the sd/sqrt of the count or data length
 mean.carb.output.Adult # display mean and sem 
 mean.carb.output.Adult <- mean.carb.output.Adult[with(mean.carb.output.Adult, order(variable)), ] #order the data by the variables
-mean.carb.output.Adult <- mean.carb.output.Adult[-c(1:4,9,10,29,30), ] #remove non-numeric parameters extra
-setwd(file.path(mainDir, 'Output'))
-write.table (mean.carb.output.Adult, "Seawater_chemistry_table_Output_Adult.csv", sep=",", row.names = FALSE)
+adult.carb.table <- mean.carb.output.Adult[,-c(3)]
+adult.carb.table <- reshape(adult.carb.table, direction="wide", timevar="variable", idvar="Treatment")
+adult.carb.table$N <- c(mean.carb.output.Adult[1,3],mean.carb.output.Adult[2,3]) #include sample size
+#create an empty dataframe 
+adult.chem.table <- matrix(nrow = 2, ncol = 1) #set the dimensions of the dataframe
+colnames(adult.chem.table)<-c("Treatment") #identify column names
+adult.chem.table <- data.frame(adult.chem.table) #change to dataframe
+adult.chem.table$Treatment <- adult.carb.table$Treatment #add treatment info
+adult.chem.table$N <- adult.carb.table$N #add sample size
+adult.chem.table$Temperature <- paste(round(adult.carb.table$mean.Temperature, digits=2), round(adult.carb.table$sem.Temperature, digits=2), sep=' ± ') #add combined mean and sem with ± separating them
+adult.chem.table$Salinity <- paste(round(adult.carb.table$mean.Salinity, digits=1), round(adult.carb.table$sem.Salinity, digits=1), sep=' ± ') #add combined mean and sem with ± separating them
+adult.chem.table$Total.Alkalinity <- paste(round(adult.carb.table$mean.TA, digits=0), round(adult.carb.table$sem.TA, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+adult.chem.table$pH <- paste(round(adult.carb.table$mean.pH, digits=2), round(adult.carb.table$sem.pH, digits=2), sep=' ± ') #add combined mean and sem with ± separating them
+adult.chem.table$pCO2 <- paste(round(adult.carb.table$mean.pCO2, digits=0), round(adult.carb.table$sem.pCO2, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+adult.chem.table$CO2 <- paste(round(adult.carb.table$mean.CO2, digits=0), round(adult.carb.table$sem.CO2, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+adult.chem.table$HCO3 <- paste(round(adult.carb.table$mean.HCO3, digits=0), round(adult.carb.table$sem.HCO3, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+adult.chem.table$CO3 <- paste(round(adult.carb.table$mean.CO3, digits=0), round(adult.carb.table$sem.CO3, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+adult.chem.table$DIC <- paste(round(adult.carb.table$mean.DIC, digits=0), round(adult.carb.table$sem.DIC, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+adult.chem.table$Arag.Sat <- paste(round(adult.carb.table$mean.Aragonite.Sat, digits=1), round(adult.carb.table$sem.Aragonite.Sat, digits=1), sep=' ± ') #add combined mean and sem with ± separating them
 
 carbo.melted.M1 <- melt(carb.ouptput.M1) #reshape the dataframe to more easily summarize all output parameters
 mean.carb.output.M1 <-ddply(carbo.melted.M1, .(Treatment, variable), summarize, #For each subset of a data frame, apply function then combine results into a data frame.
@@ -837,18 +861,52 @@ mean.carb.output.M1 <-ddply(carbo.melted.M1, .(Treatment, variable), summarize, 
                                sem = (sd(value)/sqrt(N))) #calculate the SEM as the sd/sqrt of the count or data length
 mean.carb.output.M1 # display mean and sem 
 mean.carb.output.M1 <- mean.carb.output.M1[with(mean.carb.output.M1, order(variable)), ] #order the data by the variables
-mean.carb.output.M1 <- mean.carb.output.M1[-c(1:4,9,10,29,30), ] #remove non-numeric parameters extra
-write.table (mean.carb.output.M1, "Seawater_chemistry_table_Output_M1.csv", sep=",", row.names = FALSE)
+M1.carb.table <- mean.carb.output.M1[,-c(3)] #remove sample size
+M1.carb.table <- reshape(M1.carb.table, direction="wide", timevar="variable", idvar="Treatment")
+M1.carb.table$N <- c(mean.carb.output.M1[1,3],mean.carb.output.M1[2,3]) #include sample size
+#create an empty dataframe 
+M1.chem.table <- matrix(nrow = 2, ncol = 1) #set the dimensions of the dataframe
+colnames(M1.chem.table)<-c("Treatment") #identify column names
+M1.chem.table <- data.frame(M1.chem.table) #change to dataframe
+M1.chem.table$Treatment <- M1.carb.table$Treatment #add treatment info
+M1.chem.table$N <- M1.carb.table$N #add sample size
+M1.chem.table$Temperature <- paste(round(M1.carb.table$mean.Temperature, digits=2), round(M1.carb.table$sem.Temperature, digits=2), sep=' ± ') #add combined mean and sem with ± separating them
+M1.chem.table$Salinity <- paste(round(M1.carb.table$mean.Salinity, digits=1), round(M1.carb.table$sem.Salinity, digits=1), sep=' ± ') #add combined mean and sem with ± separating them
+M1.chem.table$Total.Alkalinity <- paste(round(M1.carb.table$mean.TA, digits=0), round(M1.carb.table$sem.TA, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+M1.chem.table$pH <- paste(round(M1.carb.table$mean.pH, digits=2), round(M1.carb.table$sem.pH, digits=2), sep=' ± ') #add combined mean and sem with ± separating them
+M1.chem.table$pCO2 <- paste(round(M1.carb.table$mean.pCO2, digits=0), round(M1.carb.table$sem.pCO2, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+M1.chem.table$CO2 <- paste(round(M1.carb.table$mean.CO2, digits=0), round(M1.carb.table$sem.CO2, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+M1.chem.table$HCO3 <- paste(round(M1.carb.table$mean.HCO3, digits=0), round(M1.carb.table$sem.HCO3, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+M1.chem.table$CO3 <- paste(round(M1.carb.table$mean.CO3, digits=0), round(M1.carb.table$sem.CO3, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+M1.chem.table$DIC <- paste(round(M1.carb.table$mean.DIC, digits=0), round(M1.carb.table$sem.DIC, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+M1.chem.table$Arag.Sat <- paste(round(M1.carb.table$mean.Aragonite.Sat, digits=1), round(M1.carb.table$sem.Aragonite.Sat, digits=1), sep=' ± ') #add combined mean and sem with ± separating them
 
 carbo.melted.M6 <- melt(carb.ouptput.M6) #reshape the dataframe to more easily summarize all output parameters
 mean.carb.output.M6 <-ddply(carbo.melted.M6, .(Treatment, variable), summarize, #For each subset of a data frame, apply function then combine results into a data frame.
-                            N = length(na.omit(value)),
+                            N = length(na.omit(value)), #number of records
                             mean = (mean(value)),       #take the average of the parameters (variables) summarized by treatments
                             sem = (sd(value)/sqrt(N))) #calculate the SEM as the sd/sqrt of the count or data length
 mean.carb.output.M6 # display mean and sem 
 mean.carb.output.M6 <- mean.carb.output.M6[with(mean.carb.output.M6, order(variable)), ] #order the data by the variables
-mean.carb.output.M6 <- mean.carb.output.M6[-c(1:4,9,10,29,30), ] #remove non-numeric parameters extra
-write.table (mean.carb.output.M6 , "Seawater_chemistry_table_Output_M6.csv", sep=",", row.names = FALSE)
+M6.carb.table <- mean.carb.output.M6[,-c(3)] #remove sample size
+M6.carb.table <- reshape(M6.carb.table, direction="wide", timevar="variable", idvar="Treatment")
+M6.carb.table$N <- c(mean.carb.output.M6[1,3],mean.carb.output.M6[2,3]) #include sample size
+#create an empty dataframe 
+M6.chem.table <- matrix(nrow = 2, ncol = 1) #set the dimensions of the dataframe
+colnames(M6.chem.table)<-c("Treatment") #identify column names
+M6.chem.table <- data.frame(M6.chem.table) #change to dataframe
+M6.chem.table$Treatment <- M6.carb.table$Treatment #add treatment info
+M6.chem.table$N <- M6.carb.table$N #add sample size
+M6.chem.table$Temperature <- paste(round(M6.carb.table$mean.Temperature, digits=2), round(M6.carb.table$sem.Temperature, digits=2), sep=' ± ') #add combined mean and sem with ± separating them
+M6.chem.table$Salinity <- paste(round(M6.carb.table$mean.Salinity, digits=1), round(M6.carb.table$sem.Salinity, digits=1), sep=' ± ') #add combined mean and sem with ± separating them
+M6.chem.table$Total.Alkalinity <- paste(round(M6.carb.table$mean.TA, digits=0), round(M6.carb.table$sem.TA, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+M6.chem.table$pH <- paste(round(M6.carb.table$mean.pH, digits=2), round(M6.carb.table$sem.pH, digits=2), sep=' ± ') #add combined mean and sem with ± separating them
+M6.chem.table$pCO2 <- paste(round(M6.carb.table$mean.pCO2, digits=0), round(M6.carb.table$sem.pCO2, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+M6.chem.table$CO2 <- paste(round(M6.carb.table$mean.CO2, digits=0), round(M6.carb.table$sem.CO2, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+M6.chem.table$HCO3 <- paste(round(M6.carb.table$mean.HCO3, digits=0), round(M6.carb.table$sem.HCO3, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+M6.chem.table$CO3 <- paste(round(M6.carb.table$mean.CO3, digits=0), round(M6.carb.table$sem.CO3, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+M6.chem.table$DIC <- paste(round(M6.carb.table$mean.DIC, digits=0), round(M6.carb.table$sem.DIC, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
+M6.chem.table$Arag.Sat <- paste(round(M6.carb.table$mean.Aragonite.Sat, digits=1), round(M6.carb.table$sem.Aragonite.Sat, digits=1), sep=' ± ') #add combined mean and sem with ± separating them
 
 #####SEAWATER CHEMISTRY ANALYSIS FOR CONTINUOUS MEASUREMENTS#####
 #generate all the calibration curve data for tris standard mV and temperature
@@ -1417,8 +1475,7 @@ colnames(june.larvae) <- c("Lunar.Day", "Treatment", "mean", "se") #rename colum
 june.larvae #view data
 
 Fig25 <- ggplot(june.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
-  geom_bar() + #use bars
-  geom_bar(position=position_dodge(), stat="identity", show_guide=FALSE) + #assign bar id and position
+  geom_bar(position=position_dodge(), stat="identity", show.legend=FALSE) + #assign bar id and position
   scale_fill_manual(values=c("gray", "black")) + #bar fill color
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, size = 0.4,                   # Width of the error bars
@@ -1429,15 +1486,22 @@ Fig25 <- ggplot(june.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot m
   ylab("Number of Planulae Released") + #y axis title
   theme_bw() + #theme black and white 
   guides(fill = guide_legend(keywidth = 0.5, keyheight = 0.5))+ #legend guides
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #x axis text characteristics
-        panel.border = element_blank(), #remove border
-        panel.grid.major = element_blank(), #remove grids
-        panel.grid.minor = element_blank(), #remove grids
-        axis.line = element_line(colour = "black"), #axis line black
-        legend.title=element_blank(), #remove legend title
-        legend.position=c(0.2,0.9), #set legend position
-        plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.text = element_text(size = 8)) #set legend text size
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.text=element_text(size=16), #set text size
+        axis.title=element_text(size=18,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        panel.border = element_blank(), #Set the border
+        axis.line.x = element_line(color = 'black'), #Set the axes color
+        axis.line.y = element_line(color = 'black'), #Set the axes color
+        axis.text.x=element_text(angle=90),
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background=element_blank(),  #Set the plot background
+        legend.key = element_blank(),  #remove legend background
+        legend.position="none",  #set legend location
+        plot.title = element_text(face = 'bold', 
+                                  size = 12, 
+                                  hjust = 0)) #set title attributes
 Fig25 #view plot
 
 june.amb <- subset(june.larvae, Treatment=="Ambient") #subset data
@@ -1455,25 +1519,33 @@ colnames(july.larvae) <- c("Lunar.Day", "Treatment", "mean", "se") #rename colum
 july.larvae #view data
 
 Fig26 <- ggplot(july.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
-  geom_bar() + #use bars
-  geom_bar(position=position_dodge(), stat="identity", show_guide=FALSE) + #assign bar id and position
+  geom_bar(position=position_dodge(), stat="identity", show.legend=FALSE) + #assign bar id and position
   scale_fill_manual(values=c("gray", "black")) + #bar fill color
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
-                width=0, size = 0.4,                    # Width of the error bars
+                width=0, size = 0.4,                   # Width of the error bars
                 position=position_dodge(.9)) + #set bar position
   ylim(0,400) + #set y limits
   ggtitle("B) July") + #plot title
   xlab("Lunar Day") + #x axis title
-  ylab("Number of Planulae Released") + #y axis title
+  ylab("# Planulae Released") + #y axis title
   theme_bw() + #theme black and white 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #x axis text characteristics
-        panel.border = element_blank(), #remove border
-        panel.grid.major = element_blank(), #remove grids
-        panel.grid.minor = element_blank(), #remove grids
-        axis.line = element_line(colour = "black"), #axis line black
-        legend.title=element_blank(), #remove legend title
-        legend.position="none", #set legend position
-        plot.title=element_text(hjust=0)) #Justify the title to the top left
+  guides(fill = guide_legend(keywidth = 0.5, keyheight = 0.5))+ #legend guides
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.text=element_text(size=16), #set text size
+        axis.title=element_text(size=18,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        panel.border = element_blank(), #Set the border
+        axis.line.x = element_line(color = 'black'), #Set the axes color
+        axis.line.y = element_line(color = 'black'), #Set the axes color
+        axis.text.x=element_text(angle=90),
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background=element_blank(),  #Set the plot background
+        legend.key = element_blank(),  #remove legend background
+        legend.position="none",  #set legend location
+        plot.title = element_text(face = 'bold', 
+                                size = 12, 
+                                hjust = 0)) #set title attributes
 Fig26
 
 july.amb <- subset(july.larvae, Treatment=="Ambient") #subset data
@@ -1491,25 +1563,33 @@ colnames(august.larvae) <- c("Lunar.Day", "Treatment", "mean", "se") #rename col
 august.larvae #view data
 
 Fig27 <- ggplot(august.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
-  geom_bar() + #use bars
-  geom_bar(position=position_dodge(), stat="identity", show_guide=FALSE) + #assign bar id and position
+  geom_bar(position=position_dodge(), stat="identity", show.legend=FALSE) + #assign bar id and position
   scale_fill_manual(values=c("gray", "black")) + #bar fill color
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
-                width=0, size = 0.4,                 # Width of the error bars
+                width=0, size = 0.4,                   # Width of the error bars
                 position=position_dodge(.9)) + #set bar position
   ylim(0,400) + #set y limits
-  ggtitle("C) August") +  #plot title
+  ggtitle("C) August") + #plot title
   xlab("Lunar Day") + #x axis title
   ylab("Number of Planulae Released") + #y axis title
   theme_bw() + #theme black and white 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #x axis text characteristics
-        panel.border = element_blank(), #remove border
-        panel.grid.major = element_blank(), #remove grids
-        panel.grid.minor = element_blank(), #remove grids
-        axis.line = element_line(colour = "black"), #axis line black
-        legend.title=element_blank(), #remove legend title
-        legend.position="none", #set legend position
-        plot.title=element_text(hjust=0)) #Justify the title to the top left
+  guides(fill = guide_legend(keywidth = 0.5, keyheight = 0.5))+ #legend guides
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.text=element_text(size=16), #set text size
+        axis.title=element_text(size=18,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        panel.border = element_blank(), #Set the border
+        axis.line.x = element_line(color = 'black'), #Set the axes color
+        axis.line.y = element_line(color = 'black'), #Set the axes color
+        axis.text.x=element_text(angle=90),
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background=element_blank(),  #Set the plot background
+        legend.key = element_blank(),  #remove legend background
+        legend.position="none",  #set legend location
+        plot.title = element_text(face = 'bold', 
+                                  size = 12, 
+                                  hjust = 0)) #set title attributes
 Fig27
 
 august.amb <- subset(august.larvae, Treatment=="Ambient") #subset data
@@ -1535,14 +1615,22 @@ Fig28 <- ggplot(all.release, aes(x=Time, y=mean, colour=Treatment, group=Treatme
   ylim(0,1700) + #y axis limits
   ggtitle("D) Total") + #plot title
   theme_bw() + #theme black and white 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #x axis text characteristics
-        panel.border = element_blank(), #remove border
-        panel.grid.major = element_blank(), #remove grids
-        panel.grid.minor = element_blank(), #remove grids
-        axis.line = element_line(colour = "black"), #axis line black
-        legend.title=element_blank(), #remove legend title
-        legend.position="none", #set legend position
-        plot.title=element_text(hjust=0)) #Justify the title to the top left
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.text=element_text(size=16), #set text size
+        axis.title=element_text(size=18,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        panel.border = element_blank(), #Set the border
+        axis.line.x = element_line(color = 'black'), #Set the axes color
+        axis.line.y = element_line(color = 'black'), #Set the axes color
+        axis.text.x=element_text(angle=90),
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background=element_blank(),  #Set the plot background
+        legend.key = element_blank(),  #remove legend background
+        legend.position="none",  #set legend location
+        plot.title = element_text(face = 'bold', 
+                                  size = 12, 
+                                  hjust = 0)) #set title attributes
 Fig28
 
 #GLM release by treatment and time
@@ -1576,28 +1664,34 @@ se.survive.M0 <- aggregate(Alive ~ Origin * Secondary, data = survive.M0, FUN= "
 survivorship.M0 <- cbind(mean.survive.M0,se.survive.M0$Alive) #view data
 colnames(survivorship.M0) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
-Fig29 <- ggplot(data=survivorship.M0, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+Fig29 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
   geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
   scale_colour_manual(values=c("gray", "black")) + #set line color
-  geom_point(size=3, position=position_dodge(.1), colour="black") + #set point characteristics
+  geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
   ggtitle("A)") + #plot title
+  xlab("Treatment of Offspring") +
   ylab("Survivorship") + #Y axis label
   ylim(0,1) + #Y axis limits
   theme_bw() + #theme black and white 
-  theme(axis.title.x=element_blank(), #x axis text characteristics
-        panel.border = element_blank(), #remove border
-        panel.grid.major = element_blank(), #remove grids
-        panel.grid.minor = element_blank(), #remove grids
-        plot.background =element_blank(), #Set the plot background
-        axis.line = element_line(colour = "black"), #axis line black
-        legend.title=element_blank(), #remove legend title
-        legend.position="none", #set legend position
-        plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.text = element_text(size = 8), #set legend text size
-        legend.key = element_blank()) #Set plot legend key
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.text=element_text(size=16), #set text size
+        axis.title=element_text(size=18,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        panel.border = element_blank(), #Set the border
+        axis.line.x = element_line(color = 'black'), #Set the axes color
+        axis.line.y = element_line(color = 'black'), #Set the axes color
+        axis.text.x=element_text(angle=0),
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background=element_blank(),  #Set the plot background
+        legend.key = element_blank(),  #remove legend background
+        legend.position="none",  #set legend location
+        plot.title = element_text(face = 'bold', 
+                                  size = 12, 
+                                  hjust = 0)) #set title attributes
 
 Fig29 #view plot
 
@@ -1613,26 +1707,34 @@ se.survive.M1 <- aggregate(Alive ~ Origin + Secondary, data = survive.M1, FUN= "
 survivorship.M1 <- cbind(mean.survive.M1,se.survive.M1$Alive)
 colnames(survivorship.M1) <- c("Origin", "Secondary", "mean", "se")
 
-Fig30 <- ggplot(data=survivorship.M1, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) +
+Fig30 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) +
   geom_line(size=0.7, position=position_dodge(.1)) +
   scale_colour_manual(values=c("gray", "black")) +
-  geom_point(size=3, position=position_dodge(.1), colour="black") +
+  geom_point(size=4, position=position_dodge(.1), colour="black") +
   scale_shape_manual(values=c(1,18)) +
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
                 width=0, position=position_dodge(.1), colour="black") +
-  ggtitle("B)") + 
+  ggtitle("C)") + 
+  xlab("Treatment of Offspring") +
   ylab("Survivorship") +
   ylim(0,1) +
   theme_bw() + 
-  theme(axis.title.x=element_blank(),
-        panel.border = element_blank(), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), 
-        axis.line = element_line(colour = "black"),
-        legend.title=element_blank(),
-        legend.position="none",
-        plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.text = element_text(size = 8))
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.text=element_text(size=16), #set text size
+        axis.title=element_text(size=18,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        panel.border = element_blank(), #Set the border
+        axis.line.x = element_line(color = 'black'), #Set the axes color
+        axis.line.y = element_line(color = 'black'), #Set the axes color
+        axis.text.x=element_text(angle=0),
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background=element_blank(),  #Set the plot background
+        legend.key = element_blank(),  #remove legend background
+        legend.position="none",  #set legend location
+        plot.title = element_text(face = 'bold', 
+                                  size = 12, 
+                                  hjust = 0)) #set title attributes
 
 Fig30
 
@@ -1647,29 +1749,37 @@ se.survive.M6 <- aggregate(Alive ~ Origin + Secondary, data = survive.M6, FUN= "
 survivorship.M6 <- cbind(mean.survive.M6,se.survive.M6$Alive)
 colnames(survivorship.M6) <- c("Origin", "Secondary", "mean", "se")
 
-Fig31 <- ggplot(data=survivorship.M6, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) +
+Fig31 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) +
   geom_line(size=0.7, position=position_dodge(.1)) +
   scale_colour_manual(values=c("gray", "black"), labels=c("Ambient Parental Envt.", "High Parental Envt.")) +
-  geom_point(size=3, position=position_dodge(.1), colour="black") +
+  geom_point(size=4, position=position_dodge(.1), colour="black") +
   scale_shape_manual(values=c(1,18), labels=c("Ambient Parental Envt.", "High Parental Envt.")) +
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
                 width=0, position=position_dodge(.1), colour="black") +
-  ggtitle("C)") + 
+  ggtitle("E)") + 
+  xlab("Treatment of Offspring") +
   ylab("Survivorship") +
   ylim(0,1) +
   theme_bw() + 
-  theme(axis.title.x=element_blank(),
-        panel.border = element_blank(), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), 
-        axis.line = element_line(colour = "black"),
-        legend.title=element_blank(),
-        legend.position=c(0.6,0.8),
-        plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.text = element_text(size = 10),
-        legend.key = element_blank()) #Set plot legend key
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.text=element_text(size=16), #set text size
+        axis.title=element_text(size=18,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        panel.border = element_blank(), #Set the border
+        axis.line.x = element_line(color = 'black'), #Set the axes color
+        axis.line.y = element_line(color = 'black'), #Set the axes color
+        axis.text.x=element_text(angle=0),
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background=element_blank(),  #Set the plot background
+        legend.key = element_blank(),  #remove legend background
+        legend.position=c(0.6,0.8),  #set legend location
+        plot.title = element_text(face = 'bold', 
+                                  size = 12, 
+                                  hjust = 0)) #set title attributes
 
 Fig31
+
 
 #Repeated Measures Survivorship
 All.Survivorship <- rbind(survive.M0, survive.M1, survive.M6)
@@ -1698,27 +1808,34 @@ se.settled <- aggregate(Settled ~ Origin + Secondary, data = settlement, FUN= "s
 settlement.data <- cbind(mean.settled, se.settled$Settled)
 colnames(settlement.data) <- c("Origin", "Secondary", "mean", "se")
 
-Fig32 <- ggplot(data=settlement.data, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) +
+Fig32 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) +
   geom_line(size=0.7, position=position_dodge(.1)) +
   scale_colour_manual(values=c("gray", "black")) +
-  geom_point(size=3, position=position_dodge(.1), colour="black") +
+  geom_point(size=4, position=position_dodge(.1), colour="black") +
   scale_shape_manual(values=c(1,18)) +
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
                 width=0, position=position_dodge(.1), colour="black") +
-  ggtitle("D)") + 
+  ggtitle("B)") + 
   xlab("Treatment of Offspring") +
   ylab("Settlement") +
   ylim(0,1) +
   theme_bw() + 
-  theme(axis.title.x=element_blank(),
-        panel.border = element_blank(), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), 
-        axis.line = element_line(colour = "black"),
-        legend.title=element_blank(),
-        legend.position="none",
-        plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.text = element_text(size = 8))
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.text=element_text(size=16), #set text size
+        axis.title=element_text(size=18,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        panel.border = element_blank(), #Set the border
+        axis.line.x = element_line(color = 'black'), #Set the axes color
+        axis.line.y = element_line(color = 'black'), #Set the axes color
+        axis.text.x=element_text(angle=0),
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background=element_blank(),  #Set the plot background
+        legend.key = element_blank(),  #remove legend background
+        legend.position="none",  #set legend location
+        plot.title = element_text(face = 'bold', 
+                                  size = 12, 
+                                  hjust = 0)) #set title attributes
 Fig32
 
 settlement.lm <- aov(asin(Settled) ~Origin * Secondary, data=settlement)
@@ -1734,7 +1851,7 @@ settlement.shapiro
 settlement.qqnorm <- qqnorm(settlement.resid) # normal quantile plot
 settlement.qqline <- qqline(settlement.resid) # adding a qline of comparison
 hist(settlement.resid)
-anova(settle.results)
+
 
 sett.posthoc <- lsmeans(settlement.lm, specs=c("Origin", "Secondary")) #calculate MS means
 sett.posthoc #view results
@@ -1771,48 +1888,62 @@ colnames(m6.growth) <- c("Origin", "Secondary", "mean", "se")
 Fig33 <- ggplot(data=m1.growth, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) +
   geom_line(size=0.7, position=position_dodge(.1)) +
   scale_colour_manual(values=c("gray", "black")) +
-  geom_point(size=3, position=position_dodge(.1), colour="black") +
+  geom_point(size=4, position=position_dodge(.1), colour="black") +
   scale_shape_manual(values=c(1,18)) +
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
                 width=0, position=position_dodge(.1), colour="black") +
-  ggtitle("E)") + 
+  ggtitle("D)") + 
   xlab("Treatment of Offspring") +
-  ylab(expression(~Growth~~"(polyps "*d^"1"*")")) +
+  ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) +
   ylim(0,0.1) +
   theme_bw() + 
-  theme(axis.title.x=element_blank(),
-        panel.border = element_blank(), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), 
-        axis.line = element_line(colour = "black"),
-        legend.title=element_blank(),
-        legend.position="none",
-        plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.text = element_text(size = 8))
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.text=element_text(size=16), #set text size
+        axis.title=element_text(size=18,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        panel.border = element_blank(), #Set the border
+        axis.line.x = element_line(color = 'black'), #Set the axes color
+        axis.line.y = element_line(color = 'black'), #Set the axes color
+        axis.text.x=element_text(angle=0),
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background=element_blank(),  #Set the plot background
+        legend.key = element_blank(),  #remove legend background
+        legend.position="none",  #set legend location
+        plot.title = element_text(face = 'bold', 
+                                  size = 12, 
+                                  hjust = 0)) #set title attributes
 
 Fig33
 
 Fig34 <- ggplot(data=m6.growth, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) +
   geom_line(size=0.7, position=position_dodge(.1)) +
   scale_colour_manual(values=c("gray", "black")) +
-  geom_point(size=3, position=position_dodge(.1), colour="black") +
+  geom_point(size=4, position=position_dodge(.1), colour="black") +
   scale_shape_manual(values=c(1,18)) +
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
                 width=0, position=position_dodge(.1), colour="black") +
   ggtitle("F)") + 
   xlab("Treatment of Offspring") +
-  ylab(expression(~Growth~~"(polyps "*d^"1"*")")) +
+  ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) +
   ylim(0,0.1) +
   theme_bw() + 
-  theme(axis.title.x=element_blank(),
-        panel.border = element_blank(), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), 
-        axis.line = element_line(colour = "black"),
-        legend.title=element_blank(),
-        legend.position="none",
-        plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.text = element_text(size = 8))
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.text=element_text(size=16), #set text size
+        axis.title=element_text(size=18,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        panel.border = element_blank(), #Set the border
+        axis.line.x = element_line(color = 'black'), #Set the axes color
+        axis.line.y = element_line(color = 'black'), #Set the axes color
+        axis.text.x=element_text(angle=0),
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background=element_blank(),  #Set the plot background
+        legend.key = element_blank(),  #remove legend background
+        legend.position="none",  #set legend location
+        plot.title = element_text(face = 'bold', 
+                                  size = 12, 
+                                  hjust = 0)) #set title attributes
 
 Fig34
 
@@ -1900,7 +2031,7 @@ Fig36 <- ggplot(data=m6.size, aes(x=factor(Secondary), y=mean, group=Origin, sha
 
 Fig36
 
-#####ALL FIGURES AND STATISTICAL RESULTS#####
+#####ALL FIGURES, TABLES, AND STATISTICAL RESULTS#####
 setwd(file.path(mainDir, 'Output'))
 
 #Capture Figures to File
@@ -1928,6 +2059,12 @@ print(Fig33, vp = vplayout(2, 2))
 print(Fig34, vp = vplayout(2, 3))
 dev.off()
 
+Larval.Perform <- arrangeGrob(Fig29, Fig30, Fig31,
+                              Fig32, Fig33, Fig34, ncol=3)
+ggsave(file="Fig3.Larval.Performance.pdf", Larval.Perform, width =12, height = 6, units = c("in"))
+
+
+
 
 FigureS1.Physical <- arrangeGrob(Fig2, Fig3,
                                 Fig5, Fig7, 
@@ -1939,6 +2076,27 @@ FigureS2.Chemical <- arrangeGrob(Fig17, Fig18,
                                 Fig20, Fig21, 
                                 Fig23, Fig24, ncol=2)
 ggsave(file="FigS2.Chemical_Experimental_Conditions.pdf", FigureS2.Chemical, width =8.5, height = 11, units = c("in"))
+
+write.table(adult.chem.table, "Seawater_chemistry_table_Output_Adult.csv", sep=",", row.names = FALSE)
+write.table(M1.chem.table, "Seawater_chemistry_table_Output_M1.csv", sep=",", row.names = FALSE)
+write.table(M6.chem.table, "Seawater_chemistry_table_Output_M6.csv", sep=",", row.names = FALSE)
+
+tt2 <- ttheme_minimal()
+title1 <- "A) Adult Exposure"
+title2 <- "B) Month 1 Exposure"
+title3 <- "C) Month 6 Exposure"
+t1 <- grid.text(title1, just="left")
+t2 <- grid.text(title2, just="left")
+t3 <- grid.text(title3, just="left")
+SW.Chem.Tables <- grid.arrange(
+  t1,
+  tableGrob(adult.chem.table, theme=tt2),
+  t2,
+  tableGrob(M1.chem.table, theme=tt2),
+  t3,
+  tableGrob(M6.chem.table, theme=tt2),
+  nrow=6)
+ggsave(file="SW.Chemistry.Table.pdf", SW.Chem.Tables, width = 11, height = 6)
 
 
 setwd(file.path(mainDir, 'Data'))
