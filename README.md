@@ -2,7 +2,7 @@
 
 #Adult preconditioning to ocean acidification induces positive offspring response  
 
-This repository includes data and analysis scripts to accompany: Nurtured by Nature:Adult preconditining to ocean acidification induces positive offspring response 
+This repository includes data and analysis scripts to accompany: Nurtured by Nature:Adult preconditioning to ocean acidification induces positive offspring response 
 
 **Authors:** Putnam, Hollie M., Ritson-Willams R, Cruz JA, Davidson JM, Gates RD.   
 
@@ -22,21 +22,29 @@ This repository includes data and analysis scripts to accompany: Nurtured by Nat
   
 * Light_Calibration_Data.csv
 * Temperature_Calibration_Data.csv
-* Field_Temp.csv
 * Acclimation_Data.csv
-* Adult_Tank_Temp.csv
 * Adult_Tank_Light.csv
-* Month1_Tank_Temp.csv
+* Adult_Tank_Temp.csv
+* Adult_Tank_NBS_pH.csv
+* august.larval.release.data.csv
+* CRM_TA_Data.csv
+* Daily_Temp_pH_Sal.csv
+* Field_Temp.csv
+* july.larval.release.data.csv
+* june.larval.release.data.csv
+* Larval_Data_M0.csv
+* Larval_Data_M1.csv
+* Month1_Larval_Size.csv
 * Month1_Tank_Light.csv
-* Month6_Tank_Temp.csv
+* Month1_Tank_NBS_pH.csv
+* Month1_Tank_Temp.csv
+* Month6_Larval_Size.csv
 * Month6_Tank_Light.csv
-* /Users/hputnam/MyProjects/HI_Pdam_Parental/RAnalysis/Data/
-* pH_Calibration_Files/
+* Month6_Tank_NBS_pH.csv
+* Month6_Tank_Temp.csv
+* ~/MyProjects/HI_Pdam_Parental/RAnalysis/Data/pH_Calibration_Files/
+* ~/MyProjects/HI_Pdam_Parental/RAnalysis/Data/TA/
 * Daily_Temp_pH_Sal.csv
 * TA_mass_data.csv
-* CRM_TA_Data.csv
-* june.larval.release.data.csv
-* july.larval.release.data.csv
-* august.larval.release.data.csv
 
 **Output:** The directory containing the analysis results, figures, tables, and supplementary material.
