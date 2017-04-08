@@ -3,7 +3,7 @@
 #Title: 
 #Contact: Hollie Putnam hollieputnam@gmail.com
 #Supported by: NSF Ocean Sciencs Postdoctoral Research Fellowship (NSF OCE PRF-1323822) and NSF EPSCOR (NSF EPS-0903833)
-#last modified 20161002
+#last modified 20170408
 #See Readme file for details on data files and metadata
 
 rm(list=ls()) # removes all prior objects
@@ -24,24 +24,33 @@ library(seacarb) #version: 3.0 Date/Publication: 2014-04-05 Title: seawater carb
 library(grid) #version 3.3.1 Date/Publication: 2016-06-24 Title:grid
 library(xtable) #version 1.8-2 Date/Publication: 2016-01-08 Title: Export Tables to LaTeX or HTML Depends: R (>= 2.10.0)
 
-#Required Data files
+#####Required Data files#####
 #Light_Calibration_Data.csv
 #Temperature_Calibration_Data.csv
-#Field_Temp.csv
 #Acclimation_Data.csv
-#Adult_Tank_Temp.csv
 #Adult_Tank_Light.csv
-#Month1_Tank_Temp.csv
+#Adult_Tank_Temp.csv
+#Adult_Tank_NBS_pH.csv
+#august.larval.release.data.csv
+#CRM_TA_Data.csv
+#Daily_Temp_pH_Sal.csv
+#Field_Temp.csv
+#july.larval.release.data.csv
+#june.larval.release.data.csv
+#Larval_Data_M0.csv
+#Larval_Data_M1.csv
+#Month1_Larval_Size.csv
 #Month1_Tank_Light.csv
-#Month6_Tank_Temp.csv
+#Month1_Tank_NBS_pH.csv
+#Month1_Tank_Temp.csv
+#Month6_Larval_Size.csv
 #Month6_Tank_Light.csv
+#Month6_Tank_NBS_pH.csv
+#Month6_Tank_Temp.csv
 #~/MyProjects/HI_Pdam_Parental/RAnalysis/Data/pH_Calibration_Files/
+#~/MyProjects/HI_Pdam_Parental/RAnalysis/Data/TA/
 #Daily_Temp_pH_Sal.csv
 #TA_mass_data.csv
-#CRM_TA_Data.csv
-#june.larval.release.data.csv
-#july.larval.release.data.csv
-#august.larval.release.data.csv
 
 #############################################################
 setwd("~/MyProjects/HI_Pdam_Parental/RAnalysis/Data") #set working directory
@@ -793,7 +802,7 @@ Refs$TA.Corr <- Refs$CRM.TA-Refs$TA.Mes
 Refs <- Refs[order(Refs$Date, abs(Refs$TA.Corr) ), ] #sort by id and reverse of abs(value)
 Refs <- Refs[ !duplicated(Refs$Date), ]              # take the first row within each id
 Refs #view data
-CRM.res <- mean(abs(Refs$Per.Off), na.rm=T) #calculate the average % difference of TA from CRM values over the course of the experiment
+CRM.res <- mean(Refs$Per.Off, na.rm=T) #calculate the average % difference of TA from CRM values over the course of the experiment
 CRM.res #view the resolution of TA assay according to tests againsts Dickson CRMs
 
 #####SEAWATER CHEMISTRY ANALYSIS FOR DISCRETE MEASUREMENTS#####
@@ -1464,6 +1473,8 @@ Fig24 <- ggplot(tank.pCO2.means.M6) + #plot pCO2
         legend.position='none') #remove legend background
 Fig24 #View figure
 
+##### BIOLOGICAL RESPONSE #####
+
 ##### LARVAL RELEASE #####
 #June
 june.release.data <- read.csv("june.larval.release.data.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
@@ -1661,7 +1672,7 @@ survive.M0 <- data.frame (larval.data.M0$Chamber.num, larval.data.M0$Timepoint, 
 colnames(survive.M0) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Alive") #rename columns
 mean.survive.M0 <- aggregate(Alive ~ Origin * Secondary, data = survive.M0, FUN= "mean") #calculate mean by origin and secondary treatments
 se.survive.M0 <- aggregate(Alive ~ Origin * Secondary, data = survive.M0, FUN= "std.error")  #calculate se by origin and secondary treatments
-survivorship.M0 <- cbind(mean.survive.M0,se.survive.M0$Alive) #view data
+survivorship.M0 <- cbind(mean.survive.M0,se.survive.M0$Alive) #combine data
 colnames(survivorship.M0) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
 Fig29 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
@@ -1672,8 +1683,8 @@ Fig29 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, col
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
   ggtitle("A)") + #plot title
-  xlab("Treatment of Offspring") +
-  ylab("Survivorship") + #Y axis label
+  xlab("Treatment of Offspring") + #plot x axis label
+  ylab("Survivorship") + #plot y axis label
   ylim(0,1) + #Y axis limits
   theme_bw() + #theme black and white 
   theme(axis.line = element_line(color = 'black'), #Set the axes color
@@ -1696,29 +1707,29 @@ Fig29 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, col
 Fig29 #view plot
 
 #Month1
-larval.data.M1 <- read.csv("Larval_Data_M1.csv", header=T, sep=",", na.string="NA", as.is=T)
-proportion.alive.M1 <- larval.data.M1$month1/larval.data.M1$larvae.added
-proportion.dead.M1 <- 1-proportion.alive.M1
-survive.M1 <- data.frame (larval.data.M1$Chamber.num,larval.data.M1$Timepoint, larval.data.M1$Origin, larval.data.M1$Secondary, proportion.alive.M1)
-colnames(survive.M1) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Alive")
+larval.data.M1 <- read.csv("Larval_Data_M1.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
+proportion.alive.M1 <- larval.data.M1$month1/larval.data.M1$larvae.added #calculate survivorship
+proportion.dead.M1 <- 1-proportion.alive.M1 #calculate mortality
+survive.M1 <- data.frame (larval.data.M1$Chamber.num,larval.data.M1$Timepoint, larval.data.M1$Origin, larval.data.M1$Secondary, proportion.alive.M1) #make dataframe
+colnames(survive.M1) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Alive") #rename columns
 survive.M1$Timepoint <- "Time2"
-mean.survive.M1 <- aggregate(Alive ~ Origin + Secondary, data = survive.M1, FUN= "mean")
-se.survive.M1 <- aggregate(Alive ~ Origin + Secondary, data = survive.M1, FUN= "std.error")
-survivorship.M1 <- cbind(mean.survive.M1,se.survive.M1$Alive)
-colnames(survivorship.M1) <- c("Origin", "Secondary", "mean", "se")
+mean.survive.M1 <- aggregate(Alive ~ Origin + Secondary, data = survive.M1, FUN= "mean") #calculate mean by origin and secondary treatments
+se.survive.M1 <- aggregate(Alive ~ Origin + Secondary, data = survive.M1, FUN= "std.error") #calculate se by origin and secondary treatments
+survivorship.M1 <- cbind(mean.survive.M1,se.survive.M1$Alive) #combine data
+colnames(survivorship.M1) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
-Fig30 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) +
-  geom_line(size=0.7, position=position_dodge(.1)) +
-  scale_colour_manual(values=c("gray", "black")) +
-  geom_point(size=4, position=position_dodge(.1), colour="black") +
-  scale_shape_manual(values=c(1,18)) +
-  geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
-                width=0, position=position_dodge(.1), colour="black") +
-  ggtitle("C)") + 
-  xlab("Treatment of Offspring") +
-  ylab("Survivorship") +
-  ylim(0,1) +
-  theme_bw() + 
+Fig30 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+  geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
+  scale_colour_manual(values=c("gray", "black")) + #set line color
+  geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
+  scale_shape_manual(values=c(1,18)) + #set shapes
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
+                width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
+  ggtitle("C)") + #plot title
+  xlab("Treatment of Offspring") + #plot x axis label
+  ylab("Survivorship") + #plot y axis label
+  ylim(0,1) + #Y axis limits
+  theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
         axis.title=element_text(size=18,face="bold"), #set axis title text size
@@ -1739,28 +1750,28 @@ Fig30 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, col
 Fig30
 
 #Month6
-proportion.alive.M6 <- larval.data.M1$month6/larval.data.M1$larvae.added
-proportion.dead.M6 <- 1-proportion.alive.M6
-survive.M6 <- data.frame(larval.data.M1$Chamber.num, larval.data.M1$Timepoint, larval.data.M1$Origin, larval.data.M1$Secondary, proportion.alive.M6)
-colnames(survive.M6) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Alive")
-survive.M6$Timepoint <- "Time3"
-mean.survive.M6 <- aggregate(Alive ~ Origin + Secondary, data = survive.M6, FUN= "mean")
-se.survive.M6 <- aggregate(Alive ~ Origin + Secondary, data = survive.M6, FUN= "std.error")
-survivorship.M6 <- cbind(mean.survive.M6,se.survive.M6$Alive)
-colnames(survivorship.M6) <- c("Origin", "Secondary", "mean", "se")
+proportion.alive.M6 <- larval.data.M1$month6/larval.data.M1$larvae.added #claculate survival
+proportion.dead.M6 <- 1-proportion.alive.M6 # calculate mortality
+survive.M6 <- data.frame(larval.data.M1$Chamber.num, larval.data.M1$Timepoint, larval.data.M1$Origin, larval.data.M1$Secondary, proportion.alive.M6) #combine data
+colnames(survive.M6) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Alive") #rename columns
+survive.M6$Timepoint <- "Time3" #identify timepoint
+mean.survive.M6 <- aggregate(Alive ~ Origin + Secondary, data = survive.M6, FUN= "mean") #calculate mean
+se.survive.M6 <- aggregate(Alive ~ Origin + Secondary, data = survive.M6, FUN= "std.error") #calculate SEM
+survivorship.M6 <- cbind(mean.survive.M6,se.survive.M6$Alive) #combine descriptive statistics
+colnames(survivorship.M6) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
-Fig31 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) +
-  geom_line(size=0.7, position=position_dodge(.1)) +
-  scale_colour_manual(values=c("gray", "black"), labels=c("Ambient Parental Envt.", "High Parental Envt.")) +
-  geom_point(size=4, position=position_dodge(.1), colour="black") +
-  scale_shape_manual(values=c(1,18), labels=c("Ambient Parental Envt.", "High Parental Envt.")) +
-  geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
-                width=0, position=position_dodge(.1), colour="black") +
-  ggtitle("E)") + 
-  xlab("Treatment of Offspring") +
-  ylab("Survivorship") +
-  ylim(0,1) +
-  theme_bw() + 
+Fig31 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+  geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
+  scale_colour_manual(values=c("gray", "black"), labels=c("Ambient Parental Envt.", "High Parental Envt.")) + #set line color
+  geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
+  scale_shape_manual(values=c(1,18), labels=c("Ambient Parental Envt.", "High Parental Envt.")) + #set shapes
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
+                width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
+  ggtitle("E)") + #plot title
+  xlab("Treatment of Offspring") + #plot x axis label
+  ylab("Survivorship") + #plot y axis label
+  ylim(0,1) + #Y axis limits
+  theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
         axis.title=element_text(size=18,face="bold"), #set axis title text size
@@ -1768,7 +1779,7 @@ Fig31 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, col
         panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0),
+        axis.text.x=element_text(angle=0), #text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
@@ -1782,13 +1793,20 @@ Fig31
 
 
 #Repeated Measures Survivorship
-All.Survivorship <- rbind(survive.M0, survive.M1, survive.M6)
-All.Survivorship$Origin.numeric <- as.numeric(All.Survivorship$Origin)
-All.Survivorship$Secondary.numeric <- as.numeric(All.Survivorship$Secondary)
-All.Survivorship$Timepoint.numeric <- as.numeric(All.Survivorship$Timepoint)
-sur.RM <-  lme(Alive ~ Origin*Secondary*Timepoint, random = ~ Timepoint|Chamber, data=All.Survivorship) #repeated measures ANOVA with random intercept but not slope 
-summary(sur.RM)
-anova(sur.RM)
+All.Survivorship <- rbind(survive.M0, survive.M1, survive.M6) #combine data
+All.Survivorship$Origin.numeric <- as.numeric(All.Survivorship$Origin) #convert factor to numeric
+All.Survivorship$Secondary.numeric <- as.numeric(All.Survivorship$Secondary) #convert factor to numeric
+All.Survivorship$Timepoint.numeric <- as.numeric(All.Survivorship$Timepoint) #convert factor to numeric
+sur.RM <-  lme(sqrt(Alive) ~ Origin*Secondary*Timepoint, random = ~ Timepoint|Chamber, data=All.Survivorship) #repeated measures ANOVA with random intercept but not slope 
+summary(sur.RM) #view summary
+anova(sur.RM) #view ANOVA table
+sur.resid <-resid(sur.RM) #extract residuals
+sur.shapiro <- shapiro.test(sur.resid) #runs a normality test using shapiro-wilk test on the residuals
+sur.shapiro #view results
+sur.qqnorm <- qqnorm(sur.resid) # normal quantile plot
+sur.qqline <- qqline(sur.resid) # adding a qline of comparison
+hist(sur.resid) #plot histogram of residuals
+plot(sur.RM) ### Homogen of Var ###
 
 sur.RM.posthoc <- lsmeans(sur.RM, specs=c("Timepoint","Origin","Secondary")) #calculate MS means
 sur.RM.posthoc #view results
@@ -1807,19 +1825,24 @@ mean.settled <- aggregate(Settled ~ Origin + Secondary, data = settlement, FUN= 
 se.settled <- aggregate(Settled ~ Origin + Secondary, data = settlement, FUN= "std.error")
 settlement.data <- cbind(mean.settled, se.settled$Settled)
 colnames(settlement.data) <- c("Origin", "Secondary", "mean", "se")
+settlement.data$posthoc <- c("bc", "c", "a", "ab")
 
-Fig32 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) +
-  geom_line(size=0.7, position=position_dodge(.1)) +
-  scale_colour_manual(values=c("gray", "black")) +
-  geom_point(size=4, position=position_dodge(.1), colour="black") +
-  scale_shape_manual(values=c(1,18)) +
-  geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
-                width=0, position=position_dodge(.1), colour="black") +
-  ggtitle("B)") + 
-  xlab("Treatment of Offspring") +
-  ylab("Settlement") +
-  ylim(0,1) +
-  theme_bw() + 
+Fig32 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+  geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
+  scale_colour_manual(values=c("gray", "black")) + #set line color
+  geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
+  scale_shape_manual(values=c(1,18)) + #set shapes
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
+                width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
+  annotate("text", x = 0.8, y = 0.68, label = "bc") +
+  annotate("text", x = 0.85, y = 0.80, label = "c") +
+  annotate("text", x = 2.2, y = 0.49, label = "a") +
+  annotate("text", x = 2.25, y = 0.56, label = "ab") +
+  ggtitle("B)") + #plot title
+  xlab("Treatment of Offspring") + #plot x axis label
+  ylab("Settlement") + #plot y axis label
+  ylim(0,1) + #Y axis limits
+  theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
         axis.title=element_text(size=18,face="bold"), #set axis title text size
@@ -1827,7 +1850,7 @@ Fig32 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, col
         panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0),
+        axis.text.x=element_text(angle=0), #text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
@@ -1838,20 +1861,17 @@ Fig32 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, col
                                   hjust = 0)) #set title attributes
 Fig32
 
-settlement.lm <- aov(asin(Settled) ~Origin * Secondary, data=settlement)
-anova(settlement.lm)
-
-settlement.levene <- leveneTest(Settled  ~Origin * Secondary, data=settlement)
-settlement.levene
-
-#settlement.lm <- lm(asin(Settled)  ~Origin * Secondary, data=settlement) 
-settlement.resid <- resid(settlement.lm)                
+settlement.lm <- aov(asin(Settled) ~Origin * Secondary, data=settlement) #two-way ANOVA
+anova(settlement.lm) #view ANOVA results
+settlement.resid <- resid(settlement.lm) #identify residuals                
 settlement.shapiro <- shapiro.test(settlement.resid) #runs a normality test using shapiro-wilk test on the residuals
-settlement.shapiro
+settlement.shapiro #view results
 settlement.qqnorm <- qqnorm(settlement.resid) # normal quantile plot
 settlement.qqline <- qqline(settlement.resid) # adding a qline of comparison
-hist(settlement.resid)
-
+hist(settlement.resid) #plot histogram of residuals
+plot(settlement.lm$fitted, settlement.lm$residuals) #plot residuals as a function of fitted data
+settlement.levene <- leveneTest(Settled  ~Origin * Secondary, data=settlement) #Levene's Test for Homogeneity of Variance
+settlement.levene #view results
 
 sett.posthoc <- lsmeans(settlement.lm, specs=c("Origin", "Secondary")) #calculate MS means
 sett.posthoc #view results
@@ -1874,29 +1894,27 @@ growth$Days.M6 <- difftime(growth$Date.M6, growth$Date.M1, units = c("days")) #c
 growth$growth.rate.M1 <- (growth$Polyp.Num.M1-1)/(as.numeric(growth$Days.M1)) #calculate growth rate per day
 growth$growth.rate.M6 <- (growth$Polyp.Num.M6-growth$Polyp.Num.M1)/(as.numeric(growth$Days.M6)) #calculate growth rate per day
 
-m1.mean.growth <- aggregate(growth.rate.M1 ~ Origin + Secondary, data = growth, FUN= "mean")
-m1.se.growth <- aggregate(growth.rate.M1 ~ Origin + Secondary, data = growth, FUN= "std.error")
-m1.growth <- cbind(m1.mean.growth,m1.se.growth$growth.rate.M1)
-colnames(m1.growth) <- c("Origin", "Secondary", "mean", "se")
+m1.mean.growth <- aggregate(growth.rate.M1 ~ Origin + Secondary, data = growth, FUN= "mean") #calculate mean by origin and secondary treatments
+m1.se.growth <- aggregate(growth.rate.M1 ~ Origin + Secondary, data = growth, FUN= "std.error") #calculate se by origin and secondary treatments
+m1.growth <- cbind(m1.mean.growth,m1.se.growth$growth.rate.M1) #combine data
+colnames(m1.growth) <- c("Origin", "Secondary", "mean", "se") #rename columns
+m6.mean.growth <- aggregate(growth.rate.M6 ~ Origin + Secondary, data = growth, FUN= "mean") #calculate mean by origin and secondary treatments
+m6.se.growth <- aggregate(growth.rate.M6 ~ Origin + Secondary, data = growth, FUN= "std.error") #calculate se by origin and secondary treatments
+m6.growth <- cbind(m6.mean.growth,m6.se.growth$growth.rate.M6) #combine data
+colnames(m6.growth) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
-m6.mean.growth <- aggregate(growth.rate.M6 ~ Origin + Secondary, data = growth, FUN= "mean")
-m6.se.growth <- aggregate(growth.rate.M6 ~ Origin + Secondary, data = growth, FUN= "std.error")
-m6.growth <- cbind(m6.mean.growth,m6.se.growth$growth.rate.M6)
-colnames(m6.growth) <- c("Origin", "Secondary", "mean", "se")
-
-
-Fig33 <- ggplot(data=m1.growth, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) +
-  geom_line(size=0.7, position=position_dodge(.1)) +
-  scale_colour_manual(values=c("gray", "black")) +
-  geom_point(size=4, position=position_dodge(.1), colour="black") +
-  scale_shape_manual(values=c(1,18)) +
-  geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
-                width=0, position=position_dodge(.1), colour="black") +
-  ggtitle("D)") + 
-  xlab("Treatment of Offspring") +
-  ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) +
-  ylim(0,0.1) +
-  theme_bw() + 
+Fig33 <- ggplot(data=m1.growth, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+  geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
+  scale_colour_manual(values=c("gray", "black")) + #set line color
+  geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
+  scale_shape_manual(values=c(1,18)) + #set shapes
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
+                width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
+  ggtitle("D)") + #plot title
+  xlab("Treatment of Offspring") + #plot x axis label
+  ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
+  ylim(0,0.1) + #Y axis limits
+  theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
         axis.title=element_text(size=18,face="bold"), #set axis title text size
@@ -1904,7 +1922,7 @@ Fig33 <- ggplot(data=m1.growth, aes(x=factor(Secondary), y=mean, group=Origin, c
         panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0),
+        axis.text.x=element_text(angle=0), #set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
@@ -1916,18 +1934,18 @@ Fig33 <- ggplot(data=m1.growth, aes(x=factor(Secondary), y=mean, group=Origin, c
 
 Fig33
 
-Fig34 <- ggplot(data=m6.growth, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) +
-  geom_line(size=0.7, position=position_dodge(.1)) +
-  scale_colour_manual(values=c("gray", "black")) +
-  geom_point(size=4, position=position_dodge(.1), colour="black") +
-  scale_shape_manual(values=c(1,18)) +
-  geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
-                width=0, position=position_dodge(.1), colour="black") +
-  ggtitle("F)") + 
-  xlab("Treatment of Offspring") +
-  ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) +
-  ylim(0,0.1) +
-  theme_bw() + 
+Fig34 <- ggplot(data=m6.growth, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+  geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
+  scale_colour_manual(values=c("gray", "black")) + #set line color
+  geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
+  scale_shape_manual(values=c(1,18)) + #set shapes
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
+                width=0, position=position_dodge(.1), colour="black") +  #set error bar characteristics 
+  ggtitle("F)") +  #plot title
+  xlab("Treatment of Offspring") + #plot x axis label
+  ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
+  ylim(0,0.1) + #Y axis limits
+  theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
         axis.title=element_text(size=18,face="bold"), #set axis title text size
@@ -1935,7 +1953,7 @@ Fig34 <- ggplot(data=m6.growth, aes(x=factor(Secondary), y=mean, group=Origin, c
         panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0),
+        axis.text.x=element_text(angle=0), #set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
@@ -1947,89 +1965,33 @@ Fig34 <- ggplot(data=m6.growth, aes(x=factor(Secondary), y=mean, group=Origin, c
 
 Fig34
 
-#Repeated Measures Size
-grow.M1<- cbind.data.frame(growth$Chamber.num, growth$Origin, growth$Secondary, growth$growth.rate.M1)
-grow.M1$Timepoint <- "Time1"
-colnames(grow.M1) <- c( "Chamber.num", "Origin", "Secondary", "growth.rate", "Timepoint")
-grow.M6<- cbind.data.frame(growth$Chamber.num, growth$Origin, growth$Secondary, growth$growth.rate.M6)
-grow.M6$Timepoint <- "Time6"
-colnames(grow.M6) <- c( "Chamber.num", "Origin", "Secondary", "growth.rate", "Timepoint")
-All.Growth <- rbind(grow.M1, grow.M6)
+#Repeated Measures growth
+grow.M1<- cbind.data.frame(growth$Chamber.num, growth$Origin, growth$Secondary, growth$growth.rate.M1) #combine data
+grow.M1$Timepoint <- "Time1" #identify time points
+colnames(grow.M1) <- c( "Chamber.num", "Origin", "Secondary", "growth.rate", "Timepoint") #rename columns
+grow.M6<- cbind.data.frame(growth$Chamber.num, growth$Origin, growth$Secondary, growth$growth.rate.M6) #combine data
+grow.M6$Timepoint <- "Time6" #identify time points
+colnames(grow.M6) <- c( "Chamber.num", "Origin", "Secondary", "growth.rate", "Timepoint") #rename columns
+All.Growth <- rbind(grow.M1, grow.M6) #combine data
+All.Growth <- na.omit(All.Growth) #remove NA rows
 
-Growth.RM <- lme(growth.rate ~ Origin*Secondary*Timepoint, random = ~ Timepoint|Chamber.num, data=All.Growth) #repeated measures ANOVA with random intercept but not slope 
-summary(Growth.RM)
-anova(Growth.RM)
+Growth.RM <- lme(log10(growth.rate+1) ~ Origin*Secondary*Timepoint, random = ~ Timepoint|Chamber.num, data=All.Growth) #repeated measures ANOVA with random intercept but not slope 
+summary(Growth.RM) #view results
+anova(Growth.RM) #view results
+gro.resid <-resid(Growth.RM) #extract residuals
+gro.shapiro <- shapiro.test(gro.resid) #runs a normality test using shapiro-wilk test on the residuals
+gro.shapiro #view results
+gro.qqnorm <- qqnorm(gro.resid) # normal quantile plot
+gro.qqline <- qqline(gro.resid) # adding a qline of comparison
+hist(gro.resid) #plot histogram of residuals
+boxplot(gro.resid~ All.Growth$Origin * All.Growth$Secondary* All.Growth$Timepoint, ylab = "residuals", las = 2, par(mar = c(12, 5, 4, 2)+ 0.1)) #view Origin variability
 
-Growth.lm <- lm(growth.rate ~ Origin*Secondary*Timepoint, data=All.Growth)
-anova(Growth.lm)
-
-Growth.posthoc <- lsmeans(Growth.lm, specs=c("Timepoint","Origin","Secondary")) #calculate MS means
+Growth.posthoc <- lsmeans(Growth.RM , specs=c("Timepoint","Origin","Secondary")) #calculate MS means
 Growth.posthoc #view results
 Growth.posthoc.p <- contrast(Growth.posthoc, method="pairwise", by=c("Timepoint")) #contrast treatment groups within a species at each time point
 Growth.posthoc.p #view results
 Growth.posthoc.lett <- cld(Growth.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
 Growth.posthoc.lett #view results
-
-
-#Size
-m1.mean.size <- aggregate(Polyp.Num.M1 ~ Origin + Secondary, data = growth, FUN= "mean")
-m1.se.size <- aggregate(Polyp.Num.M1 ~ Origin + Secondary, data = growth, FUN= "std.error")
-m1.size <- cbind(m1.mean.size,m1.se.size$Polyp.Num.M1)
-colnames(m1.size) <- c("Origin", "Secondary", "mean", "se")
-
-m6.mean.size <- aggregate(Polyp.Num.M6 ~ Origin + Secondary, data = growth, FUN= "mean")
-m6.se.size <- aggregate(Polyp.Num.M6 ~ Origin + Secondary, data = growth, FUN= "std.error")
-m6.size <- cbind(m6.mean.size,m6.se.size$Polyp.Num.M6)
-colnames(m6.size) <- c("Origin", "Secondary", "mean", "se")
-
-
-
-Fig35 <- ggplot(data=m1.size, aes(x=factor(Secondary), y=mean, group=Origin, shape=Origin)) +
-  geom_line(size=1, position=position_dodge(.1)) +
-  geom_point(size=3, position=position_dodge(.1)) +
-  scale_shape_manual(values=c(1,18)) +
-  geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
-                width=0, position=position_dodge(.1)) +
-  ggtitle("Month 1 Size") + 
-  xlab("Treatment of Offspring") +
-  ylab("Size (number of polyps)") +
-  ylim(0,10) +
-  theme_bw() + 
-  theme(axis.title.x=element_blank(),
-        panel.border = element_blank(), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), 
-        axis.line = element_line(colour = "black"),
-        legend.title=element_blank(),
-        legend.position="none",
-        plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.text = element_text(size = 8),
-        axis.title.y=element_blank())
-
-Fig35
-
-
-Fig36 <- ggplot(data=m6.size, aes(x=factor(Secondary), y=mean, group=Origin, shape=Origin)) +
-  geom_line(size=1, position=position_dodge(.1)) +
-  geom_point(size=3, position=position_dodge(.1)) +
-  scale_shape_manual(values=c(1,18)) +
-  geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
-                width=0, position=position_dodge(.1)) +
-  ggtitle("Month 6 Size") + 
-  xlab("Treatment of Offspring") +
-  ylab("Size (number of polyps)") +
-  ylim(0,10) +
-  theme_bw() + 
-  theme(panel.border = element_blank(), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), 
-        axis.line = element_line(colour = "black"),
-        legend.title=element_blank(),
-        legend.position="none",
-        plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.text = element_text(size = 8))
-
-Fig36
 
 #####ALL FIGURES, TABLES, AND STATISTICAL RESULTS#####
 setwd(file.path(mainDir, 'Output'))
