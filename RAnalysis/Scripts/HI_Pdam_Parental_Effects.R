@@ -23,6 +23,7 @@ library(reshape) #version: 0.8.5 Date/Publication: 2014-04-23 Title: Flexibly re
 library(seacarb) #version: 3.0 Date/Publication: 2014-04-05 Title: seawater carbonate chemistry with R Depends: NA
 library(grid) #version 3.3.1 Date/Publication: 2016-06-24 Title:grid
 library(xtable) #version 1.8-2 Date/Publication: 2016-01-08 Title: Export Tables to LaTeX or HTML Depends: R (>= 2.10.0)
+library(lme4) #version: 1.1-12 Date/Publication: 2016-04-16 20:40:11 Title: Linear Mixed-Effects Models using 'Eigen' and S4 Depends: R (>= 3.0.2), Matrix (>= 1.1.1), methods, stats
 
 #####Required Data files#####
 #Light_Calibration_Data.csv
@@ -1473,8 +1474,7 @@ Fig24 <- ggplot(tank.pCO2.means.M6) + #plot pCO2
         legend.position='none') #remove legend background
 Fig24 #View figure
 
-##### BIOLOGICAL RESPONSE #####
-
+##### BIOLOGICAL RESPONSES #####
 ##### LARVAL RELEASE #####
 #June
 june.release.data <- read.csv("june.larval.release.data.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
@@ -1668,11 +1668,13 @@ release.posthoc.lett #view results
 larval.data.M0 <- read.csv("Larval_Data_M0.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
 proportion.alive.M0 <- (larval.data.M0$Plastic + larval.data.M0$Top.Tile + larval.data.M0$Bottom.Tile +  larval.data.M0$Edge +	larval.data.M0$Swimming)/larval.data.M0$larvae.added #calculate survivorship
 proportion.dead.M0 <- 1-proportion.alive.M0 #calculate mortality
-survive.M0 <- data.frame (larval.data.M0$Chamber.num, larval.data.M0$Timepoint, larval.data.M0$Origin, larval.data.M0$Secondary, proportion.alive.M0) #make dataframe
-colnames(survive.M0) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Alive") #rename columns
-mean.survive.M0 <- aggregate(Alive ~ Origin * Secondary, data = survive.M0, FUN= "mean") #calculate mean by origin and secondary treatments
-se.survive.M0 <- aggregate(Alive ~ Origin * Secondary, data = survive.M0, FUN= "std.error")  #calculate se by origin and secondary treatments
-survivorship.M0 <- cbind(mean.survive.M0,se.survive.M0$Alive) #combine data
+larval.data.M0$Alive <- (larval.data.M0$Plastic + larval.data.M0$Top.Tile + larval.data.M0$Bottom.Tile +  larval.data.M0$Edge +	larval.data.M0$Swimming)
+larval.data.M0$Dead <- larval.data.M0$larvae.added-(larval.data.M0$Plastic + larval.data.M0$Top.Tile + larval.data.M0$Bottom.Tile +  larval.data.M0$Edge +	larval.data.M0$Swimming)
+survive.M0 <- data.frame (larval.data.M0$Chamber.num, larval.data.M0$Timepoint, larval.data.M0$Origin, larval.data.M0$Secondary, proportion.alive.M0, proportion.dead.M0, larval.data.M0$Alive, larval.data.M0$Dead) #make dataframe
+colnames(survive.M0) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Prop.Alive","Prop.Dead", "Alive","Dead") #rename columns
+mean.survive.M0 <- aggregate(Prop.Alive ~ Origin * Secondary, data = survive.M0, FUN= "mean") #calculate mean by origin and secondary treatments
+se.survive.M0 <- aggregate(Prop.Alive ~ Origin * Secondary, data = survive.M0, FUN= "std.error")  #calculate se by origin and secondary treatments
+survivorship.M0 <- cbind(mean.survive.M0,se.survive.M0$Prop.Alive) #combine data
 colnames(survivorship.M0) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
 Fig29 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
@@ -1683,6 +1685,10 @@ Fig29 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, col
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
   ggtitle("A)") + #plot title
+  annotate("text", x = 0.87, y = 0.82, label = "a") + #add posthoc letters
+  annotate("text", x = 0.85, y = 0.74, label = "a") + #add posthoc letters
+  annotate("text", x = 2.2, y = 0.59, label = "ab") + #add posthoc letters
+  annotate("text", x = 2.15, y = 0.51, label = "bc") + #add posthoc letters
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Survivorship") + #plot y axis label
   ylim(0,1) + #Y axis limits
@@ -1694,7 +1700,7 @@ Fig29 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, col
         panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0),
+        axis.text.x=element_text(angle=0), #set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
@@ -1710,12 +1716,14 @@ Fig29 #view plot
 larval.data.M1 <- read.csv("Larval_Data_M1.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
 proportion.alive.M1 <- larval.data.M1$month1/larval.data.M1$larvae.added #calculate survivorship
 proportion.dead.M1 <- 1-proportion.alive.M1 #calculate mortality
-survive.M1 <- data.frame (larval.data.M1$Chamber.num,larval.data.M1$Timepoint, larval.data.M1$Origin, larval.data.M1$Secondary, proportion.alive.M1) #make dataframe
-colnames(survive.M1) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Alive") #rename columns
+larval.data.M1$Alive <- larval.data.M1$month1
+larval.data.M1$Dead <- larval.data.M1$larvae.added-larval.data.M1$month1
+survive.M1 <- data.frame (larval.data.M1$Chamber.num, larval.data.M1$Timepoint, larval.data.M1$Origin, larval.data.M1$Secondary, proportion.alive.M1, proportion.dead.M1, larval.data.M1$Alive, larval.data.M1$Dead) #make dataframe
+colnames(survive.M1) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Prop.Alive","Prop.Dead", "Alive","Dead") #rename columns
 survive.M1$Timepoint <- "Time2"
-mean.survive.M1 <- aggregate(Alive ~ Origin + Secondary, data = survive.M1, FUN= "mean") #calculate mean by origin and secondary treatments
-se.survive.M1 <- aggregate(Alive ~ Origin + Secondary, data = survive.M1, FUN= "std.error") #calculate se by origin and secondary treatments
-survivorship.M1 <- cbind(mean.survive.M1,se.survive.M1$Alive) #combine data
+mean.survive.M1 <- aggregate(Prop.Alive ~ Origin + Secondary, data = survive.M1, FUN= "mean") #calculate mean by origin and secondary treatments
+se.survive.M1 <- aggregate(Prop.Alive ~ Origin + Secondary, data = survive.M1, FUN= "std.error") #calculate se by origin and secondary treatments
+survivorship.M1 <- cbind(mean.survive.M1,se.survive.M1$Prop.Alive) #combine data
 colnames(survivorship.M1) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
 Fig30 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
@@ -1726,6 +1734,10 @@ Fig30 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, col
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
   ggtitle("C)") + #plot title
+  annotate("text", x = 0.87, y = 0.52, label = "bc") + #add posthoc letters
+  annotate("text", x = 0.85, y = 0.42, label = "cd") + #add posthoc letters
+  annotate("text", x = 2.2, y = 0.37, label = "cd") + #add posthoc letters
+  annotate("text", x = 2.15, y = 0.30, label = "d") + #add posthoc letters
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Survivorship") + #plot y axis label
   ylim(0,1) + #Y axis limits
@@ -1752,12 +1764,14 @@ Fig30
 #Month6
 proportion.alive.M6 <- larval.data.M1$month6/larval.data.M1$larvae.added #claculate survival
 proportion.dead.M6 <- 1-proportion.alive.M6 # calculate mortality
-survive.M6 <- data.frame(larval.data.M1$Chamber.num, larval.data.M1$Timepoint, larval.data.M1$Origin, larval.data.M1$Secondary, proportion.alive.M6) #combine data
-colnames(survive.M6) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Alive") #rename columns
+survive.M6 <- data.frame (larval.data.M1$Chamber.num, larval.data.M1$Timepoint, larval.data.M1$Origin, larval.data.M1$Secondary, proportion.alive.M6, proportion.dead.M6) #make dataframe
+colnames(survive.M6) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Prop.Alive","Prop.Dead") #rename columns
 survive.M6$Timepoint <- "Time3" #identify timepoint
-mean.survive.M6 <- aggregate(Alive ~ Origin + Secondary, data = survive.M6, FUN= "mean") #calculate mean
-se.survive.M6 <- aggregate(Alive ~ Origin + Secondary, data = survive.M6, FUN= "std.error") #calculate SEM
-survivorship.M6 <- cbind(mean.survive.M6,se.survive.M6$Alive) #combine descriptive statistics
+survive.M6$Alive <- larval.data.M1$month6
+survive.M6$Dead <- larval.data.M1$larvae.added-larval.data.M1$month6
+mean.survive.M6 <- aggregate(Prop.Alive ~ Origin + Secondary, data = survive.M6, FUN= "mean") #calculate mean
+se.survive.M6 <- aggregate(Prop.Alive ~ Origin + Secondary, data = survive.M6, FUN= "std.error") #calculate SEM
+survivorship.M6 <- cbind(mean.survive.M6,se.survive.M6$Prop.Alive) #combine descriptive statistics
 colnames(survivorship.M6) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
 Fig31 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
@@ -1768,6 +1782,10 @@ Fig31 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, col
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
   ggtitle("E)") + #plot title
+  annotate("text", x = 0.87, y = 0.16, label = "ef") + #add posthoc letters
+  annotate("text", x = 0.85, y = 0.12, label = "e") + #add posthoc letters
+  annotate("text", x = 2.12, y = 0.06, label = "ef") + #add posthoc letters
+  annotate("text", x = 2.05, y = 0.005, label = "f") + #add posthoc letters
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Survivorship") + #plot y axis label
   ylim(0,1) + #Y axis limits
@@ -1815,17 +1833,31 @@ sur.RM.posthoc.p #view results
 sur.RM.posthoc.lett <- cld(sur.RM.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
 sur.RM.posthoc.lett #view results
 
+#Binomial GLM
+# Wald-test with H0 = 0
+sur.GLM <-  glmer(cbind(Alive, Dead) ~ Origin*Secondary*Timepoint +(Timepoint|Chamber), data=All.Survivorship, family="binomial") #repeated measures ANOVA with random intercept but not slope 
+summary(sur.GLM) #view summary
+anova(sur.GLM) #view ANOVA table
+
+sur.GLM.posthoc <- lsmeans(sur.GLM, specs=c("Timepoint","Origin","Secondary")) #calculate MS means
+sur.GLM.posthoc #view results
+sur.GLM.posthoc.p <- contrast(sur.GLM.posthoc, method="pairwise", by=c("Timepoint")) #contrast treatment groups within a species at each time point
+sur.GLM.posthoc.p #view results
+sur.GLM.posthoc.lett <- cld(sur.GLM.posthoc, alpha=.05, Letters=letters) #identify posthoc letter differences
+sur.GLM.posthoc.lett #view results
+
 ##### INITIAL SETTLEMENT #####
 #Timepoint 1 only         
 settlement.data <- larval.data.M0
 settle <- (settlement.data$Plastic + settlement.data$Top.Tile + settlement.data$Bottom.Tile +  settlement.data$Edge)/(settlement.data$larvae.added)
-settlement <- data.frame (settlement.data$Timepoint, settlement.data$Origin, settlement.data$Secondary, settle)
-colnames(settlement) <- c("Timepoint", "Origin", "Secondary", "Settled")
-mean.settled <- aggregate(Settled ~ Origin + Secondary, data = settlement, FUN= "mean")
-se.settled <- aggregate(Settled ~ Origin + Secondary, data = settlement, FUN= "std.error")
-settlement.data <- cbind(mean.settled, se.settled$Settled)
+settlement <- data.frame(settlement.data$Chamber.num, settlement.data$Origin, settlement.data$Secondary, settle)
+colnames(settlement) <- c("Chamber", "Origin", "Secondary", "Prop.Settled")
+settlement$Alive <- (settlement.data$Plastic + settlement.data$Top.Tile + settlement.data$Bottom.Tile +  settlement.data$Edge)
+settlement$Dead <- settlement.data$larvae.added-(settlement.data$Plastic + settlement.data$Top.Tile + settlement.data$Bottom.Tile +  settlement.data$Edge)
+mean.settled <- aggregate(Prop.Settled ~ Origin + Secondary, data = settlement, FUN= "mean")
+se.settled <- aggregate(Prop.Settled ~ Origin + Secondary, data = settlement, FUN= "std.error")
+settlement.data <- cbind(mean.settled, se.settled$Prop.Settled)
 colnames(settlement.data) <- c("Origin", "Secondary", "mean", "se")
-settlement.data$posthoc <- c("bc", "c", "a", "ab")
 
 Fig32 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
   geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
@@ -1834,10 +1866,10 @@ Fig32 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, col
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  annotate("text", x = 0.8, y = 0.68, label = "bc") +
-  annotate("text", x = 0.85, y = 0.80, label = "c") +
-  annotate("text", x = 2.2, y = 0.49, label = "a") +
-  annotate("text", x = 2.25, y = 0.56, label = "ab") +
+  annotate("text", x = 0.85, y = 0.80, label = "a") +
+  annotate("text", x = 0.8, y = 0.68, label = "ab") +
+  annotate("text", x = 2.25, y = 0.56, label = "bc") +
+  annotate("text", x = 2.2, y = 0.49, label = "c") +
   ggtitle("B)") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Settlement") + #plot y axis label
@@ -1877,6 +1909,20 @@ sett.posthoc <- lsmeans(settlement.lm, specs=c("Origin", "Secondary")) #calculat
 sett.posthoc #view results
 sett.posthoc.lett <- cld(sett.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
 sett.posthoc.lett #view results
+
+#Binomial GLM
+# Wald-test with H0 = 0
+set.GLM <-  glmer(cbind(Alive, Dead) ~ Origin*Secondary +(1|Chamber), data=settlement, family="binomial") #repeated measures ANOVA with random intercept but not slope 
+summary(set.GLM) #view summary
+anova(set.GLM) #view ANOVA table
+
+set.GLM.posthoc <- lsmeans(set.GLM, specs=c("Origin","Secondary")) #calculate MS means
+set.GLM.posthoc #view results
+set.GLM.posthoc.p <- contrast(set.GLM.posthoc, method="pairwise") #contrast treatment groups within a species at each time point
+set.GLM.posthoc.p #view results
+set.GLM.posthoc.lett <- cld(set.GLM.posthoc, alpha=.05, Letters=letters) #identify posthoc letter differences
+set.GLM.posthoc.lett #view results
+
 
 ##### GROWTH #####
 data.M1 <- read.csv("Month1_Larval_Size.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
@@ -2059,6 +2105,9 @@ SW.Chem.Tables <- grid.arrange(
   tableGrob(M6.chem.table, theme=tt2),
   nrow=6)
 ggsave(file="SW.Chemistry.Table.pdf", SW.Chem.Tables, width = 11, height = 6)
+
+#Capture statistical results to file
+capture.output(june.ks, july.ks, august.ks, summary(Interaction), anova(sur.GLM), summary(set.GLM), anova(Growth.RM), file="HI_Pdam_Parental_Results.txt")
 
 
 setwd(file.path(mainDir, 'Data'))
