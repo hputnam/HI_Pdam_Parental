@@ -91,7 +91,7 @@ T4.lm <- coef(lm(Tank1 ~ Tank4, data=Cal.T.data)) #extract model coefficients
 T5.lm <- coef(lm(Tank1 ~ Tank5, data=Cal.T.data)) #extract model coefficients
 
 ##### FIELD DATA #####
-#See Putnam et al 2016 Evolutionary Applications
+#Data already published, see Putnam et al 2016 Evolutionary Applications
 #Field Temperature Data (28March14 - 01April14)
 #load field collection/acclimation temp data
 Field.data <- read.csv("Field_Temp.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
@@ -691,8 +691,7 @@ Fig15 #View figure
 
 ##### DISCRETE pH CALCULATIONS #####
 path <-("~/MyProjects/HI_Pdam_Parental/RAnalysis/Data/pH_Calibration_Files/")
-#list all the file names in the folder to get only get the csv files
-file.names<-list.files(path = path, pattern = "csv$")
+file.names<-list.files(path = path, pattern = "csv$") #list all the file names in the folder to get only get the csv files
 pH.cals <- data.frame(matrix(NA, nrow=length(file.names), ncol=3, dimnames=list(file.names,c("Date", "Intercept", "Slope")))) #generate a 3 column dataframe with specific column names
 
 for(i in 1:length(file.names)) { # for every file in list start at the first and run this following function
@@ -702,8 +701,8 @@ for(i in 1:length(file.names)) { # for every file in list start at the first and
   pH.cals[i,2:3] <- coe #inserts them in the dataframe
   pH.cals[i,1] <- substr(file.names[i],1,8) #stores the file name in the Date column
 }
-colnames(pH.cals) <- c("Calib.Date",  "Intercept",  "Slope")
-pH.cals
+colnames(pH.cals) <- c("Calib.Date",  "Intercept",  "Slope") #rename columns
+pH.cals #view data
 
 #constants for use in pH calculation 
 R <- 8.31447215 #gas constant in J mol-1 K-1 
@@ -724,7 +723,6 @@ SW.chem$pH.Total<-phTris+(mvTris/1000-SW.chem$pH.MV/1000)/(R*(SW.chem$Temperatur
 setwd(file.path(mainDir, 'Data'))
 massfile<-"TA_mass_data.csv" # name of your file with masses
 path<-"~/MyProjects/HI_Pdam_Parental/RAnalysis/Data/TA" #the location of all your titration files
-#date<-"TA" #set date of measurement
 Sample.Info <- read.csv("TA_mass_data.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
 Mass<-read.csv(massfile, header=T, sep=",", na.string="NA", as.is=T, row.names=1)  #load Sample Info Data
 
@@ -742,9 +740,7 @@ TA <- matrix(nrow = nrow, ncol = 3) #set the dimensions of the dataframe
 rownames(TA)<-file.names #identify row names
 colnames(TA)<-c('Sample.ID','Mass','TA.Mes') #identify column names
 
-# set working directory to where the data is
-setwd(file.path(mainDir, 'Data/TA'))
-
+setwd(file.path(mainDir, 'Data/TA')) # set working directory to where the data are
 #run a for loop to bring in the titration files on at a time and calculate TA
 for(i in 1: length(file.names)) {
   Data<-read.table(file.names[i], header=F, sep=",", na.string="NA",as.is=T) #read in each data file
@@ -792,16 +788,16 @@ d <- if(Mass[name,4] =="d1") {
 TA <- data.frame(TA) #make a dataframe from the TA results
 setwd(file.path(mainDir, 'Output')) #set output location
 write.table(TA,paste("TA", "output",".csv"),sep=",")#exports your data as a CSV file
-setwd(file.path(mainDir, 'Data'))
+setwd(file.path(mainDir, 'Data')) #set working directory back to data
 
 #load CRM standard Info
 CRMs <- read.csv("CRM_TA_Data.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
 Refs <- merge(CRMs, TA, by="Sample.ID") #merge the TA calculations with the Reference metadata
 Refs$TA.Mes <- as.numeric(paste(Refs$TA.Mes)) #set valuse as numeric
 Refs$Per.Off <- 100*((Refs$TA.Mes-Refs$CRM.TA)/Refs$CRM.TA) #calculate the percent difference of the TA from the CRM
-Refs$TA.Corr <- Refs$CRM.TA-Refs$TA.Mes
+Refs$TA.Corr <- Refs$CRM.TA-Refs$TA.Mes #correct TA for offset from CRM
 Refs <- Refs[order(Refs$Date, abs(Refs$TA.Corr) ), ] #sort by id and reverse of abs(value)
-Refs <- Refs[ !duplicated(Refs$Date), ]              # take the first row within each id
+Refs <- Refs[ !duplicated(Refs$Date), ]  # take the first row within each id
 Refs #view data
 CRM.res <- mean(Refs$Per.Off, na.rm=T) #calculate the average % difference of TA from CRM values over the course of the experiment
 CRM.res #view the resolution of TA assay according to tests againsts Dickson CRMs
@@ -825,7 +821,7 @@ carb.ouptput$CO2 <- carb.ouptput$CO2*1000000 #convert to µmol kg-1
 carb.ouptput$HCO3 <- carb.ouptput$HCO3*1000000 #convert to µmol kg-1
 carb.ouptput$CO3 <- carb.ouptput$CO3*1000000 #convert to µmol kg-1
 carb.ouptput$DIC <- carb.ouptput$DIC*1000000 #convert to µmol kg-1
-carb.ouptput <- carb.ouptput[,-c(1,4,5,8,10:13,19)]
+carb.ouptput <- carb.ouptput[,-c(1,4,5,8,10:13,19)] #subset variables of interest
 carb.ouptput <- cbind(SW.chem$Date,  SW.chem$Tank,  SW.chem$Treatment, SW.chem$Period1,SW.chem$Period2, SW.chem$Period3, carb.ouptput) #combine the sample information with the seacarb output
 colnames(carb.ouptput) <- c("Date",  "Tank",  "Treatment",	"Period1", "Period2", "Period3",	"Salinity",	"Temperature", "pH",	"CO2",	"pCO2","HCO3",	"CO3",	"DIC", "TA",	"Aragonite.Sat") #Rename columns to describe contents
 
@@ -844,8 +840,8 @@ mean.carb.output.Adult <-ddply(carbo.melted.Adult, .(Treatment, variable), summa
                          sem = (sd(value)/sqrt(N))) #calculate the SEM as the sd/sqrt of the count or data length
 mean.carb.output.Adult # display mean and sem 
 mean.carb.output.Adult <- mean.carb.output.Adult[with(mean.carb.output.Adult, order(variable)), ] #order the data by the variables
-adult.carb.table <- mean.carb.output.Adult[,-c(3)]
-adult.carb.table <- reshape(adult.carb.table, direction="wide", timevar="variable", idvar="Treatment")
+adult.carb.table <- mean.carb.output.Adult[,-c(3)] #remove column
+adult.carb.table <- reshape(adult.carb.table, direction="wide", timevar="variable", idvar="Treatment") #reshape data
 adult.carb.table$N <- c(mean.carb.output.Adult[1,3],mean.carb.output.Adult[2,3]) #include sample size
 #create an empty dataframe 
 adult.chem.table <- matrix(nrow = 2, ncol = 1) #set the dimensions of the dataframe
@@ -937,7 +933,7 @@ TAs #View data
 
 #Tank pH Data for Adult Exposure Experimental Period (06May14 - 17Aug14)
 # read in NBS pH data from Aquacontrollers frequency 15min
-setwd(file.path(mainDir, 'Data'))
+setwd(file.path(mainDir, 'Data')) #set working directory
 pHs <- read.csv("Adult_Tank_NBS_pH.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
 mydate.pHs <- strptime(pHs$Date.Time, format="%m/%d/%y %H:%M") #Identify date format
 pHs$Tank5[is.na(pHs$Tank5)] <- pHs$Tank3[is.na(pHs$Tank5)] #merge tanks 3 and 5 into one column so the data from first 3 days when corals were in tank 3 is now showing in tank 5
@@ -1486,7 +1482,7 @@ colnames(june.larvae) <- c("Lunar.Day", "Treatment", "mean", "se") #rename colum
 june.larvae #view data
 
 Fig25 <- ggplot(june.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
-  geom_bar(position=position_dodge(), stat="identity", show.legend=FALSE) + #assign bar id and position
+  geom_bar(position=position_dodge(), stat="identity") + #assign bar id and position
   scale_fill_manual(values=c("gray", "black")) + #bar fill color
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, size = 0.4,                   # Width of the error bars
@@ -1504,12 +1500,12 @@ Fig25 <- ggplot(june.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot m
         panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=90),
+        axis.text.x=element_text(angle=90), #Set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
         legend.key = element_blank(),  #remove legend background
-        legend.position="none",  #set legend location
+        legend.position=c(0.15,0.85),  #set legend location
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
@@ -1548,7 +1544,7 @@ Fig26 <- ggplot(july.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot m
         panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=90),
+        axis.text.x=element_text(angle=90), #Set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
@@ -1592,7 +1588,7 @@ Fig27 <- ggplot(august.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot
         panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=90),
+        axis.text.x=element_text(angle=90), #Set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
@@ -1627,13 +1623,13 @@ Fig28 <- ggplot(all.release, aes(x=Time, y=mean, colour=Treatment, group=Treatme
   ggtitle("D) Total") + #plot title
   theme_bw() + #theme black and white 
   theme(axis.line = element_line(color = 'black'), #Set the axes color
-        axis.text=element_text(size=16), #set text size
-        axis.title=element_text(size=18,face="bold"), #set axis title text size
-        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        axis.text=element_text(size=10), #set text size
+        axis.title=element_text(size=12,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 12, colour = "black", face="bold"),
         panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=90),
+        axis.text.x=element_text(angle=90), #Set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
@@ -1644,20 +1640,20 @@ Fig28 <- ggplot(all.release, aes(x=Time, y=mean, colour=Treatment, group=Treatme
                                   hjust = 0)) #set title attributes
 Fig28
 
-#GLM release by treatment and time
+#LM release by treatment and time
 RM.release.data #view data
 RM.release.data <- na.omit(RM.release.data) #remove NA
-Interaction <- glm(log10(Total.Release+1) ~ Treatment * Time, data=RM.release.data) #run generalized linear model 
-summary(Interaction) #view summary
-release.resid <-resid(Interaction)
+release.lm <- lm(log10(Total.Release+1) ~ Treatment * Time, data=RM.release.data) #run generalized linear model 
+summary(release.lm) #view summary
+release.resid <-resid(release.lm)
 release.shapiro <- shapiro.test(release.resid) #runs a normality test using shapiro-wilk test on the residuals
 release.shapiro #view results
 release.qqnorm <- qqnorm(release.resid) # normal quantile plot
 release.qqline <- qqline(release.resid) # adding a qline of comparison
 hist(release.resid) #plot histogram of residuals
-plot(Interaction$fitted.values, Interaction$residuals) #plot residuals as a function of fitted data
+plot(release.lm$fitted.values, release.lm$residuals) #plot residuals as a function of fitted data
 
-release.posthoc <- lsmeans(Interaction, specs=c("Time")) #calculate MS means
+release.posthoc <- lsmeans(release.lm, specs=c("Time")) #calculate MS means
 release.posthoc #view results
 release.posthoc.p <- contrast(release.posthoc, method="pairwise") #contrast treatment groups within a species at each time point
 release.posthoc.p #view results
@@ -1668,8 +1664,8 @@ release.posthoc.lett #view results
 larval.data.M0 <- read.csv("Larval_Data_M0.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
 proportion.alive.M0 <- (larval.data.M0$Plastic + larval.data.M0$Top.Tile + larval.data.M0$Bottom.Tile +  larval.data.M0$Edge +	larval.data.M0$Swimming)/larval.data.M0$larvae.added #calculate survivorship
 proportion.dead.M0 <- 1-proportion.alive.M0 #calculate mortality
-larval.data.M0$Alive <- (larval.data.M0$Plastic + larval.data.M0$Top.Tile + larval.data.M0$Bottom.Tile +  larval.data.M0$Edge +	larval.data.M0$Swimming)
-larval.data.M0$Dead <- larval.data.M0$larvae.added-(larval.data.M0$Plastic + larval.data.M0$Top.Tile + larval.data.M0$Bottom.Tile +  larval.data.M0$Edge +	larval.data.M0$Swimming)
+larval.data.M0$Alive <- (larval.data.M0$Plastic + larval.data.M0$Top.Tile + larval.data.M0$Bottom.Tile +  larval.data.M0$Edge +	larval.data.M0$Swimming) #count alive
+larval.data.M0$Dead <- larval.data.M0$larvae.added-(larval.data.M0$Plastic + larval.data.M0$Top.Tile + larval.data.M0$Bottom.Tile +  larval.data.M0$Edge +	larval.data.M0$Swimming) #calculate dead
 survive.M0 <- data.frame (larval.data.M0$Chamber.num, larval.data.M0$Timepoint, larval.data.M0$Origin, larval.data.M0$Secondary, proportion.alive.M0, proportion.dead.M0, larval.data.M0$Alive, larval.data.M0$Dead) #make dataframe
 colnames(survive.M0) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Prop.Alive","Prop.Dead", "Alive","Dead") #rename columns
 mean.survive.M0 <- aggregate(Prop.Alive ~ Origin * Secondary, data = survive.M0, FUN= "mean") #calculate mean by origin and secondary treatments
@@ -1716,8 +1712,8 @@ Fig29 #view plot
 larval.data.M1 <- read.csv("Larval_Data_M1.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
 proportion.alive.M1 <- larval.data.M1$month1/larval.data.M1$larvae.added #calculate survivorship
 proportion.dead.M1 <- 1-proportion.alive.M1 #calculate mortality
-larval.data.M1$Alive <- larval.data.M1$month1
-larval.data.M1$Dead <- larval.data.M1$larvae.added-larval.data.M1$month1
+larval.data.M1$Alive <- larval.data.M1$month1 #count alive
+larval.data.M1$Dead <- larval.data.M1$larvae.added-larval.data.M1$month1 #calculate dead
 survive.M1 <- data.frame (larval.data.M1$Chamber.num, larval.data.M1$Timepoint, larval.data.M1$Origin, larval.data.M1$Secondary, proportion.alive.M1, proportion.dead.M1, larval.data.M1$Alive, larval.data.M1$Dead) #make dataframe
 colnames(survive.M1) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Prop.Alive","Prop.Dead", "Alive","Dead") #rename columns
 survive.M1$Timepoint <- "Time2"
@@ -1735,7 +1731,7 @@ Fig30 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, col
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
   ggtitle("C)") + #plot title
   annotate("text", x = 0.87, y = 0.52, label = "bc") + #add posthoc letters
-  annotate("text", x = 0.85, y = 0.42, label = "cd") + #add posthoc letters
+  annotate("text", x = 0.83, y = 0.42, label = "cd") + #add posthoc letters
   annotate("text", x = 2.2, y = 0.37, label = "cd") + #add posthoc letters
   annotate("text", x = 2.15, y = 0.30, label = "d") + #add posthoc letters
   xlab("Treatment of Offspring") + #plot x axis label
@@ -1749,7 +1745,7 @@ Fig30 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, col
         panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0),
+        axis.text.x=element_text(angle=0), #Set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
@@ -1767,8 +1763,8 @@ proportion.dead.M6 <- 1-proportion.alive.M6 # calculate mortality
 survive.M6 <- data.frame (larval.data.M1$Chamber.num, larval.data.M1$Timepoint, larval.data.M1$Origin, larval.data.M1$Secondary, proportion.alive.M6, proportion.dead.M6) #make dataframe
 colnames(survive.M6) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Prop.Alive","Prop.Dead") #rename columns
 survive.M6$Timepoint <- "Time3" #identify timepoint
-survive.M6$Alive <- larval.data.M1$month6
-survive.M6$Dead <- larval.data.M1$larvae.added-larval.data.M1$month6
+survive.M6$Alive <- larval.data.M1$month6 #count alive
+survive.M6$Dead <- larval.data.M1$larvae.added-larval.data.M1$month6 #calculate dead
 mean.survive.M6 <- aggregate(Prop.Alive ~ Origin + Secondary, data = survive.M6, FUN= "mean") #calculate mean
 se.survive.M6 <- aggregate(Prop.Alive ~ Origin + Secondary, data = survive.M6, FUN= "std.error") #calculate SEM
 survivorship.M6 <- cbind(mean.survive.M6,se.survive.M6$Prop.Alive) #combine descriptive statistics
@@ -1782,10 +1778,10 @@ Fig31 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, col
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
   ggtitle("E)") + #plot title
-  annotate("text", x = 0.87, y = 0.16, label = "ef") + #add posthoc letters
-  annotate("text", x = 0.85, y = 0.12, label = "e") + #add posthoc letters
-  annotate("text", x = 2.12, y = 0.06, label = "ef") + #add posthoc letters
-  annotate("text", x = 2.05, y = 0.005, label = "f") + #add posthoc letters
+  annotate("text", x = 0.90, y = 0.19, label = "ef") + #add posthoc letters
+  annotate("text", x = 0.82, y = 0.12, label = "e") + #add posthoc letters
+  annotate("text", x = 2.13, y = 0.06, label = "ef") + #add posthoc letters
+  annotate("text", x = 1.87, y = 0.0005, label = "f") + #add posthoc letters
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Survivorship") + #plot y axis label
   ylim(0,1) + #Y axis limits
@@ -1809,36 +1805,41 @@ Fig31 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, col
 
 Fig31
 
-
-#Repeated Measures Survivorship
+# #Repeated Measures Survivorship
 All.Survivorship <- rbind(survive.M0, survive.M1, survive.M6) #combine data
 All.Survivorship$Origin.numeric <- as.numeric(All.Survivorship$Origin) #convert factor to numeric
 All.Survivorship$Secondary.numeric <- as.numeric(All.Survivorship$Secondary) #convert factor to numeric
 All.Survivorship$Timepoint.numeric <- as.numeric(All.Survivorship$Timepoint) #convert factor to numeric
-sur.RM <-  lme(sqrt(Alive) ~ Origin*Secondary*Timepoint, random = ~ Timepoint|Chamber, data=All.Survivorship) #repeated measures ANOVA with random intercept but not slope 
-summary(sur.RM) #view summary
-anova(sur.RM) #view ANOVA table
-sur.resid <-resid(sur.RM) #extract residuals
-sur.shapiro <- shapiro.test(sur.resid) #runs a normality test using shapiro-wilk test on the residuals
-sur.shapiro #view results
-sur.qqnorm <- qqnorm(sur.resid) # normal quantile plot
-sur.qqline <- qqline(sur.resid) # adding a qline of comparison
-hist(sur.resid) #plot histogram of residuals
-plot(sur.RM) ### Homogen of Var ###
 
-sur.RM.posthoc <- lsmeans(sur.RM, specs=c("Timepoint","Origin","Secondary")) #calculate MS means
-sur.RM.posthoc #view results
-sur.RM.posthoc.p <- contrast(sur.RM.posthoc, method="pairwise", by=c("Timepoint")) #contrast treatment groups within a species at each time point
-sur.RM.posthoc.p #view results
-sur.RM.posthoc.lett <- cld(sur.RM.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
-sur.RM.posthoc.lett #view results
+# sur.RM <-  lme(sqrt(Alive) ~ Origin*Secondary*Timepoint, random = ~ Timepoint|Chamber, data=All.Survivorship) #repeated measures ANOVA with random intercept but not slope 
+# summary(sur.RM) #view summary
+# anova(sur.RM) #view ANOVA table
+# sur.resid <-resid(sur.RM) #extract residuals
+# sur.shapiro <- shapiro.test(sur.resid) #runs a normality test using shapiro-wilk test on the residuals
+# sur.shapiro #view results
+# sur.qqnorm <- qqnorm(sur.resid) # normal quantile plot
+# sur.qqline <- qqline(sur.resid) # adding a qline of comparison
+# hist(sur.resid) #plot histogram of residuals
+# boxplot(sur.resid~ All.Survivorship$Origin * All.Survivorship$Secondary* All.Survivorship$Timepoint, ylab = "residuals", las = 2, par(mar = c(12, 5, 4, 2)+ 0.1)) #view Origin variability
+# sur.RM.posthoc <- lsmeans(sur.RM, specs=c("Timepoint","Origin","Secondary")) #calculate MS means
+# sur.RM.posthoc #view results
+# sur.RM.posthoc.p <- contrast(sur.RM.posthoc, method="pairwise", by=c("Timepoint")) #contrast treatment groups within a species at each time point
+# sur.RM.posthoc.p #view results
+# sur.RM.posthoc.lett <- cld(sur.RM.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
+# sur.RM.posthoc.lett #view results
 
 #Binomial GLM
 # Wald-test with H0 = 0
 sur.GLM <-  glmer(cbind(Alive, Dead) ~ Origin*Secondary*Timepoint +(Timepoint|Chamber), data=All.Survivorship, family="binomial") #repeated measures ANOVA with random intercept but not slope 
 summary(sur.GLM) #view summary
 anova(sur.GLM) #view ANOVA table
-
+sur.resid <-resid(sur.GLM) #extract residuals
+sur.shapiro <- shapiro.test(sur.resid) #runs a normality test using shapiro-wilk test on the residuals
+sur.shapiro #view results
+sur.qqnorm <- qqnorm(sur.resid) # normal quantile plot
+sur.qqline <- qqline(sur.resid) # adding a qline of comparison
+hist(sur.resid) #plot histogram of residuals
+boxplot(sur.resid~ All.Survivorship$Origin * All.Survivorship$Secondary* All.Survivorship$Timepoint, ylab = "residuals", las = 2, par(mar = c(12, 5, 4, 2)+ 0.1)) #view Origin variability
 sur.GLM.posthoc <- lsmeans(sur.GLM, specs=c("Timepoint","Origin","Secondary")) #calculate MS means
 sur.GLM.posthoc #view results
 sur.GLM.posthoc.p <- contrast(sur.GLM.posthoc, method="pairwise", by=c("Timepoint")) #contrast treatment groups within a species at each time point
@@ -1851,13 +1852,13 @@ sur.GLM.posthoc.lett #view results
 settlement.data <- larval.data.M0
 settle <- (settlement.data$Plastic + settlement.data$Top.Tile + settlement.data$Bottom.Tile +  settlement.data$Edge)/(settlement.data$larvae.added)
 settlement <- data.frame(settlement.data$Chamber.num, settlement.data$Origin, settlement.data$Secondary, settle)
-colnames(settlement) <- c("Chamber", "Origin", "Secondary", "Prop.Settled")
-settlement$Alive <- (settlement.data$Plastic + settlement.data$Top.Tile + settlement.data$Bottom.Tile +  settlement.data$Edge)
-settlement$Dead <- settlement.data$larvae.added-(settlement.data$Plastic + settlement.data$Top.Tile + settlement.data$Bottom.Tile +  settlement.data$Edge)
-mean.settled <- aggregate(Prop.Settled ~ Origin + Secondary, data = settlement, FUN= "mean")
-se.settled <- aggregate(Prop.Settled ~ Origin + Secondary, data = settlement, FUN= "std.error")
-settlement.data <- cbind(mean.settled, se.settled$Prop.Settled)
-colnames(settlement.data) <- c("Origin", "Secondary", "mean", "se")
+colnames(settlement) <- c("Chamber", "Origin", "Secondary", "Prop.Settled") #rename columns
+settlement$Settle <- (settlement.data$Plastic + settlement.data$Top.Tile + settlement.data$Bottom.Tile +  settlement.data$Edge) #count settlers
+settlement$Not.Settle <- settlement.data$larvae.added-(settlement.data$Plastic + settlement.data$Top.Tile + settlement.data$Bottom.Tile +  settlement.data$Edge) #calculate not settled
+mean.settled <- aggregate(Prop.Settled ~ Origin + Secondary, data = settlement, FUN= "mean") #calculate mean
+se.settled <- aggregate(Prop.Settled ~ Origin + Secondary, data = settlement, FUN= "std.error") #calculate se
+settlement.data <- cbind(mean.settled, se.settled$Prop.Settled) #make dataframe
+colnames(settlement.data) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
 Fig32 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
   geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
@@ -1893,36 +1894,24 @@ Fig32 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, col
                                   hjust = 0)) #set title attributes
 Fig32
 
-settlement.lm <- aov(asin(Settled) ~Origin * Secondary, data=settlement) #two-way ANOVA
-anova(settlement.lm) #view ANOVA results
-settlement.resid <- resid(settlement.lm) #identify residuals                
-settlement.shapiro <- shapiro.test(settlement.resid) #runs a normality test using shapiro-wilk test on the residuals
-settlement.shapiro #view results
-settlement.qqnorm <- qqnorm(settlement.resid) # normal quantile plot
-settlement.qqline <- qqline(settlement.resid) # adding a qline of comparison
-hist(settlement.resid) #plot histogram of residuals
-plot(settlement.lm$fitted, settlement.lm$residuals) #plot residuals as a function of fitted data
-settlement.levene <- leveneTest(Settled  ~Origin * Secondary, data=settlement) #Levene's Test for Homogeneity of Variance
-settlement.levene #view results
-
-sett.posthoc <- lsmeans(settlement.lm, specs=c("Origin", "Secondary")) #calculate MS means
-sett.posthoc #view results
-sett.posthoc.lett <- cld(sett.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
-sett.posthoc.lett #view results
-
 #Binomial GLM
 # Wald-test with H0 = 0
-set.GLM <-  glmer(cbind(Alive, Dead) ~ Origin*Secondary +(1|Chamber), data=settlement, family="binomial") #repeated measures ANOVA with random intercept but not slope 
+set.GLM <-  glmer(cbind(Settle, Not.Settle) ~ Origin*Secondary +(1|Chamber), data=settlement, family="binomial") #repeated measures ANOVA with random intercept but not slope 
 summary(set.GLM) #view summary
 anova(set.GLM) #view ANOVA table
-
+set.resid <-resid(set.GLM) #extract residuals
+set.shapiro <- shapiro.test(set.resid) #runs a normality test using shapiro-wilk test on the residuals
+set.shapiro #view results
+sur.qqnorm <- qqnorm(set.resid) # normal quantile plot
+sur.qqline <- qqline(set.resid) # adding a qline of comparison
+hist(set.resid) #plot histogram of residuals
+boxplot(set.resid~ settlement$Origin * settlement$Secondary, ylab = "residuals", las = 2, par(mar = c(12, 5, 4, 2)+ 0.1)) #view Origin variability
 set.GLM.posthoc <- lsmeans(set.GLM, specs=c("Origin","Secondary")) #calculate MS means
 set.GLM.posthoc #view results
 set.GLM.posthoc.p <- contrast(set.GLM.posthoc, method="pairwise") #contrast treatment groups within a species at each time point
 set.GLM.posthoc.p #view results
 set.GLM.posthoc.lett <- cld(set.GLM.posthoc, alpha=.05, Letters=letters) #identify posthoc letter differences
 set.GLM.posthoc.lett #view results
-
 
 ##### GROWTH #####
 data.M1 <- read.csv("Month1_Larval_Size.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
@@ -2039,12 +2028,100 @@ Growth.posthoc.p #view results
 Growth.posthoc.lett <- cld(Growth.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
 Growth.posthoc.lett #view results
 
+#transform and calculate descriptive stats
+All.Growth$logged <- log10(All.Growth$growth.rate +1)
+mean.growth <- aggregate(logged ~ Origin + Secondary + Timepoint, data = All.Growth, FUN= "mean") #calculate mean by origin and secondary treatments
+se.growth <- aggregate(logged ~ Origin + Secondary + Timepoint, data = All.Growth, FUN= "std.error") #calculate se by origin and secondary treatments
+growth <- cbind(mean.growth,se.growth$logged) #combine data
+m1.growth <- subset(growth, Timepoint=="Time1")
+colnames(m1.growth) <- c("Origin", "Secondary","Timepoint", "mean", "se") #rename columns
+m6.growth <- subset(growth, Timepoint=="Time6") 
+colnames(m6.growth) <- c("Origin", "Secondary","Timepoint", "mean", "se") #rename columns
+
+#backtransform means and asymetrical error
+m1.growth.bt <- m1.growth #assign data
+m1.growth.bt$mean <- 10^(m1.growth.bt$mean)-1 #backtransform
+m1.growth.bt$upper <- m1.growth$mean + m1.growth$se #upper sem value
+m1.growth.bt$lower <- m1.growth$mean - m1.growth$se #lower sem value
+m1.growth.bt$upper.bt <- 10^(m1.growth.bt$upper)-1 #backtransform
+m1.growth.bt$lower.bt <- 10^(m1.growth.bt$lower)-1 #backtransform
+
+Fig35 <- ggplot(data=m1.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+  geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
+  scale_colour_manual(values=c("gray", "black")) + #set line color
+  geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
+  scale_shape_manual(values=c(1,18)) + #set shapes
+  geom_errorbar(aes(ymin=lower.bt, ymax=upper.bt), #plot error bars
+                width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
+  ggtitle("D)") + #plot title
+  xlab("Treatment of Offspring") + #plot x axis label
+  ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
+  ylim(0,0.1) + #Y axis limits
+  theme_bw() + #theme black and white
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.text=element_text(size=16), #set text size
+        axis.title=element_text(size=18,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        panel.border = element_blank(), #Set the border
+        axis.line.x = element_line(color = 'black'), #Set the axes color
+        axis.line.y = element_line(color = 'black'), #Set the axes color
+        axis.text.x=element_text(angle=0), #set text angle
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background=element_blank(),  #Set the plot background
+        legend.key = element_blank(),  #remove legend background
+        legend.position="none",  #set legend location
+        plot.title = element_text(face = 'bold', 
+                                  size = 12, 
+                                  hjust = 0)) #set title attributes
+
+Fig35
+
+#backtransform means and asymetrical error
+m6.growth.bt <- m6.growth #assign data
+m6.growth.bt$mean <- 10^(m6.growth.bt$mean)-1 #backtransform
+m6.growth.bt$upper <- m6.growth$mean + m6.growth$se #upper sem value
+m6.growth.bt$lower <- m6.growth$mean - m6.growth$se #lower sem value
+m6.growth.bt$upper.bt <- 10^(m6.growth.bt$upper)-1 #backtransform
+m6.growth.bt$lower.bt <- 10^(m6.growth.bt$lower)-1 #backtransform
+
+Fig36 <- ggplot(data=m6.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+  geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
+  scale_colour_manual(values=c("gray", "black")) + #set line color
+  geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
+  scale_shape_manual(values=c(1,18)) + #set shapes
+  geom_errorbar(aes(ymin=lower.bt, ymax=upper.bt), #plot error bars
+                width=0, position=position_dodge(.1), colour="black") +  #set error bar characteristics 
+  ggtitle("F)") +  #plot title
+  xlab("Treatment of Offspring") + #plot x axis label
+  ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
+  ylim(0,0.1) + #Y axis limits
+  theme_bw() + #theme black and white
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.text=element_text(size=16), #set text size
+        axis.title=element_text(size=18,face="bold"), #set axis title text size
+        strip.text.x = element_text(size = 16, colour = "black", face="bold"),
+        panel.border = element_blank(), #Set the border
+        axis.line.x = element_line(color = 'black'), #Set the axes color
+        axis.line.y = element_line(color = 'black'), #Set the axes color
+        axis.text.x=element_text(angle=0), #set text angle
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background=element_blank(),  #Set the plot background
+        legend.key = element_blank(),  #remove legend background
+        legend.position="none",  #set legend location
+        plot.title = element_text(face = 'bold', 
+                                  size = 12, 
+                                  hjust = 0)) #set title attributes
+
+Fig36
+
 #####ALL FIGURES, TABLES, AND STATISTICAL RESULTS#####
 setwd(file.path(mainDir, 'Output'))
 
 #Capture Figures to File
 pdf("Fig2.Larval.release.pdf", width = 11, height = 6)
-inset <- viewport(width = 0.22, height = 0.5, x = 0.85, y = 0.6)  # the inset in upper right
+inset <- viewport(width = 0.22, height = 0.5, x = 0.86, y = 0.65)  # the inset in upper right
 grid.newpage()
 vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
 pushViewport(viewport(layout = grid.layout(1, 3)))
@@ -2107,7 +2184,7 @@ SW.Chem.Tables <- grid.arrange(
 ggsave(file="SW.Chemistry.Table.pdf", SW.Chem.Tables, width = 11, height = 6)
 
 #Capture statistical results to file
-capture.output(june.ks, july.ks, august.ks, summary(Interaction), anova(sur.GLM), summary(set.GLM), anova(Growth.RM), file="HI_Pdam_Parental_Results.txt")
+capture.output(june.ks, july.ks, august.ks, summary(release.lm), summary(sur.GLM), summary(set.GLM), summary(Growth.RM), file="HI_Pdam_Parental_Stat_Results.txt")
 
 
 setwd(file.path(mainDir, 'Data'))
