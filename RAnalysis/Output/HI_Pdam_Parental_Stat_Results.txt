@@ -19,193 +19,30 @@ data:  august.amb$mean and august.high$mean
 D = 0.4285714, p-value = 0.575175
 alternative hypothesis: two-sided
 
-
-Call:
-lm(formula = log10(Total.Release + 1) ~ Treatment * Time, data = RM.release.data)
-
-Residuals:
-       Min         1Q     Median         3Q        Max 
--1.7054570 -0.5595388  0.0727844  0.6280768  1.7084935 
-
-Coefficients:
-                         Estimate Std. Error  t value   Pr(>|t|)    
-(Intercept)             1.5793341  0.3384224  4.66675 4.1402e-05 ***
-TreatmentHigh          -0.3079795  0.5169487 -0.59576   0.555060    
-TimeJuly                1.0292129  0.4786015  2.15046   0.038309 *  
-TimeJune                0.6477350  0.4786015  1.35339   0.184368    
-TreatmentHigh:TimeJuly -0.4885774  0.7310759 -0.66830   0.508205    
-TreatmentHigh:TimeJune  0.0770052  0.7310759  0.10533   0.916698    
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 0.957203 on 36 degrees of freedom
-Multiple R-squared:  0.196624,	Adjusted R-squared:  0.0850442 
-F-statistic: 1.76218 on 5 and 36 DF,  p-value: 0.14561
-
-Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) [
-glmerMod]
- Family: binomial  ( logit )
-Formula: cbind(Alive, Dead) ~ Origin * Secondary * Timepoint + (Timepoint |  
-    Chamber)
-   Data: All.Survivorship
-
-     AIC      BIC   logLik deviance df.resid 
-  1281.9   1347.8   -622.9   1245.9      270 
-
-Scaled residuals: 
-       Min         1Q     Median         3Q        Max 
--1.6555401 -0.5914050 -0.0625121  0.5194323  1.9603095 
-
-Random effects:
- Groups  Name           Variance  Std.Dev. Corr           
- Chamber (Intercept)    0.3855335 0.620913                
-         TimepointTime2 0.0418835 0.204655 -0.7965        
-         TimepointTime3 0.5456548 0.738685 -0.3217  0.8283
-Number of obs: 288, groups:  Chamber, 96
-
-Fixed effects:
-                                           Estimate  Std. Error   z value
-(Intercept)                              0.95204944  0.13506704   7.04872
-OriginHigh                               0.57050574  0.28115640   2.02914
-SecondaryHigh                           -0.86089177  0.18741002  -4.59363
-TimepointTime2                          -1.34373370  0.12183315 -11.02929
-TimepointTime3                          -3.23569961  0.20946271 -15.44762
-OriginHigh:SecondaryHigh                -0.21397018  0.38360891  -0.55778
-OriginHigh:TimepointTime2               -0.10939499  0.25365759  -0.43127
-OriginHigh:TimepointTime3               -0.32350492  0.39449653  -0.82005
-SecondaryHigh:TimepointTime2             0.42355630  0.17085311   2.47907
-SecondaryHigh:TimepointTime3            -0.11788574  0.30938245  -0.38104
-OriginHigh:SecondaryHigh:TimepointTime2  0.01137583  0.34647815   0.03283
-OriginHigh:SecondaryHigh:TimepointTime3 -0.00379137  0.61497093  -0.00617
-                                          Pr(>|z|)    
-(Intercept)                             1.8057e-12 ***
-OriginHigh                                0.042444 *  
-SecondaryHigh                           4.3561e-06 ***
-TimepointTime2                          < 2.22e-16 ***
-TimepointTime3                          < 2.22e-16 ***
-OriginHigh:SecondaryHigh                  0.576993    
-OriginHigh:TimepointTime2                 0.666272    
-OriginHigh:TimepointTime3                 0.412190    
-SecondaryHigh:TimepointTime2              0.013173 *  
-SecondaryHigh:TimepointTime3              0.703177    
-OriginHigh:SecondaryHigh:TimepointTime2   0.973808    
-OriginHigh:SecondaryHigh:TimepointTime3   0.995081    
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Correlation of Fixed Effects:
-            (Intr) OrgnHg ScndrH TmpnT2 TmpnT3 OrH:SH OH:TT2 OH:TT3 SH:TT2 SH:TT3
-OriginHigh  -0.476                                                               
-SecondryHgh -0.720  0.343                                                        
-TimepontTm2 -0.629  0.298  0.453                                                 
-TimepontTm3 -0.412  0.195  0.297  0.433                                          
-OrgnHgh:ScH  0.350 -0.733 -0.487 -0.220 -0.144                                   
-OrgnHgh:TT2  0.297 -0.666 -0.214 -0.475 -0.205  0.488                            
-OrgnHgh:TT3  0.216 -0.476 -0.156 -0.227 -0.497  0.348  0.503                     
-ScndryH:TT2  0.450 -0.212 -0.605 -0.713 -0.311  0.294  0.337  0.162              
-ScndryH:TT3  0.280 -0.132 -0.379 -0.295 -0.591  0.184  0.139  0.318  0.397       
-OrgH:SH:TT2 -0.220  0.487  0.297  0.350  0.152 -0.632 -0.731 -0.368 -0.490 -0.195
-OrgH:SH:TT3 -0.139  0.305  0.190  0.147  0.306 -0.401 -0.322 -0.638 -0.198 -0.501
-            OH:SH:TT2
-OriginHigh           
-SecondryHgh          
-TimepontTm2          
-TimepontTm3          
-OrgnHgh:ScH          
-OrgnHgh:TT2          
-OrgnHgh:TT3          
-ScndryH:TT2          
-ScndryH:TT3          
-OrgH:SH:TT2          
-OrgH:SH:TT3  0.422   
-convergence code: 0
-Model failed to converge with max|grad| = 0.0570591 (tol = 0.001, component 1)
-
-Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) [
-glmerMod]
- Family: binomial  ( logit )
-Formula: cbind(Settle, Not.Settle) ~ Origin * Secondary + (1 | Chamber)
-   Data: settlement
-
-     AIC      BIC   logLik deviance df.resid 
-   511.5    524.3   -250.8    501.5       91 
-
-Scaled residuals: 
-       Min         1Q     Median         3Q        Max 
--1.1862121 -0.4369742 -0.0108422  0.4473872  1.7679806 
-
-Random effects:
- Groups  Name        Variance Std.Dev.
- Chamber (Intercept) 0.40322  0.634996
-Number of obs: 96, groups:  Chamber, 96
-
-Fixed effects:
-                          Estimate Std. Error  z value   Pr(>|z|)    
-(Intercept)               0.783122   0.135011  5.80043 6.6147e-09 ***
-OriginHigh                0.664017   0.282247  2.35261   0.018642 *  
-SecondaryHigh            -0.768497   0.188522 -4.07644 4.5730e-05 ***
-OriginHigh:SecondaryHigh -0.410974   0.386800 -1.06250   0.288010    
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Correlation of Fixed Effects:
-            (Intr) OrgnHg ScndrH
-OriginHigh  -0.474              
-SecondryHgh -0.716  0.339       
-OrgnHgh:ScH  0.347 -0.729 -0.486
-Linear mixed-effects model fit by REML
- Data: All.Growth 
-          AIC         BIC     logLik
-  -1043.78066 -1007.49409 533.890329
-
-Random effects:
- Formula: ~Timepoint | Chamber.num
- Structure: General positive-definite, Log-Cholesky parametrization
-               StdDev        Corr  
-(Intercept)    0.00819670135 (Intr)
-TimepointTime6 0.00965816426 -0.918
-Residual       0.00251082454       
-
-Fixed effects: log10(growth.rate + 1) ~ Origin * Secondary * Timepoint 
-                                                 Value     Std.Error DF     t-value
-(Intercept)                              0.02342980497 0.00142877330 92 16.39854623
-OriginHigh                               0.00607598813 0.00285754659 92  2.12629538
-SecondaryHigh                            0.00016957737 0.00202059057 92  0.08392465
-TimepointTime6                          -0.01710534315 0.00177937280 60 -9.61313063
-OriginHigh:SecondaryHigh                -0.00148576706 0.00404118115 92 -0.36765663
-OriginHigh:TimepointTime6               -0.00489875564 0.00351296650 60 -1.39447832
-SecondaryHigh:TimepointTime6            -0.00020319535 0.00255441490 60 -0.07954673
-OriginHigh:SecondaryHigh:TimepointTime6 -0.00122596753 0.00507704691 60 -0.24147256
-                                        p-value
-(Intercept)                              0.0000
-OriginHigh                               0.0362
-SecondaryHigh                            0.9333
-TimepointTime6                           0.0000
-OriginHigh:SecondaryHigh                 0.7140
-OriginHigh:TimepointTime6                0.1683
-SecondaryHigh:TimepointTime6             0.9369
-OriginHigh:SecondaryHigh:TimepointTime6  0.8100
- Correlation: 
-                                        (Intr) OrgnHg ScndrH TmpnT6 OrH:SH OH:TT6
-OriginHigh                              -0.500                                   
-SecondaryHigh                           -0.707  0.354                            
-TimepointTime6                          -0.863  0.431  0.610                     
-OriginHigh:SecondaryHigh                 0.354 -0.707 -0.500 -0.305              
-OriginHigh:TimepointTime6                0.437 -0.874 -0.309 -0.507  0.618       
-SecondaryHigh:TimepointTime6             0.601 -0.300 -0.850 -0.697  0.425  0.353
-OriginHigh:SecondaryHigh:TimepointTime6 -0.302  0.605  0.428  0.350 -0.855 -0.692
-                                        SH:TT6
-OriginHigh                                    
-SecondaryHigh                                 
-TimepointTime6                                
-OriginHigh:SecondaryHigh                      
-OriginHigh:TimepointTime6                     
-SecondaryHigh:TimepointTime6                  
-OriginHigh:SecondaryHigh:TimepointTime6 -0.503
-
-Standardized Within-Group Residuals:
-          Min            Q1           Med            Q3           Max 
--1.1958512752 -0.2220205406 -0.0080363646  0.2260568023  1.4461260298 
-
-Number of Observations: 160
-Number of Groups: 96 
+                                        Estimate Std. Error z value Pr(>|z|)
+(Intercept)                                0.946      0.127   7.437    0.000
+OriginHigh                                 0.561      0.267   2.106    0.035
+SecondaryHigh                             -0.855      0.176  -4.844    0.000
+TimepointTime2                            -1.349      0.127 -10.644    0.000
+TimepointTime3                            -3.105      0.159 -19.561    0.000
+OriginHigh:SecondaryHigh                  -0.217      0.362  -0.599    0.549
+OriginHigh:TimepointTime2                 -0.089      0.263  -0.340    0.734
+OriginHigh:TimepointTime3                 -0.355      0.314  -1.133    0.257
+SecondaryHigh:TimepointTime2               0.414      0.177   2.335    0.020
+SecondaryHigh:TimepointTime3              -0.110      0.253  -0.432    0.666
+OriginHigh:SecondaryHigh:TimepointTime2    0.009      0.360   0.025    0.980
+OriginHigh:SecondaryHigh:TimepointTime3   -0.012      0.512  -0.024    0.981
+                         Estimate Std. Error z value Pr(>|z|)
+(Intercept)                 0.783      0.135   5.800    0.000
+OriginHigh                  0.664      0.282   2.353    0.019
+SecondaryHigh              -0.768      0.189  -4.076    0.000
+OriginHigh:SecondaryHigh   -0.411      0.387  -1.062    0.288
+                           numDF denDF F-value p-value
+(Intercept)                    1    92 914.371  <.0001
+Origin                         1    92   4.680   0.033
+Secondary                      1    92   0.436   0.511
+Timepoint                      1    60 253.014  <.0001
+Origin:Secondary               1    92   0.384   0.537
+Origin:Timepoint               1    60   3.948   0.052
+Secondary:Timepoint            1    60   0.038   0.845
+Origin:Secondary:Timepoint     1    60   0.065   0.799

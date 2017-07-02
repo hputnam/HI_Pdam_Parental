@@ -1,9 +1,9 @@
-#Examination of Parental Effects and Trans-generational Acclimatization in Pocillopora damicornis exposed to Ocean Acifiication
+#Examination of Trans-generational Acclimatization in Pocillopora damicornis exposed to Ocean Acifiication
 #Data published in X
 #Title: 
 #Contact: Hollie Putnam hollieputnam@gmail.com
 #Supported by: NSF Ocean Sciencs Postdoctoral Research Fellowship (NSF OCE PRF-1323822) and NSF EPSCOR (NSF EPS-0903833)
-#last modified 20170408
+#last modified 20170702
 #See Readme file for details on data files and metadata
 
 rm(list=ls()) # removes all prior objects
@@ -11,19 +11,21 @@ rm(list=ls()) # removes all prior objects
 #R Version:
 #RStudio Version:
 #Read in required libraries
-library(car) #version 2.0-21 Date: 2014/08/09 Title: Companion to Applied Regression Depends: R (>= 2.14.0), stats, graphics
-library(ggplot2) #version 1.0.1 Date/Publication: 2015-03-17 Title: An Implementation of the Grammar of Graphics Depends: R (>= 2.14), stats, methods
-library(gridExtra) #version: 0.9.1 Date/Publication: 2012-08-09 Title: functions in Grid graphics Depends: R(>= 2.5.0), grid
-library(lsmeans)  #version: 2.17 Date: 2015-04-15 Title: Least-Squares Means Depends: estimability, methods, R (>= 3.0)
-library(multcomp) #version: 1.4-0 Date: 2015-03-05 Title: Simultaneous Inference in General Parametric Models Depends: stats, graphics, mvtnorm (>= 0.8-0), survival (>= 2.35-7), TH.data (>= 1.0-2)
-library(nlme) #version: 3.1-118 Date: 2014-10-07 Title: Linear and Nonlinear Mixed Effects Models Depends: graphics, stats, R (>= 3.0.0)
-library(plotrix) #version: 3.5-7 Date: 2014-05-26 Title: Various plotting functions Depends:NA
-library(plyr) #version: 1.8.1 Date/Publication: 2014-02-26 Title: Tools for splitting, applying and combining data Depends: R (>= 2.11.0)
-library(reshape) #version: 0.8.5 Date/Publication: 2014-04-23 Title: Flexibly reshape data. Depends: R (>= 2.6.1)
-library(seacarb) #version: 3.0 Date/Publication: 2014-04-05 Title: seawater carbonate chemistry with R Depends: NA
-library(grid) #version 3.3.1 Date/Publication: 2016-06-24 Title:grid
-library(xtable) #version 1.8-2 Date/Publication: 2016-01-08 Title: Export Tables to LaTeX or HTML Depends: R (>= 2.10.0)
-library(lme4) #version: 1.1-12 Date/Publication: 2016-04-16 20:40:11 Title: Linear Mixed-Effects Models using 'Eigen' and S4 Depends: R (>= 3.0.2), Matrix (>= 1.1.1), methods, stats
+library(car) #version 2.1-4 Date: 2016-11-30 Depends: R (>= 3.2.0) Imports:MASS, mgcv, nnet, pbkrtest (>= 0.3-2), quantreg, grDevices, utils, stats, graphics, Rcpp
+library(ggplot2) #version 2.2.1 Date/Publication: 2016-12-30 Depends: R (>= 3.1) Imports: digest, grid, gtable (>= 0.1.1), MASS, plyr (>= 1.7.1),reshape2, scales (>= 0.4.1), stats, tibble, lazyeval
+library(gridExtra) #version: 2.2.1 Date/Publication: 2016-02-29 Depends: R(>= 2.5.0) Imports: gtable, grid, grDevices, graphics, utils
+library(lsmeans)  #version: 2.26-3 Date: 2017-05-09 Depends: estimability, methods, R (>= 3.0) Imports: graphics, stats, utils, nlme, coda (>= 0.17), multcomp, plyr,mvtnorm, xtable (>= 1.8-2)
+library(multcomp) #version: 1.4-6 Date: 2016-07-14 Depends: stats, graphics, mvtnorm (>= 1.0-3), survival (>= 2.39-4), TH.data (>= 1.0-2)
+library(nlme) #version: 3.1-131 Date: 2017-02-06 Depends: R (>= 3.0.2) Imports: graphics, stats, utils, lattice
+library(plotrix) #version: 3.6-5 Date: 2017-05-09 Depends: NA Imports: grDevices, graphics, stats, utils
+library(plyr) #version: 1.8.4 Date/Publication: 2016-06-08 Depends: R (>= 3.1.0) Imports: Rcpp (>= 0.11.0)
+library(reshape) #version: 3.3.1 Date/Publication: 2016-06-24  Depends: R (>= 3.3.1)
+library(seacarb) #version: 3.2 Date/Publication: 2017-06-19 Depends: R (>= 2.10), oce, gsw Imports: NA
+library(grid) #version: 3.3.1 Date/Publication: 2016-06-24  Depends: R (>= 3.3.1)
+library(xtable) #version 1.8-2 Date/Publication: 2016-01-08 Depends: R (>= 2.10.0)
+library(lme4) #version: 1.1-13 Date/Publication: 2017-04-19 Depends: R (>= 3.0.2), Matrix (>= 1.1.1), methods, stats Imports: graphics, grid, splines, utils, parallel, MASS, lattice, nlme(>= 3.1-123), minqa (>= 1.1.15), nloptr (>= 1.0.4)
+library(blmeco) #version: 1.1 Date/Publication: 2015-08-22 Depends: R (>= 3.0.0), stats, MASS Imports: MuMIn, arm, lme4
+library(MuMIn) #version: 1.15.6 Date/Publication: 2016-01-07 Depends: R (>= 3.0.0) Imports: graphics, methods, Matrix, stats, stats4
 
 #####Required Data files#####
 #Light_Calibration_Data.csv
@@ -91,40 +93,40 @@ T4.lm <- coef(lm(Tank1 ~ Tank4, data=Cal.T.data)) #extract model coefficients
 T5.lm <- coef(lm(Tank1 ~ Tank5, data=Cal.T.data)) #extract model coefficients
 
 ##### FIELD DATA #####
-#Data already published, see Putnam et al 2016 Evolutionary Applications
-#Field Temperature Data (28March14 - 01April14)
-#load field collection/acclimation temp data
-Field.data <- read.csv("Field_Temp.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
-mydate2 <- strptime(Field.data$Date.Time, format="%m/%d/%y %H:%M") #convert date format to characters
-quarterhours2 <- format(as.POSIXct(mydate2) ,format = "%H:%M") #set time as every 15 min
-Field.data <- cbind(Field.data, quarterhours2) #make a dataframe out of data and new times
-Field.data #View data
-min(Field.data$Temperature) #view minimum
-max(Field.data$Temperature) #view maximum
-quarterly.temp.mean2 <- aggregate(Temperature ~ quarterhours2, data=Field.data, mean, na.rm=TRUE) #calculate mean of temperature for every 15 min interval
-quarterly.temp.se2 <- aggregate(Temperature ~ quarterhours2, data=Field.data, std.error, na.rm=TRUE)  #calculate standard error of the mean of temperature for every 15 min interval
-Field.temp.N <- sum(!is.na(Field.data$Temperature)) #Count sample size without NA values
-field.temp.means <- data.frame(quarterly.temp.mean2, quarterly.temp.se2$Temperature) #combine mean and standard error results
-colnames(field.temp.means) <- c("Time", "mean", "se")  #rename columns to describe contents
-
-#Plot average diurnal cycle of temp data
-Fig1 <- ggplot(field.temp.means) + #Plot average diurnal cycle of temperature data
-  geom_point(aes(x = Time, y = mean), colour="black") + #Plot points using time as the x axis, light as the Y axis and black dots
-  geom_errorbar(aes(x=Time, ymax=mean+se, ymin=mean-se), position=position_dodge(0.9), data=field.temp.means) + #set values for standard error bars and offset on the X axis for clarity
-  scale_x_discrete(breaks=c("0:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00","13:00", "14:00", "15:00", "16:00", "17:00", "18:00","19:00", "20:00", "21:00", "22:00", "23:00")) + #set discrete breaks on the X axis
-  ggtitle("F Field Acclimation") + #Label the graph with the main title
-  ylim(23.5,29) + #Set Y axis limits
-  xlab("Time") + #Label the X Axis
-  ylab("Temperature (°C)") + #Label the Y Axis
-  theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
-        panel.grid.major = element_blank(), #Set the major gridlines
-        panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background=element_blank(), #Set the plot background
-        plot.title=element_text(hjust=0)) #Justify the title to the top left
-Fig1 #View figure
+##Data available in Putnam et al 2016 Evolutionary Applications
+##Field Temperature Data (28March14 - 01April14)
+##load field collection/acclimation temp data
+# Field.data <- read.csv("Field_Temp.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
+# mydate2 <- strptime(Field.data$Date.Time, format="%m/%d/%y %H:%M") #convert date format to characters
+# quarterhours2 <- format(as.POSIXct(mydate2) ,format = "%H:%M") #set time as every 15 min
+# Field.data <- cbind(Field.data, quarterhours2) #make a dataframe out of data and new times
+# Field.data #View data
+# min(Field.data$Temperature) #view minimum
+# max(Field.data$Temperature) #view maximum
+# quarterly.temp.mean2 <- aggregate(Temperature ~ quarterhours2, data=Field.data, mean, na.rm=TRUE) #calculate mean of temperature for every 15 min interval
+# quarterly.temp.se2 <- aggregate(Temperature ~ quarterhours2, data=Field.data, std.error, na.rm=TRUE)  #calculate standard error of the mean of temperature for every 15 min interval
+# Field.temp.N <- sum(!is.na(Field.data$Temperature)) #Count sample size without NA values
+# field.temp.means <- data.frame(quarterly.temp.mean2, quarterly.temp.se2$Temperature) #combine mean and standard error results
+# colnames(field.temp.means) <- c("Time", "mean", "se")  #rename columns to describe contents
+# 
+# #Plot average diurnal cycle of temp data
+# Fig1 <- ggplot(field.temp.means) + #Plot average diurnal cycle of temperature data
+#   geom_point(aes(x = Time, y = mean), colour="black") + #Plot points using time as the x axis, light as the Y axis and black dots
+#   geom_errorbar(aes(x=Time, ymax=mean+se, ymin=mean-se), position=position_dodge(0.9), data=field.temp.means) + #set values for standard error bars and offset on the X axis for clarity
+#   scale_x_discrete(breaks=c("0:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00","13:00", "14:00", "15:00", "16:00", "17:00", "18:00","19:00", "20:00", "21:00", "22:00", "23:00")) + #set discrete breaks on the X axis
+#   ggtitle("F Field Acclimation") + #Label the graph with the main title
+#   ylim(23.5,29) + #Set Y axis limits
+#   xlab("Time") + #Label the X Axis
+#   ylab("Temperature (°C)") + #Label the Y Axis
+#   theme_bw() + #Set the background color
+#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
+#         axis.line = element_line(color = 'black'), #Set the axes color
+#         panel.border = element_blank(), #Set the border
+#         panel.grid.major = element_blank(), #Set the major gridlines
+#         panel.grid.minor = element_blank(), #Set the minor gridlines
+#         plot.background=element_blank(), #Set the plot background
+#         plot.title=element_text(hjust=0)) #Justify the title to the top left
+# Fig1 #View figure
 
 ##### TANK ACCLIMATION DATA #####
 Acclim.data <- read.csv("Acclimation_Data.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
@@ -138,6 +140,8 @@ mydate <- strptime(Acc$Acclim.data.Date.Time, format="%m/%d/%y %H:%M") #convert 
 quarterhours <- format(as.POSIXct(mydate) ,format = "%H:%M") #set time as every 15 min
 Acc.data <- cbind(Acc, quarterhours) #make a dataframe out of data and new times
 Acc.data #View data
+range(na.omit(Acc.data$temp)) #view data range
+plot(Acc.data$Acclim.data.Date.Time, Acc.data$temp) #plot temperature by time
 
 #Tank Temperature Data for Acclimation Period (02April14 - 05May14)
 quarterly.temp.mean <- aggregate(temp ~ quarterhours, data=Acc.data, mean, na.rm=TRUE) #calculate mean of temperature for every 15 min interval
@@ -146,12 +150,13 @@ Acc.temp.N <- sum(!is.na(Acc.data$temp)) #Count sample size without NA values
 Acc.temp.N #View data
 temp.means <- data.frame(quarterly.temp.mean, quarterly.temp.se$temp) #combine mean and standard error results
 colnames(temp.means) <- c("Time", "mean", "se")  #rename columns to describe contents
+range(na.omit(temp.means$mean)) #range of average temp levels
 
 Fig2 <- ggplot(temp.means) + #Plot average diurnal cycle of temperature data
   geom_point(aes(x = Time, y = mean), colour="black") + #Plot points using time as the x axis, light as the Y axis and black dots
   geom_errorbar(aes(x=Time, ymax=mean+se, ymin=mean-se), position=position_dodge(0.9), data=temp.means) + #set values for standard error bars and offset on the X axis for clarity
   scale_x_discrete(breaks=c("01:00", "06:00", "12:00", "18:00", "23:00")) + #set discrete breaks on the X axis
-  ggtitle("TEMPERATURE\nA) Tank Acclimation") + #Label the graph with the main title
+  ggtitle("ACCLIMATION\nA)") + #Label the graph with the main title
   ylim(23.5,29) + #Set Y axis limits
   xlab("Time") + #Label the X Axis
   ylab("Temperature (°C)") + #Label the Y Axis
@@ -184,13 +189,14 @@ quarterly.light.se[59,c(1,2)] <- c("20:15", "NA") #add row of time to complete d
 quarterly.light.se$light <- as.numeric(quarterly.light.se$light) #set column as numeric
 light.means <- data.frame(quarterly.light.mean, quarterly.light.se$light) #combine mean and standard error results
 colnames(light.means) <- c("Time", "mean", "se")  #rename columns to describe contents
+range(na.omit(light.means$mean)) #range of average light levels
 
 Fig3 <- ggplot(light.means) + #Plot average diurnal cycle of light data
   geom_point(aes(x = Time, y = mean), colour="black") + #Plot points using time as the x axis, light as the Y axis and black points
   geom_errorbar(aes(x=Time, ymax=mean+se, ymin=mean-se), data=light.means) + #set values for standard error bars
   scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
   ylim(0,300) + #set Y axis limits
-  ggtitle("IRRADIANCE\nE) Tank Acclimation") + #Label the graph with the main title
+  ggtitle("E)") + #Label the graph with the main title
   xlab("Time") + #Label the X Axis
   ylab(bquote('Irradiance ('*mu~'mol' ~photons ~ m^-2~s^-1*')')) + #Label the Y Axis
   theme_bw() + #Set the background color
@@ -216,6 +222,8 @@ tank.tempdata <-data.frame(mydate.tanks, tank.data$Tank4.cal, tank.data$Tank5.ca
 colnames(tank.tempdata) <- c("Date.Time", "Tank4", "Tank5")
 Tank4.temp.N <- sum(!is.na(tank.tempdata$Tank4)) #Count sample size
 Tank5.temp.N <- sum(!is.na(tank.tempdata$Tank5)) #Count sample size
+range(na.omit(tank.tempdata$Tank4)) #range of average ambient temp levels
+range(na.omit(tank.tempdata$Tank5)) #range of average high temp levels
 
 Fig4 <- ggplot(tank.tempdata, aes(Date.Time)) + #plot tank temperature data
   geom_line(aes(y = Tank4, colour="Ambient")) + #plot Temperature data as a line on the Y axis with date as the X axis 
@@ -252,6 +260,8 @@ quarterly.tank.temp.mean5 <- aggregate(Tank5 ~ Time, data=tank.temperatures, mea
 quarterly.tank.temp.se5 <- aggregate(Tank5 ~ Time, data=tank.temperatures, std.error, na.rm=TRUE)  #calculate standard error of the mean of temperature for every 15 min interval
 tank.temp.means <- data.frame(quarterly.tank.temp.mean4, quarterly.tank.temp.se4$Tank4, quarterly.tank.temp.mean5$Tank5, quarterly.tank.temp.se5$Tank5) #combine mean and standard error results
 colnames(tank.temp.means) <- c("Time", "Tank4.mean", "Tank4.se", "Tank5.mean", "Tank5.se")  #Rename columns to describe contents
+range(na.omit(tank.temp.means$Tank4.mean)) #range of average ambient temp levels
+range(na.omit(tank.temp.means$Tank5.mean)) #range of average high temp levels
 
 Fig5 <- ggplot(tank.temp.means, aes(Time)) + # plot mean temp by tank
   geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
@@ -260,7 +270,7 @@ Fig5 <- ggplot(tank.temp.means, aes(Time)) + # plot mean temp by tank
   geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=tank.temp.means) + #set values for standard error bars and offset on the X axis for clarity
   scale_colour_manual("Treatment", values = c("blue","red")) +
   scale_x_discrete(breaks=c("01:00", "06:00", "12:00", "18:00", "23:00")) + #set discrete breaks on the X axis
-  ggtitle("B) Adult Exposure") + #Label graphic title
+  ggtitle("ADULT EXPOSURE\nB)") + #Label graphic title
   ylim(23.5,29) + #Set Y axis limits
   xlab("Time") + #Label the X Axis
   ylab("Temperature (°C)") + #Label the Y Axis
@@ -291,6 +301,8 @@ tank.light.data$Tank5.cal <-(tank.light.data$Tank5.quanta*L5.lm[2])+L5.lm[1] #Ap
 tank.light.data$Tank5.cal[is.na(tank.light.data$Tank5.cal)] <- tank.light.data$Tank3.cal[is.na(tank.light.data$Tank5.cal)] #merge tanks 3 and 5 into one column so the data from first 3 days when corals were in tank 3 is now showing in tank 5
 tank.lightdata <-data.frame(mydate.tanks, tank.light.data$Tank4.cal, tank.light.data$Tank5.cal) #make a dataframe of temperature and time
 colnames(tank.lightdata) <- c("Date.Time", "Tank4", "Tank5") #rename columns
+range(na.omit(tank.lightdata$Tank4)) #range ambient light levels
+range(na.omit(tank.lightdata$Tank5)) #range high light levels
 
 Tank4.light.N <- sum(!is.na(tank.lightdata$Tank4)) #Count sample size
 Tank5.light.N <- sum(!is.na(tank.lightdata$Tank5)) #Count sample size
@@ -334,6 +346,8 @@ quarterly.tank.light.se5[58,1] <- "20:00" #add empty row
 quarterly.tank.light.se5[59,1] <- "20:15" #add empty row
 tank.light.means <- data.frame(quarterly.tank.light.mean4, quarterly.tank.light.se4$Tank4, quarterly.tank.light.mean5$Tank5, quarterly.tank.light.se5$Tank5) #combine mean and standard error results
 colnames(tank.light.means) <- c("Time", "Tank4.mean", "Tank4.se", "Tank5.mean", "Tank5.se")  #Rename columns to describe contents
+range(na.omit(tank.light.means$Tank4.mean)) #range of average ambient light levels
+range(na.omit(tank.light.means$Tank5.mean)) #range of average high light levels
 
 Fig7 <- ggplot(tank.light.means, aes(Time)) + # plot mean temp by tank
   geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
@@ -343,7 +357,7 @@ Fig7 <- ggplot(tank.light.means, aes(Time)) + # plot mean temp by tank
   scale_colour_manual("Treatment", values = c("blue","red")) +
   scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
   ylim(0,300) + #set Y axis limits
-  ggtitle("F) Adult Exposure") + #Label graphic title
+  ggtitle("F)") + #Label graphic title
   xlab("Time") + #Label the X Axis
   ylab(bquote('Irradiance ('*mu~'mol' ~photons ~ m^-2~s^-1*')')) + #Label the Y Axis
   theme_bw() + #Set the background color
@@ -402,6 +416,9 @@ quarterly.M1.tank.temp.mean5 <- aggregate(Tank5 ~ Time, data=M1.tank.temperature
 quarterly.M1.tank.temp.se5 <- aggregate(Tank5 ~ Time, data=M1.tank.temperatures, std.error, na.rm=TRUE)  #calculate standard error of the mean of temperature for every 15 min interval
 M1.tank.temp.means <- data.frame(quarterly.M1.tank.temp.mean4, quarterly.M1.tank.temp.se4$Tank4, quarterly.M1.tank.temp.mean5$Tank5, quarterly.M1.tank.temp.se5$Tank5) #combine mean and standard error results
 colnames(M1.tank.temp.means) <- c("Time", "Tank4.mean", "Tank4.se", "Tank5.mean", "Tank5.se")  #Rename columns to describe contents
+range(na.omit(M1.tank.temp.means$Tank4.mean)) #range of average amb temp levels
+range(na.omit(M1.tank.temp.means$Tank5.mean)) #range of average high temp levels
+
 
 Fig9 <- ggplot(M1.tank.temp.means, aes(Time)) + # plot mean temp by tank
   geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
@@ -410,7 +427,7 @@ Fig9 <- ggplot(M1.tank.temp.means, aes(Time)) + # plot mean temp by tank
   geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=M1.tank.temp.means) + #set values for standard error bars and offset on the X axis for clarity
   scale_colour_manual("Treatment", values = c("blue","red")) +
   scale_x_discrete(breaks=c("01:00", "06:00", "12:00", "18:00", "23:00")) + #set discrete breaks on the X axis
-  ggtitle("C) Month 1 Larval Exposure") + #Label graphic title
+  ggtitle("LARVAL MONTH 1\nC)") + #Label graphic title
   ylim(23.5,29) + #Set Y axis limits
   xlab("Time") + #Label the X Axis
   ylab("Temperature (°C)") + #Label the Y Axis
@@ -436,7 +453,6 @@ M1.tank.light.data$Tank4.cal <-(M1.tank.light.data$Tank4.quanta*L4.lm[2])+L4.lm[
 M1.tank.light.data$Tank5.cal <-(M1.tank.light.data$Tank5.quanta*L5.lm[2])+L5.lm[1] #Apply the cross calibration of temperature to standard logger #1
 M1.tank.lightdata <-data.frame(mydate.tanks, M1.tank.light.data$Tank4.cal, M1.tank.light.data$Tank5.cal) #make a dataframe of temperature and time
 colnames(M1.tank.lightdata) <- c("Date.Time", "Tank4", "Tank5")
-
 Tank4.M1.light.N <- sum(!is.na(M1.tank.lightdata$Tank4)) #Count sample size
 Tank5.M1.light.N <- sum(!is.na(M1.tank.lightdata$Tank5)) #Count sample size
 
@@ -499,6 +515,8 @@ quarterly.M1.tank.light.se5[59,c(1,2)] <- c("20:15", "NA") #add empty row
 quarterly.M1.tank.light.se5$Tank5 <- as.numeric(quarterly.M1.tank.light.se5$Tank5) #set as numeric
 M1.tank.light.means <-data.frame(quarterly.M1.tank.light.mean4,quarterly.M1.tank.light.se4$Tank4,quarterly.M1.tank.light.mean5$Tank5,quarterly.M1.tank.light.se5$Tank5) #make a dataframe 
 colnames(M1.tank.light.means) <- c("Time", "Tank4.mean", "Tank4.se", "Tank5.mean", "Tank5.se")  #Rename columns to describe contents
+range(na.omit(M1.tank.light.means$Tank4.mean)) #range of average ambient light levels
+range(na.omit(M1.tank.light.means$Tank5.mean)) #minimum of average high light levels
 
 Fig11 <- ggplot(M1.tank.light.means, aes(Time)) + # plot mean temp by tank
   geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
@@ -508,7 +526,7 @@ Fig11 <- ggplot(M1.tank.light.means, aes(Time)) + # plot mean temp by tank
   scale_colour_manual("Treatment", values = c("blue","red")) +
   scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
   ylim(0,300) + #set Y axis limits
-  ggtitle("G) Month 1 Larval Exposure") + #Label graphic title
+  ggtitle("G)") + #Label graphic title
   xlab("Time") + #Label the X Axis
   ylab(bquote('Irradiance ('*mu~'mol' ~photons ~ m^-2~s^-1*')')) + #Label the Y Axis
   theme_bw() + #Set the background color
@@ -568,6 +586,8 @@ quarterly.M6.tank.temp.mean5 <- aggregate(Tank5 ~ Time, data=M6.tank.temperature
 quarterly.M6.tank.temp.se5 <- aggregate(Tank5 ~ Time, data=M6.tank.temperatures, std.error, na.rm=TRUE)  #calculate standard error of the mean of temperature for every 15 min interval
 M6.tank.temp.means <- data.frame(quarterly.M6.tank.temp.mean4, quarterly.M6.tank.temp.se4$Tank4, quarterly.M6.tank.temp.mean5$Tank5, quarterly.M6.tank.temp.se5$Tank5) #combine mean and standard error results
 colnames(M6.tank.temp.means) <- c("Time", "Tank4.mean", "Tank4.se", "Tank5.mean", "Tank5.se")  #Rename columns to describe contents
+range(na.omit(M6.tank.temp.means$Tank4.mean)) #range of average amb temp levels
+range(na.omit(M6.tank.temp.means$Tank5.mean)) #range of average high temp levels
 
 Fig13 <- ggplot(M6.tank.temp.means, aes(Time)) + # plot mean temp by tank
   geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
@@ -576,7 +596,7 @@ Fig13 <- ggplot(M6.tank.temp.means, aes(Time)) + # plot mean temp by tank
   geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=M6.tank.temp.means) + #set values for standard error bars and offset on the X axis for clarity
   scale_colour_manual("Treatment", values = c("blue","red")) +
   scale_x_discrete(breaks=c("01:00", "06:00", "12:00", "18:00", "23:00")) + #set discrete breaks on the X axis
-  ggtitle("D) Month 6 Larval Exposure") + #Label graphic title
+  ggtitle("LARVAL MONTH 6\nD)") + #Label graphic title
   ylim(23.5,29) + #Set Y axis limits
   xlab("Time") + #Label the X Axis
   ylab("Temperature (°C)") + #Label the Y Axis
@@ -602,7 +622,6 @@ M6.tank.light.data$Tank4.cal <-(M6.tank.light.data$Tank4.quanta*L4.lm[2])+L4.lm[
 M6.tank.light.data$Tank5.cal <-(M6.tank.light.data$Tank5.quanta*L5.lm[2])+L5.lm[1] #Apply the cross calibration of temperature to standard logger #1
 M6.tank.lightdata <-data.frame(mydate.tanks, M6.tank.light.data$Tank4.cal, M6.tank.light.data$Tank5.cal) #make a dataframe of temperature and time
 colnames(M6.tank.lightdata) <- c("Date.Time", "Tank4", "Tank5")
-
 Tank4.M6.light.N <- sum(!is.na(M6.tank.lightdata$Tank4)) #Count sample size
 Tank5.M6.light.N <- sum(!is.na(M6.tank.lightdata$Tank5)) #Count sample size
 
@@ -665,6 +684,8 @@ quarterly.M6.tank.light.se5[59,c(1,2)] <- c("20:15", "NA") #add empty row
 quarterly.M6.tank.light.se5$Tank5 <- as.numeric(quarterly.M6.tank.light.se5$Tank5) #set as numeric
 M6.tank.light.means <-data.frame(quarterly.M6.tank.light.mean4,quarterly.M6.tank.light.se4$Tank4,quarterly.M6.tank.light.mean5$Tank5,quarterly.M6.tank.light.se5$Tank5) #make a dataframe
 colnames(M6.tank.light.means) <- c("Time", "Tank4.mean", "Tank4.se", "Tank5.mean", "Tank5.se")  #Rename columns to describe contents
+range(na.omit(M6.tank.light.means$Tank4.mean)) #range of average ambient light levels
+range(na.omit(M6.tank.light.means$Tank5.mean)) #minimum of average high light levels
 
 Fig15 <- ggplot(M6.tank.light.means, aes(Time)) + # plot mean temp by tank
   geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
@@ -674,7 +695,7 @@ Fig15 <- ggplot(M6.tank.light.means, aes(Time)) + # plot mean temp by tank
   scale_colour_manual("Treatment", values = c("blue","red")) +
   scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
   ylim(0,300) + #set Y axis limits
-  ggtitle("H) Month 6 Larval Exposure") + #Label graphic title
+  ggtitle("H)") + #Label graphic title
   xlab("Time") + #Label the X Axis
   ylab(bquote('Irradiance ('*mu~'mol' ~photons ~ m^-2~s^-1*')')) + #Label the Y Axis
   theme_bw() + #Set the background color
@@ -726,7 +747,7 @@ path<-"~/MyProjects/HI_Pdam_Parental/RAnalysis/Data/TA" #the location of all you
 Sample.Info <- read.csv("TA_mass_data.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
 Mass<-read.csv(massfile, header=T, sep=",", na.string="NA", as.is=T, row.names=1)  #load Sample Info Data
 
-# Select the mV for pH=3 and pH=3.5 based on your probe calibration
+# Select the mV for pH=3 and pH=3.5 based on probe calibration
 pH35<-mean(Sample.Info$pH35, na.rm=T) #take the average mV reading for pH 3.5 across all samples
 pH3<-mean(Sample.Info$pH3, na.rm=T) #take the average mV reading for pH 3.0 across all samples
 
@@ -741,7 +762,7 @@ rownames(TA)<-file.names #identify row names
 colnames(TA)<-c('Sample.ID','Mass','TA.Mes') #identify column names
 
 setwd(file.path(mainDir, 'Data/TA')) # set working directory to where the data are
-#run a for loop to bring in the titration files on at a time and calculate TA
+#run a for loop to bring in the titration files one at a time and calculate TA
 for(i in 1: length(file.names)) {
   Data<-read.table(file.names[i], header=F, sep=",", na.string="NA",as.is=T) #read in each data file
   Data<-Data[-1:-6,] #remove the rows with characters
@@ -786,11 +807,9 @@ d <- if(Mass[name,4] =="d1") {
 }
 
 TA <- data.frame(TA) #make a dataframe from the TA results
-setwd(file.path(mainDir, 'Output')) #set output location
-write.table(TA,paste("TA", "output",".csv"),sep=",")#exports your data as a CSV file
-setwd(file.path(mainDir, 'Data')) #set working directory back to data
 
 #load CRM standard Info
+setwd(file.path(mainDir, 'Data')) # set working directory to where the data are
 CRMs <- read.csv("CRM_TA_Data.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
 Refs <- merge(CRMs, TA, by="Sample.ID") #merge the TA calculations with the Reference metadata
 Refs$TA.Mes <- as.numeric(paste(Refs$TA.Mes)) #set valuse as numeric
@@ -824,6 +843,7 @@ carb.ouptput$DIC <- carb.ouptput$DIC*1000000 #convert to µmol kg-1
 carb.ouptput <- carb.ouptput[,-c(1,4,5,8,10:13,19)] #subset variables of interest
 carb.ouptput <- cbind(SW.chem$Date,  SW.chem$Tank,  SW.chem$Treatment, SW.chem$Period1,SW.chem$Period2, SW.chem$Period3, carb.ouptput) #combine the sample information with the seacarb output
 colnames(carb.ouptput) <- c("Date",  "Tank",  "Treatment",	"Period1", "Period2", "Period3",	"Salinity",	"Temperature", "pH",	"CO2",	"pCO2","HCO3",	"CO3",	"DIC", "TA",	"Aragonite.Sat") #Rename columns to describe contents
+write.table(carb.ouptput, "Seawater_chemistry_table_Output_All.csv", sep=",", row.names = FALSE) #save data
 
 carb.ouptput.Acc <- subset(carb.ouptput, Period1 == "Acc") #subset data
 carb.ouptput.Adult <- subset(carb.ouptput, Period1 == "Adult") #subset data
@@ -914,25 +934,9 @@ M6.chem.table$CO3 <- paste(round(M6.carb.table$mean.CO3, digits=0), round(M6.car
 M6.chem.table$DIC <- paste(round(M6.carb.table$mean.DIC, digits=0), round(M6.carb.table$sem.DIC, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
 M6.chem.table$Arag.Sat <- paste(round(M6.carb.table$mean.Aragonite.Sat, digits=1), round(M6.carb.table$sem.Aragonite.Sat, digits=1), sep=' ± ') #add combined mean and sem with ± separating them
 
-#####SEAWATER CHEMISTRY ANALYSIS FOR CONTINUOUS MEASUREMENTS#####
-#generate all the calibration curve data for tris standard mV and temperature
-sal <- aggregate(Salinity ~ Treatment, data=daily, mean, na.rm = TRUE) #Calculate average salinity from the tank YSI probe measurements
-sal #View data
-#if salinity is the same in both treatments, take grand average
-#if the salinity is different by treatment, use individual salinity values manually assigned
-sal <- mean(daily$Salinity, na.rm=T) #Assign the salinity from the calculated mean value
-sal #View data
-
-TA.mean <- aggregate(Corrected.TA ~ Treatment, data=SW.chem, mean, na.rm = TRUE) #calculate the average of total alkalinity in each tank
-TA.mean #View data
-TA.se <- aggregate(Corrected.TA ~ Treatment, data=SW.chem, std.error, na.rm = TRUE) #calculate the standard error of total alkalinity in each tank
-TA.se #View data
-TAs <- cbind(TA.mean, TA.se$Corrected.TA) #merge the mean and standard error of total alkalinity
-colnames(TAs) <- c("Treatment", "mean", "se") #Rename columns to describe contents
-TAs #View data
-
-#Tank pH Data for Adult Exposure Experimental Period (06May14 - 17Aug14)
-# read in NBS pH data from Aquacontrollers frequency 15min
+#####CONTINUOUS pH MEASUREMENTS#####
+#Tank NBS pH Data for Adult Exposure Experimental Period (06May14 - 17Aug14)
+# read in NBS pH data from Aquacontrollers, frequency 15min
 setwd(file.path(mainDir, 'Data')) #set working directory
 pHs <- read.csv("Adult_Tank_NBS_pH.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
 mydate.pHs <- strptime(pHs$Date.Time, format="%m/%d/%y %H:%M") #Identify date format
@@ -940,89 +944,15 @@ pHs$Tank5[is.na(pHs$Tank5)] <- pHs$Tank3[is.na(pHs$Tank5)] #merge tanks 3 and 5 
 tank.pHdata <-data.frame(mydate.pHs, pHs$Tank4, pHs$Tank5) #make a dataframe of temperature and time
 colnames(tank.pHdata) <- c("Date.Time", "Ambient.NBS", "High.NBS") #Rename columns to describe contents
 pH.data <- merge(tank.pHdata, tank.tempdata, by="Date.Time") #merge data sets by time and date
+pH.data$Time <- format(pH.data$Date.Time, format = "%H:%M:%S") #separate date and time
 
-#Convert pH from NBS to total scale for ambient tank 
-pH.Amb <- pH.data$Ambient.NBS # pH data on NBS scale logged every 15 minutes
-Temp.Amb <- pH.data$Tank4+273.15 # Temperature from Hobo loggers every 15 minutes that match pH measurement frequency
-S <- sal # salinity measured daily with YSI meter calibrated to conductivity standard at 25°C
-
-TS <- (0.14/96.062)*(S/1.80655) #concentration of SO4-2 in mol/kg-SW 
-##Morris, A. W., and Riley, J. P., Deep-Sea Research 13:699-705, 1966: this is .02824.*Sali./35. = .0008067.*Sali
-
-TF <- (0.000067/18.998)*(S/1.80655) #concentration of fluoride in mol/kg-SW 
-##Riley, J. P., Deep-Sea Research 12:219-220, 1965
-
-fH <- 1.2948 - 0.002036*Temp.Amb + (0.0004607 -  0.000001475*Temp.Amb)*(S^2) # the activity coefficient of the H+ ion, which is valid for the temperatures of 20-40°C
-#Takahashi et al, Chapter 3 in GEOSECS Pacific Expedition, v. 3, 1982 (p. 80)
-
-IonS <- (19.924*S)/(1000 - 1.005*S) # the ionic strength of Hydrogen Fluoride 
-##This is from the DOE handbook, Chapter 5, p. 13/22, eq. 7.2.4 and Zeebe Wolfgladrow Appendix A p260
-
-lnKSO4 <- -4276.1/Temp.Amb + 141.328 - 23.093*log(Temp.Amb) + 
-  (-13856/Temp.Amb + 324.57 - 47.986*log(Temp.Amb))*sqrt(IonS) +    
-  (35474/Temp.Amb - 771.54 + 114.723*log(Temp.Amb))*IonS +
-  (-2698/Temp.Amb)*sqrt(IonS)*IonS + (1776/Temp.Amb)*IonS^2 
-
-KSO4 <- exp(lnKSO4)*(1-0.001005*S) #this is on the free pH scale in mol/kg-SW 
-#This is from the DOE handbook 1994 ORNL/CDIAC-74
-
-lnKF <- 1590.2/Temp.Amb - 12.641 + 1.525*sqrt(IonS)
-
-KF <- exp(lnKF)*(1-0.001005*S) #the dissociation constant of HF, this is on the free pH scale in mol/kg-H2O
-#Dickson, A. G. and Riley, J. P., Marine Chemistry 7:89-99, 1979
-
-#Conversion Functions
-SWStoTOT.amb <- (1 + TS/KSO4)/(1 + TS/KSO4 + TF/KF) #pH scale conversion factor
-NBStoTOT.amb <- pH.Amb-(log(SWStoTOT.amb)/log(0.1) + log(fH)/log(0.1))  #conversion for NBS to total                                  
-
-pH.Amb.Out <- data.frame(pH.data$Date.Time, pH.data$Tank4, pH.data$Ambient.NBS, NBStoTOT.amb) #create dataframe of pH and time
-colnames(pH.Amb.Out) <- c("Date.Time", "Amb.Temp", "pH.Amb.NBS", "pH.Amb.TOTAL") #Rename columns to describe contents
-
-#Convert pH from NBS to total scale for high tank 
-pH.High <- pH.data$High.NBS # pH data on NBS scale logged every 15 minutes
-Temp.High <- pH.data$Tank5+273.15 # Temperature from Hobo loggers every 15 minutes that match pH measurement frequency converted to Kelvin
-
-TS <- (0.14/96.062)*(S/1.80655) #concentration of SO4-2 in mol/kg-SW 
-##Morris, A. W., and Riley, J. P., Deep-Sea Research 13:699-705, 1966: this is .02824.*Sali./35. = .0008067.*Sali
-
-TF <- (0.000067/18.998)*(S/1.80655) #concentration of fluoride in mol/kg-SW 
-##Riley, J. P., Deep-Sea Research 12:219-220, 1965
-
-fH <- 1.2948 - 0.002036*Temp.High + (0.0004607 -  0.000001475*Temp.High)*(S^2) # the activity coefficient of the H+ ion, which is valid for the temperatures of 20-40°C
-#Takahashi et al, Chapter 3 in GEOSECS Pacific Expedition, v. 3, 1982 (p. 80)
-
-IonS <- (19.924*S)/(1000 - 1.005*S) # the ionic strength of Hydrogen Fluoride 
-##This is from the DOE handbook, Chapter 5, p. 13/22, eq. 7.2.4 and Zeebe Wolfgladrow Appendix A p260
-
-lnKSO4 <- -4276.1/Temp.High + 141.328 - 23.093*log(Temp.High) + 
-  (-13856/Temp.High + 324.57 - 47.986*log(Temp.High))*sqrt(IonS) +    
-  (35474/Temp.High - 771.54 + 114.723*log(Temp.High))*IonS +
-  (-2698/Temp.High)*sqrt(IonS)*IonS + (1776/Temp.High)*IonS^2 
-
-KSO4 <- exp(lnKSO4)*(1-0.001005*S) #this is on the free pH scale in mol/kg-SW 
-#This is from the DOE handbook 1994 ORNL/CDIAC-74
-
-lnKF <- 1590.2/Temp.High - 12.641 + 1.525*sqrt(IonS)
-KF <- exp(lnKF)*(1-0.001005*S) #the dissociation constant of HF, this is on the free pH scale in mol/kg-H2O
-#Dickson, A. G. and Riley, J. P., Marine Chemistry 7:89-99, 1979
-
-#Conversion Functions
-SWStoTOT.high  <- (1 + TS/KSO4)/(1 + TS/KSO4 + TF/KF) #pH scale conversion factor
-NBStoTOT.high <- pH.High-(log(SWStoTOT.high)/log(0.1) + log(fH)/log(0.1))  #conversion for NBS to total                                  
-
-pH.High.Out <- data.frame(pH.data$Date.Time, pH.data$Tank5, pH.data$High.NBS, NBStoTOT.high) #create dataframe of total pH, Temperature, and time
-colnames(pH.High.Out) <- c("Date.Time", "High.Temp", "pH.High.NBS", "pH.High.TOTAL") #Rename columns to describe contents
-
-pH.TOT <- cbind(pH.High.Out, pH.Amb.Out$Amb.Temp,  pH.Amb.Out$pH.Amb.NBS,  pH.Amb.Out$pH.Amb.TOTAL) #create dataframe of total pH and time
-colnames(pH.TOT) <- c("Date.Time",  "High.Temp",	"pH.High.NBS",	"pH.High.TOTAL",	"Amb.Temp",	"pH.Amb.NBS",	"pH.Amb.TOTAL")
-
-#Plot total pH for both treatments for adult exposure
-Fig16 <- ggplot(pH.TOT) + #plot pH total scale
-  geom_line(aes(x = Date.Time, y = pH.High.TOTAL, col="High")) + #plot as a line
-  geom_line(aes(x = Date.Time, y = pH.Amb.TOTAL, col="Ambient")) + #plot as a line
+#Plot total pH for both treatments for duration of M1
+Fig16 <- ggplot(pH.data) + #plot pH total scale
+  geom_line(aes(x = Date.Time, y = High.NBS, col="High")) + #plot as a line
+  geom_line(aes(x = Date.Time, y = Ambient.NBS, col="Ambient")) + #plot as a line
   xlab("Date") + #Label the X Axis
-  ylab("pH (Total Scale)") + #Label the Y Axis
-  ggtitle("All Tanks Total pH") + #Label the graph title
+  ylab("pH (NBS Scale)") + #Label the Y Axis
+  ggtitle("Adult NBS pH") + #Label the graph title
   theme_bw() + #Set the background color
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         panel.border = element_blank(), #Set the border
@@ -1032,28 +962,28 @@ Fig16 <- ggplot(pH.TOT) + #plot pH total scale
         legend.key = element_blank()) #Set plot legend key
 Fig16 #View figure
 
-pH.time <- format(as.POSIXct(pH.TOT$Date.Time) ,format = "%H:%M") #Identify time in hours and minutes
-pH.TOT <- cbind(pH.TOT, pH.time) #Combine total pH and time
-colnames(pH.TOT) <- c("Date.Time",  "High.Temp",  "pH.High.NBS",  "pH.High.TOTAL",	"Amb.Temp",	"pH.Amb.NBS",	"pH.Amb.TOTAL", "Time") #Rename columns to describe contents
-
-quarterly.tank.pH.amb.mean <- aggregate(pH.Amb.TOTAL ~ Time, data=pH.TOT, mean, na.rm=TRUE) #calculate mean of pH for every 15 min interval
-quarterly.tank.pH.amb.se <- aggregate(pH.Amb.TOTAL ~ Time, data=pH.TOT, std.error, na.rm=TRUE)  #calculate standard error of the mean of pH for every 15 min interval
-quarterly.tank.pH.high.mean <- aggregate(pH.High.TOTAL ~ Time, data=pH.TOT, mean, na.rm=TRUE) #calculate mean of pH for every 15 min interval
-quarterly.tank.pH.high.se <- aggregate(pH.High.TOTAL ~ Time, data=pH.TOT, std.error, na.rm=TRUE)  #calculate standard error of the mean of pH for every 15 min interval
-tank.pH.means <- data.frame(quarterly.tank.pH.amb.mean, quarterly.tank.pH.amb.se$pH.Amb.TOTAL, quarterly.tank.pH.high.mean$pH.High.TOTAL, quarterly.tank.pH.high.se$pH.High.TOTAL) #combine mean and standard error results
-colnames(tank.pH.means) <- c("Time", "pH.Amb.TOTAL.mean", "pH.Amb.TOTAL.se", "pH.High.TOTAL.mean", "pH.High.TOTAL.se")  #Rename columns to describe contents
+quarterly.tank.pH.amb.mean <- aggregate(Ambient.NBS ~ Time, data=pH.data, mean, na.rm=TRUE) #calculate mean of pH for every 15 min interval
+quarterly.tank.pH.amb.se <- aggregate(Ambient.NBS ~ Time, data=pH.data, std.error, na.rm=TRUE)  #calculate standard error of the mean of pH for every 15 min interval
+quarterly.tank.pH.high.mean <- aggregate(High.NBS ~ Time, data=pH.data, mean, na.rm=TRUE) #calculate mean of pH for every 15 min interval
+quarterly.tank.pH.high.se <- aggregate(High.NBS ~ Time, data=pH.data, std.error, na.rm=TRUE)  #calculate standard error of the mean of pH for every 15 min interval
+adult.pH.amb.rng <- range(quarterly.tank.pH.amb.mean$Ambient.NBS) #range average ambient NBS pH
+adult.pH.high.rng <-range(quarterly.tank.pH.high.mean$High.NBS) #range average high NBS pH
+tank.pH.means <- data.frame(quarterly.tank.pH.amb.mean, quarterly.tank.pH.amb.se$Ambient.NBS, quarterly.tank.pH.high.mean$High.NBS, quarterly.tank.pH.high.se$High.NBS) #combine mean and standard error results
+colnames(tank.pH.means) <- c("Time", "pH.Amb.NBS.mean", "pH.Amb.NBS.se", "pH.High.NBS.mean", "pH.High.NBS.se")  #Rename columns to describe contents
+quarts <- as.data.frame(seq(ISOdatetime(2001,2,3,0,0,0), ISOdatetime(2001,2,4,0,0,0), by=(60*15))) #add sequence of time by 15 min
+tank.pH.means$Time <- quarts[1:96,] #remove last line
 
 Fig17 <- ggplot(tank.pH.means, aes(Time)) + # plot mean pH by tank
-  geom_point(aes(x =Time, y = pH.Amb.TOTAL.mean, colour="Ambient")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=pH.Amb.TOTAL.mean+pH.Amb.TOTAL.se, ymin=pH.Amb.TOTAL.mean-pH.Amb.TOTAL.se), position=position_dodge(0.9), data=tank.pH.means) + #set values for standard error bars and offset on the X axis for clarity
-  geom_point(aes(x = Time, y = pH.High.TOTAL.mean, colour="High")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=pH.High.TOTAL.mean+pH.High.TOTAL.se, ymin=pH.High.TOTAL.mean-pH.High.TOTAL.se), position=position_dodge(0.9), data=tank.pH.means) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(x =Time, y = pH.Amb.NBS.mean, colour="Ambient")) + #plot points
+  geom_errorbar(aes(x=Time, ymax=pH.Amb.NBS.mean+pH.Amb.NBS.se, ymin=pH.Amb.NBS.mean-pH.Amb.NBS.se), position=position_dodge(0.9), data=tank.pH.means) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(x = Time, y = pH.High.NBS.mean, colour="High")) + #plot points
+  geom_errorbar(aes(x=Time, ymax=pH.High.NBS.mean+pH.High.NBS.se, ymin=pH.High.NBS.mean-pH.High.NBS.se), position=position_dodge(0.9), data=tank.pH.means) + #set values for standard error bars and offset on the X axis for clarity
   scale_colour_manual("Treatment", values = c("blue","red")) +
-  scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
-  scale_y_continuous(name="pH (Total Scale)", breaks=c( 7.4, 7.5, 7.6, 7.7, 7.8, 7.9), limits=c(7.30, 7.95)) + #set Y axis ticks
-  ggtitle("pH\nA) Adult Exposure") + #Label graph
+  scale_x_datetime(date_labels="%H %M") + #label hours and min
+  scale_y_continuous(name="pH (NBS Scale)", breaks=c( 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 8.0, 8.1), limits=c(7.35, 8.1)) + #set Y axis ticks
+  ggtitle("J)") + #Label graph
   xlab("Time") + #Label the X Axis
-  ylab("pH (Total Scale)") + #Label the Y Axis
+  ylab("pH (NBS Scale)") + #Label the Y Axis
   theme_bw() + #Set the background color
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
         axis.line = element_line(color = 'black'), #Set the axes color
@@ -1066,51 +996,6 @@ Fig17 <- ggplot(tank.pH.means, aes(Time)) + # plot mean pH by tank
         legend.position='none') #remove legend background
 Fig17 #View figure
 
-#Generate dataframe and set parameters for seacarb calculations
-For.seacarb <- pH.TOT[,c(1,2,4,5,7,8)] #create data frame of temp and total pH
-For.seacarb$Salinity <- sal #set salinity from average of tanks
-For.seacarb$TA.Amb <- TAs[1,2] #set TA from average of ambient tanks calculated above
-For.seacarb$TA.High <- TAs[2,2] #set TA from average of high tanks calculated above
-colnames(For.seacarb) <- c("Date.Time", "Temp.High", "pH.High.TOTAL",  "Temp.Amb", "pH.Amb.TOTAL", "Time", "Salinity",	"TA.Amb",	"TA.High") #Rename columns to describe contents
-For.seacarb <- na.omit(For.seacarb) #omit missing values
-
-#Calculate CO2 parameters using seacarb
-carbo.high <- carb(flag=8, var1=For.seacarb$pH.High.TOTAL, var2=For.seacarb$TA.High/1000000, S= For.seacarb$Salinity, T=For.seacarb$Temp.High, P=0, Pt=0, Sit=0, pHscale="T", kf="pf", k1k2="l", ks="d") #calculate seawater chemistry parameters using seacarb
-carbo.amb <- carb(flag=8, var1=For.seacarb$pH.Amb.TOTAL, var2=For.seacarb$TA.Amb/1000000, S= For.seacarb$Salinity, T=For.seacarb$Temp.Amb, P=0, Pt=0, Sit=0, pHscale="T", kf="pf", k1k2="l", ks="d") #calculate seawater chemistry parameters using seacarb
-
-pCO2 <- data.frame(For.seacarb$Date.Time, For.seacarb$Time, carbo.amb$pCO2, carbo.high$pCO2) #make dataframe of CO2 output
-colnames(pCO2) <- c("Date.Time", "Time", "pCO2.Amb", "pCO2.High") #Rename columns to describe contents
-
-quarterly.tank.pCO2.amb.mean <- aggregate(pCO2.Amb ~ Time, data=pCO2, mean, na.rm=TRUE) #calculate mean of pCO2 for every 15 min interval
-quarterly.tank.pCO2.amb.se <- aggregate(pCO2.Amb ~ Time, data=pCO2, std.error, na.rm=TRUE)  #calculate standard error of the mean of pCO2 for every 15 min interval
-quarterly.tank.pCO2.high.mean <- aggregate(pCO2.High ~ Time, data=pCO2, mean, na.rm=TRUE) #calculate mean of pCO2 for every 15 min interval
-quarterly.tank.pCO2.high.se <- aggregate(pCO2.High ~ Time, data=pCO2, std.error, na.rm=TRUE)  #calculate standard error of the mean of pCO2 for every 15 min interval
-tank.pCO2.means <- data.frame(quarterly.tank.pCO2.amb.mean, quarterly.tank.pCO2.amb.se$pCO2.Amb, quarterly.tank.pCO2.high.mean$pCO2.High, quarterly.tank.pCO2.high.se$pCO2.High) #combine mean and standard error results
-colnames(tank.pCO2.means) <- c("Time", "Amb.mean", "Amb.se", "High.mean", "High.se") #Rename columns to describe contents
-
-#plotting averages of pCO2 every 15 min for a 1 day cycle from all data
-Fig18 <- ggplot(tank.pCO2.means) + #plot pCO2
-  geom_point(aes(x = Time, y = Amb.mean, colour="Ambient")) + #plot as line
-  geom_errorbar(aes(x=Time, ymax=Amb.mean+Amb.se, ymin=Amb.mean-Amb.se), position=position_dodge(0.9), data=tank.pCO2.means) + #plot error bars
-  geom_point(aes(x = Time, y = High.mean, colour="High")) + #plot as line
-  geom_errorbar(aes(x=Time, ymax=High.mean+High.se, ymin=High.mean-High.se), position=position_dodge(0.9), data=tank.pCO2.means) + #plot error bars
-  scale_colour_manual("Treatment", values = c("blue","red")) + #Set colors for treatments
-  scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
-  ggtitle("pCO2\nD) Adult Exposure") + #Label graph
-  xlab("Time") + #Label the X Axis
-  ylab(expression(paste('p',CO[2], ' (µatm)', sep=''))) + #Label the Y Axis
-  ylim(500,2600) + #set y axis limits
-  theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
-        panel.grid.major = element_blank(), #Set the major gridlines
-        panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
-        plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.position='none') #remove legend background
-Fig18 #View figure
 
 #Tank pH Data for Larval Month 1 Exposure Period (12July - 25Aug14)
 # read in NBS pH data from Aquacontrollers frequency 15min
@@ -1119,89 +1004,15 @@ mydate.pHs.M1 <- strptime(pHs.M1$Date.Time, format="%m/%d/%y %H:%M") #Identify d
 tank.pHdata.M1 <-data.frame(mydate.pHs.M1, pHs.M1$Tank4, pHs.M1$Tank5) #make a dataframe of temperature and time
 colnames(tank.pHdata.M1) <- c("Date.Time", "Ambient.NBS", "High.NBS") #Rename columns to describe contents
 pH.data.M1 <- merge(tank.pHdata.M1, M1.tank.tempdata, by="Date.Time") #merge data sets by time and date
+pH.data.M1$Time <- format(pH.data.M1$Date.Time, format = "%H:%M:%S") #separate date and time
 
-#Convert pH from NBS to total scale for ambient tank 
-pH.Amb.M1 <- pH.data.M1$Ambient.NBS # pH data on NBS scale logged every 15 minutes
-Temp.Amb.M1 <- pH.data.M1$Tank4+273.15 # Temperature from Hobo loggers every 15 minutes that match pH measurement frequency
-#S <- sal # salinity measured daily with YSI meter calibrated to conductivity standard at 25°C
-
-TS <- (0.14/96.062)*(S/1.80655) #concentration of SO4-2 in mol/kg-SW 
-##Morris, A. W., and Riley, J. P., Deep-Sea Research 13:699-705, 1966: this is .02824.*Sali./35. = .0008067.*Sali
-
-TF <- (0.000067/18.998)*(S/1.80655) #concentration of fluoride in mol/kg-SW 
-##Riley, J. P., Deep-Sea Research 12:219-220, 1965
-
-fH <- 1.2948 - 0.002036*Temp.Amb.M1 + (0.0004607 -  0.000001475*Temp.Amb.M1)*(S^2) # the activity coefficient of the H+ ion, which is valid for the temperatures of 20-40°C
-#Takahashi et al, Chapter 3 in GEOSECS Pacific Expedition, v. 3, 1982 (p. 80)
-
-IonS <- (19.924*S)/(1000 - 1.005*S) # the ionic strength of Hydrogen Fluoride 
-##This is from the DOE handbook, Chapter 5, p. 13/22, eq. 7.2.4 and Zeebe Wolfgladrow Appendix A p260
-
-lnKSO4 <- -4276.1/Temp.Amb.M1 + 141.328 - 23.093*log(Temp.Amb.M1) + 
-  (-13856/Temp.Amb.M1 + 324.57 - 47.986*log(Temp.Amb.M1))*sqrt(IonS) +    
-  (35474/Temp.Amb.M1 - 771.54 + 114.723*log(Temp.Amb.M1))*IonS +
-  (-2698/Temp.Amb.M1)*sqrt(IonS)*IonS + (1776/Temp.Amb.M1)*IonS^2 
-
-KSO4 <- exp(lnKSO4)*(1-0.001005*S) #this is on the free pH scale in mol/kg-SW 
-#This is from the DOE handbook 1994 ORNL/CDIAC-74
-
-lnKF <- 1590.2/Temp.Amb.M1 - 12.641 + 1.525*sqrt(IonS)
-
-KF <- exp(lnKF)*(1-0.001005*S) #the dissociation constant of HF, this is on the free pH scale in mol/kg-H2O
-#Dickson, A. G. and Riley, J. P., Marine Chemistry 7:89-99, 1979
-
-#Conversion Functions
-SWStoTOT.amb.M1 <- (1 + TS/KSO4)/(1 + TS/KSO4 + TF/KF) #pH scale conversion factor
-NBStoTOT.amb.M1 <- pH.Amb.M1-(log(SWStoTOT.amb.M1)/log(0.1) + log(fH)/log(0.1))  #conversion for NBS to total                                  
-
-pH.Amb.Out.M1 <- data.frame(pH.data.M1$Date.Time, pH.data.M1$Tank4, pH.data.M1$Ambient.NBS, NBStoTOT.amb.M1) #create dataframe of pH and time
-colnames(pH.Amb.Out.M1) <- c("Date.Time", "Amb.Temp", "pH.Amb.NBS", "pH.Amb.TOTAL") #Rename columns to describe contents
-
-#Convert pH from NBS to total scale for high tank 
-pH.High.M1 <- pH.data.M1$High.NBS # pH data on NBS scale logged every 15 minutes
-Temp.High.M1 <- pH.data.M1$Tank5+273.15 # Temperature from Hobo loggers every 15 minutes that match pH measurement frequency converted to Kelvin
-
-TS <- (0.14/96.062)*(S/1.80655) #concentration of SO4-2 in mol/kg-SW 
-##Morris, A. W., and Riley, J. P., Deep-Sea Research 13:699-705, 1966: this is .02824.*Sali./35. = .0008067.*Sali
-
-TF <- (0.000067/18.998)*(S/1.80655) #concentration of fluoride in mol/kg-SW 
-##Riley, J. P., Deep-Sea Research 12:219-220, 1965
-
-fH <- 1.2948 - 0.002036*Temp.High.M1 + (0.0004607 -  0.000001475*Temp.High.M1)*(S^2) # the activity coefficient of the H+ ion, which is valid for the temperatures of 20-40°C
-#Takahashi et al, Chapter 3 in GEOSECS Pacific Expedition, v. 3, 1982 (p. 80)
-
-IonS <- (19.924*S)/(1000 - 1.005*S) # the ionic strength of Hydrogen Fluoride 
-##This is from the DOE handbook, Chapter 5, p. 13/22, eq. 7.2.4 and Zeebe Wolfgladrow Appendix A p260
-
-lnKSO4 <- -4276.1/Temp.High.M1 + 141.328 - 23.093*log(Temp.High.M1) + 
-  (-13856/Temp.High.M1 + 324.57 - 47.986*log(Temp.High.M1))*sqrt(IonS) +    
-  (35474/Temp.High.M1 - 771.54 + 114.723*log(Temp.High.M1))*IonS +
-  (-2698/Temp.High.M1)*sqrt(IonS)*IonS + (1776/Temp.High.M1)*IonS^2 
-
-KSO4 <- exp(lnKSO4)*(1-0.001005*S) #this is on the free pH scale in mol/kg-SW 
-#This is from the DOE handbook 1994 ORNL/CDIAC-74
-
-lnKF <- 1590.2/Temp.High.M1 - 12.641 + 1.525*sqrt(IonS)
-KF <- exp(lnKF)*(1-0.001005*S) #the dissociation constant of HF, this is on the free pH scale in mol/kg-H2O
-#Dickson, A. G. and Riley, J. P., Marine Chemistry 7:89-99, 1979
-
-#Conversion Functions
-SWStoTOT.high.M1  <- (1 + TS/KSO4)/(1 + TS/KSO4 + TF/KF) #pH scale conversion factor
-NBStoTOT.high.M1 <- pH.High.M1-(log(SWStoTOT.high.M1)/log(0.1) + log(fH)/log(0.1))  #conversion for NBS to total                                  
-
-pH.High.Out.M1 <- data.frame(pH.data.M1$Date.Time, pH.data.M1$Tank5, pH.data.M1$High.NBS, NBStoTOT.high.M1) #create dataframe of total pH, Temperature, and time
-colnames(pH.High.Out.M1) <- c("Date.Time", "High.Temp", "pH.High.NBS", "pH.High.TOTAL") #Rename columns to describe contents
-
-pH.TOT.M1 <- cbind(pH.High.Out.M1, pH.Amb.Out.M1$Amb.Temp,  pH.Amb.Out.M1$pH.Amb.NBS,  pH.Amb.Out.M1$pH.Amb.TOTAL) #create dataframe of total pH and time
-colnames(pH.TOT.M1) <- c("Date.Time",  "High.Temp",  "pH.High.NBS",	"pH.High.TOTAL",	"Amb.Temp",	"pH.Amb.NBS",	"pH.Amb.TOTAL")
-
-#Plot total pH for both treatments for duration of M1
-Fig19 <- ggplot(pH.TOT.M1) + #plot pH total scale
-  geom_line(aes(x = Date.Time, y = pH.High.TOTAL, col="High")) + #plot as a line
-  geom_line(aes(x = Date.Time, y = pH.Amb.TOTAL, col="Ambient")) + #plot as a line
+#Plot pH for both treatments for duration of M1
+Fig18 <- ggplot(pH.data.M1) + #plot pH total scale
+  geom_line(aes(x = Date.Time, y = High.NBS, col="High")) + #plot as a line
+  geom_line(aes(x = Date.Time, y = Ambient.NBS, col="Ambient")) + #plot as a line
   xlab("Date") + #Label the X Axis
-  ylab("pH (Total Scale)") + #Label the Y Axis
-  ggtitle("All Tanks Total pH") + #Label the graph title
+  ylab("pH (NBS Scale)") + #Label the Y Axis
+  ggtitle("Month1 NBS pH") + #Label the graph title
   theme_bw() + #Set the background color
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         panel.border = element_blank(), #Set the border
@@ -1209,30 +1020,29 @@ Fig19 <- ggplot(pH.TOT.M1) + #plot pH total scale
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background =element_blank(), #Set the plot background
         legend.key = element_blank()) #Set plot legend key
-Fig19 #View figure
+Fig18 #View figure
 
-pH.time.M1 <- format(as.POSIXct(pH.TOT.M1$Date.Time) ,format = "%H:%M") #Identify time in hours and minutes
-pH.TOT.M1 <- cbind(pH.TOT.M1, pH.time.M1) #Combine total pH and time
-colnames(pH.TOT.M1) <- c("Date.Time",  "High.Temp",  "pH.High.NBS",  "pH.High.TOTAL",	"Amb.Temp",	"pH.Amb.NBS",	"pH.Amb.TOTAL", "Time") #Rename columns to describe contents
+quarterly.tank.pH.amb.mean <- aggregate(Ambient.NBS ~ Time, data=pH.data.M1, mean, na.rm=TRUE) #calculate mean of pH for every 15 min interval
+quarterly.tank.pH.amb.se <- aggregate(Ambient.NBS ~ Time, data=pH.data.M1, std.error, na.rm=TRUE)  #calculate standard error of the mean of pH for every 15 min interval
+quarterly.tank.pH.high.mean <- aggregate(High.NBS ~ Time, data=pH.data.M1, mean, na.rm=TRUE) #calculate mean of pH for every 15 min interval
+quarterly.tank.pH.high.se <- aggregate(High.NBS ~ Time, data=pH.data.M1, std.error, na.rm=TRUE)  #calculate standard error of the mean of pH for every 15 min interval
+M1.pH.amb.rng <- range(quarterly.tank.pH.amb.mean$Ambient.NBS) #range average ambient NBS pH
+M1.pH.high.rng <-range(quarterly.tank.pH.high.mean$High.NBS) #range average high NBS pH
+tank.pH.means.M1 <- data.frame(quarterly.tank.pH.amb.mean, quarterly.tank.pH.amb.se$Ambient.NBS, quarterly.tank.pH.high.mean$High.NBS, quarterly.tank.pH.high.se$High.NBS) #combine mean and standard error results
+colnames(tank.pH.means.M1) <- c("Time", "pH.Amb.NBS.mean", "pH.Amb.NBS.se", "pH.High.NBS.mean", "pH.High.NBS.se")  #Rename columns to describe contents
+tank.pH.means.M1$Time <- quarts[1:96,]
 
-quarterly.tank.pH.amb.mean <- aggregate(pH.Amb.TOTAL ~ Time, data=pH.TOT.M1, mean, na.rm=TRUE) #calculate mean of pH for every 15 min interval
-quarterly.tank.pH.amb.se <- aggregate(pH.Amb.TOTAL ~ Time, data=pH.TOT.M1, std.error, na.rm=TRUE)  #calculate standard error of the mean of pH for every 15 min interval
-quarterly.tank.pH.high.mean <- aggregate(pH.High.TOTAL ~ Time, data=pH.TOT.M1, mean, na.rm=TRUE) #calculate mean of pH for every 15 min interval
-quarterly.tank.pH.high.se <- aggregate(pH.High.TOTAL ~ Time, data=pH.TOT.M1, std.error, na.rm=TRUE)  #calculate standard error of the mean of pH for every 15 min interval
-tank.pH.means.M1 <- data.frame(quarterly.tank.pH.amb.mean, quarterly.tank.pH.amb.se$pH.Amb.TOTAL, quarterly.tank.pH.high.mean$pH.High.TOTAL, quarterly.tank.pH.high.se$pH.High.TOTAL) #combine mean and standard error results
-colnames(tank.pH.means.M1) <- c("Time", "pH.Amb.TOTAL.mean", "pH.Amb.TOTAL.se", "pH.High.TOTAL.mean", "pH.High.TOTAL.se")  #Rename columns to describe contents
-
-Fig20 <- ggplot(tank.pH.means.M1, aes(Time)) + # plot mean pH by tank
-  geom_point(aes(x =Time, y = pH.Amb.TOTAL.mean, colour="Ambient")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=pH.Amb.TOTAL.mean+pH.Amb.TOTAL.se, ymin=pH.Amb.TOTAL.mean-pH.Amb.TOTAL.se), position=position_dodge(0.9), data=tank.pH.means.M1) + #set values for standard error bars and offset on the X axis for clarity
-  geom_point(aes(x = Time, y = pH.High.TOTAL.mean, colour="High")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=pH.High.TOTAL.mean+pH.High.TOTAL.se, ymin=pH.High.TOTAL.mean-pH.High.TOTAL.se), position=position_dodge(0.9), data=tank.pH.means.M1) + #set values for standard error bars and offset on the X axis for clarity
+Fig19 <- ggplot(tank.pH.means.M1, aes(Time)) + # plot mean pH by tank
+  geom_point(aes(x =Time, y = pH.Amb.NBS.mean, colour="Ambient")) + #plot points
+  geom_errorbar(aes(x=Time, ymax=pH.Amb.NBS.mean+pH.Amb.NBS.se, ymin=pH.Amb.NBS.mean-pH.Amb.NBS.se), position=position_dodge(0.9), data=tank.pH.means.M1) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(x = Time, y = pH.High.NBS.mean, colour="High")) + #plot points
+  geom_errorbar(aes(x=Time, ymax=pH.High.NBS.mean+pH.High.NBS.se, ymin=pH.High.NBS.mean-pH.High.NBS.se), position=position_dodge(0.9), data=tank.pH.means.M1) + #set values for standard error bars and offset on the X axis for clarity
   scale_colour_manual("Treatment", values = c("blue","red")) +
-  scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
-  scale_y_continuous(name="pH (Total Scale)", breaks=c( 7.4, 7.5, 7.6, 7.7, 7.8, 7.9), limits=c(7.30, 7.95)) + #set Y axis ticks
-  ggtitle("B) Month 1 Larval Exposure") + #Label graph
+  scale_x_datetime(date_labels="%H %M") + #label hours and min
+  scale_y_continuous(name="pH (NBS Scale)", breaks=c( 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 8.0, 8.1), limits=c(7.35, 8.1)) + #set Y axis ticks
+  ggtitle("K)") + #Label graph
   xlab("Time") + #Label the X Axis
-  ylab("pH (Total Scale)") + #Label the Y Axis
+  ylab("pH (NBS Scale)") + #Label the Y Axis
   theme_bw() + #Set the background color
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
         axis.line = element_line(color = 'black'), #Set the axes color
@@ -1243,42 +1053,55 @@ Fig20 <- ggplot(tank.pH.means.M1, aes(Time)) + # plot mean pH by tank
         legend.key = element_blank(), #Set plot legend key
         plot.title=element_text(hjust=0), #Justify the title to the top left
         legend.position='none') #remove legend background
+Fig19 #View figure
+
+
+#Tank pH Data for Larval Month 6 Exposure Period (12July - 28January15)
+# read in NBS pH data from Aquacontrollers frequency 15min
+pHs.M6 <- read.csv("Month6_Tank_NBS_pH.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
+mydate.pHs.M6 <- strptime(pHs.M6$Date.Time, format="%m/%d/%y %H:%M") #Identify date format
+tank.pHdata.M6 <-data.frame(mydate.pHs.M6, pHs.M6$Tank4, pHs.M6$Tank5) #make a dataframe of temperature and time
+colnames(tank.pHdata.M6) <- c("Date.Time", "Ambient.NBS", "High.NBS") #Rename columns to describe contents
+pH.data.M6 <- merge(tank.pHdata.M6, M6.tank.tempdata, by="Date.Time") #merge data sets by time and date
+pH.data.M6$Time <- format(pH.data.M6$Date.Time, format = "%H:%M:%S") #separate date and time
+
+#Plot pH for both treatments for duration of m6
+Fig20 <- ggplot(pH.data.M6) + #plot pH total scale
+  geom_line(aes(x = Date.Time, y = High.NBS, col="High")) + #plot as a line
+  geom_line(aes(x = Date.Time, y = Ambient.NBS, col="Ambient")) + #plot as a line
+  xlab("Date") + #Label the X Axis
+  ylab("pH (NBS Scale)") + #Label the Y Axis
+  ggtitle("Month 6 Total pH") + #Label the graph title
+  theme_bw() + #Set the background color
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        panel.border = element_blank(), #Set the border
+        panel.grid.major = element_blank(), #Set the major gridlines
+        panel.grid.minor = element_blank(), #Set the minor gridlines
+        plot.background =element_blank(), #Set the plot background
+        legend.key = element_blank()) #Set plot legend key
 Fig20 #View figure
 
-#Generate dataframe and set parameters for seacarb calculations
-For.seacarb <- pH.TOT.M1[,c(1,2,4,5,7,8)] #create data frame of temp and total pH
-For.seacarb$Salinity <- sal #set salinity from average of tanks
-For.seacarb$TA.Amb <- TAs[1,2] #set TA from average of ambient tanks calculated above
-For.seacarb$TA.High <- TAs[2,2] #set TA from average of high tanks calculated above
-colnames(For.seacarb) <- c("Date.Time", "Temp.High", "pH.High.TOTAL",  "Temp.Amb", "pH.Amb.TOTAL", "Time", "Salinity",	"TA.Amb",	"TA.High") #Rename columns to describe contents
-For.seacarb <- na.omit(For.seacarb) #omit missing values
+quarterly.tank.pH.amb.mean <- aggregate(Ambient.NBS ~ Time, data=pH.data.M6, mean, na.rm=TRUE) #calculate mean of pH for every 15 min interval
+quarterly.tank.pH.amb.se <- aggregate(Ambient.NBS ~ Time, data=pH.data.M6, std.error, na.rm=TRUE)  #calculate standard error of the mean of pH for every 15 min interval
+quarterly.tank.pH.high.mean <- aggregate(High.NBS ~ Time, data=pH.data.M6, mean, na.rm=TRUE) #calculate mean of pH for every 15 min interval
+quarterly.tank.pH.high.se <- aggregate(High.NBS ~ Time, data=pH.data.M6, std.error, na.rm=TRUE)  #calculate standard error of the mean of pH for every 15 min interval
+M6.pH.amb.rng <- range(quarterly.tank.pH.amb.mean$Ambient.NBS) #range average ambient NBS pH
+M6.pH.high.rng <-range(quarterly.tank.pH.high.mean$High.NBS) #range average high NBS pH
+tank.pH.means.M6 <- data.frame(quarterly.tank.pH.amb.mean, quarterly.tank.pH.amb.se$Ambient.NBS, quarterly.tank.pH.high.mean$High.NBS, quarterly.tank.pH.high.se$High.NBS) #combine mean and standard error results
+colnames(tank.pH.means.M6) <- c("Time", "pH.Amb.NBS.mean", "pH.Amb.NBS.se", "pH.High.NBS.mean", "pH.High.NBS.se")  #Rename columns to describe contents
+tank.pH.means.M6$Time <- quarts[1:96,]
 
-#Calculate CO2 parameters using seacarb
-carbo.high.M1 <- carb(flag=8, var1=For.seacarb$pH.High.TOTAL, var2=For.seacarb$TA.High/1000000, S= For.seacarb$Salinity, T=For.seacarb$Temp.High, P=0, Pt=0, Sit=0, pHscale="T", kf="pf", k1k2="l", ks="d") #calculate seawater chemistry parameters using seacarb
-carbo.amb.M1 <- carb(flag=8, var1=For.seacarb$pH.Amb.TOTAL, var2=For.seacarb$TA.Amb/1000000, S= For.seacarb$Salinity, T=For.seacarb$Temp.Amb, P=0, Pt=0, Sit=0, pHscale="T", kf="pf", k1k2="l", ks="d") #calculate seawater chemistry parameters using seacarb
-
-pCO2.M1 <- data.frame(For.seacarb$Date.Time, For.seacarb$Time, carbo.amb.M1$pCO2, carbo.high.M1$pCO2) #make dataframe of CO2 output
-colnames(pCO2.M1) <- c("Date.Time", "Time", "pCO2.Amb", "pCO2.High") #Rename columns to describe contents
-
-quarterly.tank.pCO2.amb.mean <- aggregate(pCO2.Amb ~ Time, data=pCO2.M1, mean, na.rm=TRUE) #calculate mean of pCO2 for every 15 min interval
-quarterly.tank.pCO2.amb.se <- aggregate(pCO2.Amb ~ Time, data=pCO2.M1, std.error, na.rm=TRUE)  #calculate standard error of the mean of pCO2 for every 15 min interval
-quarterly.tank.pCO2.high.mean <- aggregate(pCO2.High ~ Time, data=pCO2.M1, mean, na.rm=TRUE) #calculate mean of pCO2 for every 15 min interval
-quarterly.tank.pCO2.high.se <- aggregate(pCO2.High ~ Time, data=pCO2.M1, std.error, na.rm=TRUE)  #calculate standard error of the mean of pCO2 for every 15 min interval
-tank.pCO2.means.M1 <- data.frame(quarterly.tank.pCO2.amb.mean, quarterly.tank.pCO2.amb.se$pCO2.Amb, quarterly.tank.pCO2.high.mean$pCO2.High, quarterly.tank.pCO2.high.se$pCO2.High) #combine mean and standard error results
-colnames(tank.pCO2.means.M1) <- c("Time", "Amb.mean", "Amb.se", "High.mean", "High.se") #Rename columns to describe contents
-
-#plotting averages of total pCO2 every 15 min for a 1 day cycle from all data
-Fig21 <- ggplot(tank.pCO2.means.M1) + #plot pCO2
-  geom_point(aes(x = Time, y = Amb.mean, colour="Ambient")) + #plot as line
-  geom_errorbar(aes(x=Time, ymax=Amb.mean+Amb.se, ymin=Amb.mean-Amb.se), position=position_dodge(0.9), data=tank.pCO2.means.M1) + #plot error bars
-  geom_point(aes(x = Time, y = High.mean, colour="High")) + #plot as line
-  geom_errorbar(aes(x=Time, ymax=High.mean+High.se, ymin=High.mean-High.se), position=position_dodge(0.9), data=tank.pCO2.means.M1) + #plot error bars
-  scale_colour_manual("Treatment", values = c("blue","red")) + #Set colors for treatments
-  scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
-  ggtitle("E) Month 1 Larval Exposure") + #Label graph
+Fig21 <- ggplot(tank.pH.means.M6, aes(Time)) + # plot mean pH by tank
+  geom_point(aes(x =Time, y = pH.Amb.NBS.mean, colour="Ambient")) + #plot points
+  geom_errorbar(aes(x=Time, ymax=pH.Amb.NBS.mean+pH.Amb.NBS.se, ymin=pH.Amb.NBS.mean-pH.Amb.NBS.se), position=position_dodge(0.9), data=tank.pH.means.M6) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(x = Time, y = pH.High.NBS.mean, colour="High")) + #plot points
+  geom_errorbar(aes(x=Time, ymax=pH.High.NBS.mean+pH.High.NBS.se, ymin=pH.High.NBS.mean-pH.High.NBS.se), position=position_dodge(0.9), data=tank.pH.means.M6) + #set values for standard error bars and offset on the X axis for clarity
+  scale_colour_manual("Treatment", values = c("blue","red")) +
+  scale_x_datetime(date_labels="%H %M") + #label hours and min on the X axis
+  scale_y_continuous(name="pH (NBS Scale)", breaks=c( 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 8.0, 8.1), limits=c(7.35, 8.1)) + #set Y axis ticks 
+  ggtitle("L)") + #Label graph
   xlab("Time") + #Label the X Axis
-  ylab(expression(paste('p',CO[2], ' (µatm)', sep=''))) + #Label the Y Axis
-  ylim(500,2600) + #set y axis limits
+  ylab("pH (NBS Scale)") + #Label the Y Axis
   theme_bw() + #Set the background color
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
         axis.line = element_line(color = 'black'), #Set the axes color
@@ -1291,127 +1114,15 @@ Fig21 <- ggplot(tank.pCO2.means.M1) + #plot pCO2
         legend.position='none') #remove legend background
 Fig21 #View figure
 
-#Tank pH Data for Larval Month 6 Exposure Period (12July - 28January15)
-# read in NBS pH data from Aquacontrollers frequency 15min
-pHs.M6 <- read.csv("Month6_Tank_NBS_pH.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
-mydate.pHs.M6 <- strptime(pHs.M6$Date.Time, format="%m/%d/%y %H:%M") #Identify date format
-tank.pHdata.M6 <-data.frame(mydate.pHs.M6, pHs.M6$Tank4, pHs.M6$Tank5) #make a dataframe of temperature and time
-colnames(tank.pHdata.M6) <- c("Date.Time", "Ambient.NBS", "High.NBS") #Rename columns to describe contents
-pH.data.M6 <- merge(tank.pHdata.M6, M6.tank.tempdata, by="Date.Time") #merge data sets by time and date
-
-#Convert pH from NBS to total scale for ambient tank 
-pH.Amb.M6 <- pH.data.M6$Ambient.NBS # pH data on NBS scale logged every 15 minutes
-Temp.Amb.M6 <- pH.data.M6$Tank4+273.15 # Temperature from Hobo loggers every 15 minutes that match pH measurement frequency
-#S <- sal # salinity measured daily with YSI meter calibrated to conductivity standard at 25°C
-
-TS <- (0.14/96.062)*(S/1.80655) #concentration of SO4-2 in mol/kg-SW 
-##Morris, A. W., and Riley, J. P., Deep-Sea Research 13:699-705, 1966: this is .02824.*Sali./35. = .0008067.*Sali
-
-TF <- (0.000067/18.998)*(S/1.80655) #concentration of fluoride in mol/kg-SW 
-##Riley, J. P., Deep-Sea Research 12:219-220, 1965
-
-fH <- 1.2948 - 0.002036*Temp.Amb.M6 + (0.0004607 -  0.000001475*Temp.Amb.M6)*(S^2) # the activity coefficient of the H+ ion, which is valid for the temperatures of 20-40°C
-#Takahashi et al, Chapter 3 in GEOSECS Pacific Expedition, v. 3, 1982 (p. 80)
-
-IonS <- (19.924*S)/(1000 - 1.005*S) # the ionic strength of Hydrogen Fluoride 
-##This is from the DOE handbook, Chapter 5, p. 13/22, eq. 7.2.4 and Zeebe Wolfgladrow Appendix A p260
-
-lnKSO4 <- -4276.1/Temp.Amb.M6 + 141.328 - 23.093*log(Temp.Amb.M6) + 
-  (-13856/Temp.Amb.M6 + 324.57 - 47.986*log(Temp.Amb.M6))*sqrt(IonS) +    
-  (35474/Temp.Amb.M6 - 771.54 + 114.723*log(Temp.Amb.M6))*IonS +
-  (-2698/Temp.Amb.M6)*sqrt(IonS)*IonS + (1776/Temp.Amb.M6)*IonS^2 
-
-KSO4 <- exp(lnKSO4)*(1-0.001005*S) #this is on the free pH scale in mol/kg-SW 
-#This is from the DOE handbook 1994 ORNL/CDIAC-74
-
-lnKF <- 1590.2/Temp.Amb.M6 - 12.641 + 1.525*sqrt(IonS)
-
-KF <- exp(lnKF)*(1-0.001005*S) #the dissociation constant of HF, this is on the free pH scale in mol/kg-H2O
-#Dickson, A. G. and Riley, J. P., Marine Chemistry 7:89-99, 1979
-
-#Conversion Functions
-SWStoTOT.amb.M6 <- (1 + TS/KSO4)/(1 + TS/KSO4 + TF/KF) #pH scale conversion factor
-NBStoTOT.amb.M6 <- pH.Amb.M6-(log(SWStoTOT.amb.M6)/log(0.1) + log(fH)/log(0.1))  #conversion for NBS to total                                  
-
-pH.Amb.Out.M6 <- data.frame(pH.data.M6$Date.Time, pH.data.M6$Tank4, pH.data.M6$Ambient.NBS, NBStoTOT.amb.M6) #create dataframe of pH and time
-colnames(pH.Amb.Out.M6) <- c("Date.Time", "Amb.Temp", "pH.Amb.NBS", "pH.Amb.TOTAL") #Rename columns to describe contents
-
-#Convert pH from NBS to total scale for high tank 
-pH.High.M6 <- pH.data.M6$High.NBS # pH data on NBS scale logged every 15 minutes
-Temp.High.M6 <- pH.data.M6$Tank5+273.15 # Temperature from Hobo loggers every 15 minutes that match pH measurement frequency converted to Kelvin
-
-TS <- (0.14/96.062)*(S/1.80655) #concentration of SO4-2 in mol/kg-SW 
-##Morris, A. W., and Riley, J. P., Deep-Sea Research 13:699-705, 1966: this is .02824.*Sali./35. = .0008067.*Sali
-
-TF <- (0.000067/18.998)*(S/1.80655) #concentration of fluoride in mol/kg-SW 
-##Riley, J. P., Deep-Sea Research 12:219-220, 1965
-
-fH <- 1.2948 - 0.002036*Temp.High.M6 + (0.0004607 -  0.000001475*Temp.High.M6)*(S^2) # the activity coefficient of the H+ ion, which is valid for the temperatures of 20-40°C
-#Takahashi et al, Chapter 3 in GEOSECS Pacific Expedition, v. 3, 1982 (p. 80)
-
-IonS <- (19.924*S)/(1000 - 1.005*S) # the ionic strength of Hydrogen Fluoride 
-##This is from the DOE handbook, Chapter 5, p. 13/22, eq. 7.2.4 and Zeebe Wolfgladrow Appendix A p260
-
-lnKSO4 <- -4276.1/Temp.High.M6 + 141.328 - 23.093*log(Temp.High.M6) + 
-  (-13856/Temp.High.M6 + 324.57 - 47.986*log(Temp.High.M6))*sqrt(IonS) +    
-  (35474/Temp.High.M6 - 771.54 + 114.723*log(Temp.High.M6))*IonS +
-  (-2698/Temp.High.M6)*sqrt(IonS)*IonS + (1776/Temp.High.M6)*IonS^2 
-
-KSO4 <- exp(lnKSO4)*(1-0.001005*S) #this is on the free pH scale in mol/kg-SW 
-#This is from the DOE handbook 1994 ORNL/CDIAC-74
-
-lnKF <- 1590.2/Temp.High.M6 - 12.641 + 1.525*sqrt(IonS)
-KF <- exp(lnKF)*(1-0.001005*S) #the dissociation constant of HF, this is on the free pH scale in mol/kg-H2O
-#Dickson, A. G. and Riley, J. P., Marine Chemistry 7:89-99, 1979
-
-#Conversion Functions
-SWStoTOT.high.M6  <- (1 + TS/KSO4)/(1 + TS/KSO4 + TF/KF) #pH scale conversion factor
-NBStoTOT.high.M6 <- pH.High.M6-(log(SWStoTOT.high.M6)/log(0.1) + log(fH)/log(0.1))  #conversion for NBS to total                                  
-
-pH.High.Out.M6 <- data.frame(pH.data.M6$Date.Time, pH.data.M6$Tank5, pH.data.M6$High.NBS, NBStoTOT.high.M6) #create dataframe of total pH, Temperature, and time
-colnames(pH.High.Out.M6) <- c("Date.Time", "High.Temp", "pH.High.NBS", "pH.High.TOTAL") #Rename columns to describe contents
-
-pH.TOT.M6 <- cbind(pH.High.Out.M6, pH.Amb.Out.M6$Amb.Temp,  pH.Amb.Out.M6$pH.Amb.NBS,  pH.Amb.Out.M6$pH.Amb.TOTAL) #create dataframe of total pH and time
-colnames(pH.TOT.M6) <- c("Date.Time",  "High.Temp",  "pH.High.NBS",  "pH.High.TOTAL",	"Amb.Temp",	"pH.Amb.NBS",	"pH.Amb.TOTAL")
-
-#Plot total pH for both treatments for duration of experiment
-Fig22 <- ggplot(pH.TOT.M6) + #plot pH total scale
-  geom_line(aes(x = Date.Time, y = pH.High.TOTAL, col="High")) + #plot as a line
-  geom_line(aes(x = Date.Time, y = pH.Amb.TOTAL, col="Ambient")) + #plot as a line
-  xlab("Date") + #Label the X Axis
-  ylab("pH (Total Scale)") + #Label the Y Axis
-  ggtitle("All Tanks Total pH") + #Label the graph title
-  theme_bw() + #Set the background color
-  theme(axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
-        panel.grid.major = element_blank(), #Set the major gridlines
-        panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank()) #Set plot legend key
-Fig22 #View figure
-
-pH.time.M6 <- format(as.POSIXct(pH.TOT.M6$Date.Time) ,format = "%H:%M") #Identify time in hours and minutes
-pH.TOT.M6 <- cbind(pH.TOT.M6, pH.time.M6) #Combine total pH and time
-colnames(pH.TOT.M6) <- c("Date.Time",  "High.Temp",  "pH.High.NBS",  "pH.High.TOTAL",	"Amb.Temp",	"pH.Amb.NBS",	"pH.Amb.TOTAL", "Time") #Rename columns to describe contents
-
-quarterly.tank.pH.amb.mean <- aggregate(pH.Amb.TOTAL ~ Time, data=pH.TOT.M6, mean, na.rm=TRUE) #calculate mean of pH for every 15 min interval
-quarterly.tank.pH.amb.se <- aggregate(pH.Amb.TOTAL ~ Time, data=pH.TOT.M6, std.error, na.rm=TRUE)  #calculate standard error of the mean of pH for every 15 min interval
-quarterly.tank.pH.high.mean <- aggregate(pH.High.TOTAL ~ Time, data=pH.TOT.M6, mean, na.rm=TRUE) #calculate mean of pH for every 15 min interval
-quarterly.tank.pH.high.se <- aggregate(pH.High.TOTAL ~ Time, data=pH.TOT.M6, std.error, na.rm=TRUE)  #calculate standard error of the mean of pH for every 15 min interval
-tank.pH.means.M6 <- data.frame(quarterly.tank.pH.amb.mean, quarterly.tank.pH.amb.se$pH.Amb.TOTAL, quarterly.tank.pH.high.mean$pH.High.TOTAL, quarterly.tank.pH.high.se$pH.High.TOTAL) #combine mean and standard error results
-colnames(tank.pH.means.M6) <- c("Time", "pH.Amb.TOTAL.mean", "pH.Amb.TOTAL.se", "pH.High.TOTAL.mean", "pH.High.TOTAL.se")  #Rename columns to describe contents
-
-Fig23 <- ggplot(tank.pH.means.M6, aes(Time)) + # plot mean pH by tank
-  geom_point(aes(x =Time, y = pH.Amb.TOTAL.mean, colour="Ambient")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=pH.Amb.TOTAL.mean+pH.Amb.TOTAL.se, ymin=pH.Amb.TOTAL.mean-pH.Amb.TOTAL.se), position=position_dodge(0.9), data=tank.pH.means.M6) + #set values for standard error bars and offset on the X axis for clarity
-  geom_point(aes(x = Time, y = pH.High.TOTAL.mean, colour="High")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=pH.High.TOTAL.mean+pH.High.TOTAL.se, ymin=pH.High.TOTAL.mean-pH.High.TOTAL.se), position=position_dodge(0.9), data=tank.pH.means.M6) + #set values for standard error bars and offset on the X axis for clarity
-  scale_colour_manual("Treatment", values = c("blue","red")) +
-  scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
-  scale_y_continuous(name="pH (Total Scale)", breaks=c( 7.4, 7.5, 7.6, 7.7, 7.8, 7.9), limits=c(7.30, 7.95)) + #set Y axis ticks 
-  ggtitle("C) Month 6 Larval Exposure") + #Label graph
+FigMT <- ggplot(tank.pH.means.M6, aes(Time)) + # plot mean pH by tank
+  geom_point(aes(x =Time, y = pH.Amb.NBS.mean, colour="Ambient")) + #plot points
+  geom_point(aes(x = Time, y = pH.High.NBS.mean, colour="High")) + #plot points
+  scale_colour_manual("Treatment", values = c("white","white")) +
+  scale_x_datetime(date_labels="%H %M") + #label hours and min on the X axis
+  scale_y_continuous(name="pH (NBS Scale)", breaks=c( 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 8.0, 8.1), limits=c(7.35, 8.1)) + #set Y axis ticks 
+  ggtitle("I) ") + #Label graph
   xlab("Time") + #Label the X Axis
-  ylab("pH (Total Scale)") + #Label the Y Axis
+  ylab("pH (NBS Scale)") + #Label the Y Axis
   theme_bw() + #Set the background color
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
         axis.line = element_line(color = 'black'), #Set the axes color
@@ -1422,53 +1133,7 @@ Fig23 <- ggplot(tank.pH.means.M6, aes(Time)) + # plot mean pH by tank
         legend.key = element_blank(), #Set plot legend key
         plot.title=element_text(hjust=0), #Justify the title to the top left
         legend.position='none') #remove legend background
-Fig23 #View figure
-
-#Generate dataframe and set parameters for seacarb calculations
-For.seacarb <- pH.TOT.M6[,c(1,2,4,5,7,8)] #create data frame of temp and total pH
-For.seacarb$Salinity <- sal #set salinity from average of tanks
-For.seacarb$TA.Amb <- TAs[1,2] #set TA from average of ambient tanks calculated above
-For.seacarb$TA.High <- TAs[2,2] #set TA from average of high tanks calculated above
-colnames(For.seacarb) <- c("Date.Time", "Temp.High", "pH.High.TOTAL",  "Temp.Amb", "pH.Amb.TOTAL", "Time", "Salinity",	"TA.Amb",	"TA.High") #Rename columns to describe contents
-For.seacarb <- na.omit(For.seacarb) #omit missing values
-
-#Calculate CO2 parameters using seacarb
-carbo.high.M6 <- carb(flag=8, var1=For.seacarb$pH.High.TOTAL, var2=For.seacarb$TA.High/1000000, S= For.seacarb$Salinity, T=For.seacarb$Temp.High, P=0, Pt=0, Sit=0, pHscale="T", kf="pf", k1k2="l", ks="d") #calculate seawater chemistry parameters using seacarb
-carbo.amb.M6 <- carb(flag=8, var1=For.seacarb$pH.Amb.TOTAL, var2=For.seacarb$TA.Amb/1000000, S= For.seacarb$Salinity, T=For.seacarb$Temp.Amb, P=0, Pt=0, Sit=0, pHscale="T", kf="pf", k1k2="l", ks="d") #calculate seawater chemistry parameters using seacarb
-
-pCO2.M6 <- data.frame(For.seacarb$Date.Time, For.seacarb$Time, carbo.amb.M6$pCO2, carbo.high.M6$pCO2) #make dataframe of CO2 output
-colnames(pCO2.M6) <- c("Date.Time", "Time", "pCO2.Amb", "pCO2.High") #Rename columns to describe contents
-
-quarterly.tank.pCO2.amb.mean <- aggregate(pCO2.Amb ~ Time, data=pCO2.M6, mean, na.rm=TRUE) #calculate mean of pCO2 for every 15 min interval
-quarterly.tank.pCO2.amb.se <- aggregate(pCO2.Amb ~ Time, data=pCO2.M6, std.error, na.rm=TRUE)  #calculate standard error of the mean of pCO2 for every 15 min interval
-quarterly.tank.pCO2.high.mean <- aggregate(pCO2.High ~ Time, data=pCO2.M6, mean, na.rm=TRUE) #calculate mean of pCO2 for every 15 min interval
-quarterly.tank.pCO2.high.se <- aggregate(pCO2.High ~ Time, data=pCO2.M6, std.error, na.rm=TRUE)  #calculate standard error of the mean of pCO2 for every 15 min interval
-tank.pCO2.means.M6 <- data.frame(quarterly.tank.pCO2.amb.mean, quarterly.tank.pCO2.amb.se$pCO2.Amb, quarterly.tank.pCO2.high.mean$pCO2.High, quarterly.tank.pCO2.high.se$pCO2.High) #combine mean and standard error results
-colnames(tank.pCO2.means.M6) <- c("Time", "Amb.mean", "Amb.se", "High.mean", "High.se") #Rename columns to describe contents
-
-#plotting averages of total pCO2 every 15 min for a 1 day cycle from all data
-Fig24 <- ggplot(tank.pCO2.means.M6) + #plot pCO2
-  geom_point(aes(x = Time, y = Amb.mean, colour="Ambient")) + #plot as line
-  geom_errorbar(aes(x=Time, ymax=Amb.mean+Amb.se, ymin=Amb.mean-Amb.se), position=position_dodge(0.9), data=tank.pCO2.means.M6) + #plot error bars
-  geom_point(aes(x = Time, y = High.mean, colour="High")) + #plot as line
-  geom_errorbar(aes(x=Time, ymax=High.mean+High.se, ymin=High.mean-High.se), position=position_dodge(0.9), data=tank.pCO2.means.M6) + #plot error bars
-  scale_colour_manual("Treatment", values = c("blue","red")) + #Set colors for treatments
-  scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
-  ggtitle("F) Month 6 Larval Exposure") + #Label graph
-  xlab("Time") + #Label the X Axis
-  ylab(expression(paste('p',CO[2], ' (µatm)', sep=''))) + #Label the Y Axis
-  ylim(500,2600) + #set y axis limits
-  theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
-        panel.grid.major = element_blank(), #Set the major gridlines
-        panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
-        plot.title=element_text(hjust=0), #Justify the title to the top left
-        legend.position='none') #remove legend background
-Fig24 #View figure
+FigMT
 
 ##### BIOLOGICAL RESPONSES #####
 ##### LARVAL RELEASE #####
@@ -1481,7 +1146,7 @@ june.larvae <- cbind(june.mean_larvae,june.se_larvae$numb.larvae) #make datafram
 colnames(june.larvae) <- c("Lunar.Day", "Treatment", "mean", "se") #rename columns
 june.larvae #view data
 
-Fig25 <- ggplot(june.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
+Fig22 <- ggplot(june.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
   geom_bar(position=position_dodge(), stat="identity") + #assign bar id and position
   scale_fill_manual(values=c("gray", "black")) + #bar fill color
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
@@ -1509,7 +1174,7 @@ Fig25 <- ggplot(june.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot m
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
-Fig25 #view plot
+Fig22 #view plot
 
 june.amb <- subset(june.larvae, Treatment=="Ambient") #subset data
 june.high <- subset(june.larvae, Treatment=="High") #subset data
@@ -1525,7 +1190,7 @@ july.larvae <- cbind(july.mean_larvae,july.se_larvae$numb.larvae) #make datafram
 colnames(july.larvae) <- c("Lunar.Day", "Treatment", "mean", "se") #rename columns
 july.larvae #view data
 
-Fig26 <- ggplot(july.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
+Fig23 <- ggplot(july.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
   geom_bar(position=position_dodge(), stat="identity", show.legend=FALSE) + #assign bar id and position
   scale_fill_manual(values=c("gray", "black")) + #bar fill color
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
@@ -1534,12 +1199,13 @@ Fig26 <- ggplot(july.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot m
   ylim(0,400) + #set y limits
   ggtitle("B) July") + #plot title
   xlab("Lunar Day") + #x axis title
-  ylab("# Planulae Released") + #y axis title
+ # ylab("Number of Planulae Released") + #y axis title
   theme_bw() + #theme black and white 
   guides(fill = guide_legend(keywidth = 0.5, keyheight = 0.5))+ #legend guides
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
         axis.title=element_text(size=18,face="bold"), #set axis title text size
+        axis.title.y=element_blank(), #remove Y axis label
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
         panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
@@ -1553,7 +1219,7 @@ Fig26 <- ggplot(july.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot m
         plot.title = element_text(face = 'bold', 
                                 size = 12, 
                                 hjust = 0)) #set title attributes
-Fig26
+Fig23
 
 july.amb <- subset(july.larvae, Treatment=="Ambient") #subset data
 july.high <- subset(july.larvae, Treatment=="High") #subset data
@@ -1569,7 +1235,7 @@ august.larvae <- cbind(august.mean_larvae,august.se_larvae$numb.larvae) #make da
 colnames(august.larvae) <- c("Lunar.Day", "Treatment", "mean", "se") #rename columns
 august.larvae #view data
 
-Fig27 <- ggplot(august.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
+Fig24 <- ggplot(august.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot mean as a function of day
   geom_bar(position=position_dodge(), stat="identity", show.legend=FALSE) + #assign bar id and position
   scale_fill_manual(values=c("gray", "black")) + #bar fill color
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
@@ -1584,6 +1250,7 @@ Fig27 <- ggplot(august.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
         axis.title=element_text(size=18,face="bold"), #set axis title text size
+        axis.title.y=element_blank(), #remove Y axis label
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
         panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
@@ -1597,7 +1264,7 @@ Fig27 <- ggplot(august.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
-Fig27
+Fig24
 
 august.amb <- subset(august.larvae, Treatment=="Ambient") #subset data
 august.high <- subset(august.larvae, Treatment=="High") #subset data
@@ -1611,7 +1278,7 @@ all.release.se <- aggregate(Total.Release ~ Treatment + Time, data=RM.release.da
 all.release <- cbind(all.release.mean, all.release.se$Total.Release) #make dataframe
 colnames(all.release) <- c("Treatment", "Time", "mean", "se") #rename columns
 
-Fig28 <- ggplot(all.release, aes(x=Time, y=mean, colour=Treatment, group=Treatment), position=position_dodge(width=0.5)) +  #plot mean as a function of Time
+Fig25 <- ggplot(all.release, aes(x=Time, y=mean, colour=Treatment, group=Treatment), position=position_dodge(width=0.5)) +  #plot mean as a function of Time
   geom_errorbar(aes(ymin=all.release$mean - all.release$se, ymax=all.release$mean + all.release$se), #plot error bars
                 colour="black", width=0, size = 0.4, # Width of the error bars
                 position=position_dodge(width=0.5)) + #set bar position
@@ -1638,7 +1305,7 @@ Fig28 <- ggplot(all.release, aes(x=Time, y=mean, colour=Treatment, group=Treatme
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
-Fig28
+Fig25
 
 #LM release by treatment and time
 RM.release.data #view data
@@ -1670,10 +1337,17 @@ survive.M0 <- data.frame (larval.data.M0$Chamber.num, larval.data.M0$Timepoint, 
 colnames(survive.M0) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Prop.Alive","Prop.Dead", "Alive","Dead") #rename columns
 mean.survive.M0 <- aggregate(Prop.Alive ~ Origin * Secondary, data = survive.M0, FUN= "mean") #calculate mean by origin and secondary treatments
 se.survive.M0 <- aggregate(Prop.Alive ~ Origin * Secondary, data = survive.M0, FUN= "std.error")  #calculate se by origin and secondary treatments
+n.survive.M0 <- aggregate(Prop.Alive ~ Origin * Secondary, data = survive.M0, FUN= "length")  #calculate sample size by origin and secondary treatments
 survivorship.M0 <- cbind(mean.survive.M0,se.survive.M0$Prop.Alive) #combine data
 colnames(survivorship.M0) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
-Fig29 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+#descriptive stats
+(survivorship.M0[2,3]-survivorship.M0[1,3])/survivorship.M0[1,3] #percent change between treatments
+(survivorship.M0[4,3]-survivorship.M0[3,3])/survivorship.M0[3,3] #percent change between treatments
+mean.surs <- aggregate(Prop.Alive ~ Secondary, data = survive.M0, FUN= "mean") #calculate mean by secondary treatment
+(mean.surs[1,2]-mean.surs[2,2])/mean.surs[1,2] #percent change between secondary treatments
+
+Fig26 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
   geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
   scale_colour_manual(values=c("gray", "black")) + #set line color
   geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
@@ -1682,9 +1356,9 @@ Fig29 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, col
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
   ggtitle("A)") + #plot title
   annotate("text", x = 0.87, y = 0.82, label = "a") + #add posthoc letters
-  annotate("text", x = 0.85, y = 0.74, label = "a") + #add posthoc letters
-  annotate("text", x = 2.2, y = 0.59, label = "ab") + #add posthoc letters
-  annotate("text", x = 2.15, y = 0.51, label = "bc") + #add posthoc letters
+  annotate("text", x = 0.85, y = 0.74, label = "ab") + #add posthoc letters
+  annotate("text", x = 2.2, y = 0.59, label = "bc") + #add posthoc letters
+  annotate("text", x = 2.15, y = 0.51, label = "cd") + #add posthoc letters
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Survivorship") + #plot y axis label
   ylim(0,1) + #Y axis limits
@@ -1706,7 +1380,7 @@ Fig29 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, col
                                   size = 12, 
                                   hjust = 0)) #set title attributes
 
-Fig29 #view plot
+Fig26 #view plot
 
 #Month1
 larval.data.M1 <- read.csv("Larval_Data_M1.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
@@ -1719,21 +1393,28 @@ colnames(survive.M1) <- c("Chamber", "Timepoint", "Origin", "Secondary", "Prop.A
 survive.M1$Timepoint <- "Time2"
 mean.survive.M1 <- aggregate(Prop.Alive ~ Origin + Secondary, data = survive.M1, FUN= "mean") #calculate mean by origin and secondary treatments
 se.survive.M1 <- aggregate(Prop.Alive ~ Origin + Secondary, data = survive.M1, FUN= "std.error") #calculate se by origin and secondary treatments
+n.survive.M1 <- aggregate(Prop.Alive ~ Origin * Secondary, data = survive.M1, FUN= "length")  #calculate sample size by origin and secondary treatments
 survivorship.M1 <- cbind(mean.survive.M1,se.survive.M1$Prop.Alive) #combine data
 colnames(survivorship.M1) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
-Fig30 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+#descriptive stats
+(survivorship.M1[2,3]-survivorship.M1[1,3])/survivorship.M1[1,3] #percent change between treatments
+(survivorship.M1[4,3]-survivorship.M1[3,3])/survivorship.M1[3,3] #percent change between treatments
+mean.surs.m1 <- aggregate(Prop.Alive ~ Secondary, data = survive.M1, FUN= "mean") #calculate mean by secondary treatment
+(mean.surs.m1[1,2]-mean.surs.m1[2,2])/mean.surs.m1[1,2] #percent change between secondary treatments
+
+Fig27 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
   geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
   scale_colour_manual(values=c("gray", "black")) + #set line color
   geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("C)") + #plot title
-  annotate("text", x = 0.87, y = 0.52, label = "bc") + #add posthoc letters
-  annotate("text", x = 0.83, y = 0.42, label = "cd") + #add posthoc letters
-  annotate("text", x = 2.2, y = 0.37, label = "cd") + #add posthoc letters
-  annotate("text", x = 2.15, y = 0.30, label = "d") + #add posthoc letters
+  ggtitle("B)") + #plot title
+  annotate("text", x = 0.87, y = 0.52, label = "cd") + #add posthoc letters
+  annotate("text", x = 0.83, y = 0.42, label = "de") + #add posthoc letters
+  annotate("text", x = 2.2, y = 0.37, label = "de") + #add posthoc letters
+  annotate("text", x = 2.15, y = 0.30, label = "e") + #add posthoc letters
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Survivorship") + #plot y axis label
   ylim(0,1) + #Y axis limits
@@ -1755,7 +1436,7 @@ Fig30 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, col
                                   size = 12, 
                                   hjust = 0)) #set title attributes
 
-Fig30
+Fig27
 
 #Month6
 proportion.alive.M6 <- larval.data.M1$month6/larval.data.M1$larvae.added #claculate survival
@@ -1767,21 +1448,28 @@ survive.M6$Alive <- larval.data.M1$month6 #count alive
 survive.M6$Dead <- larval.data.M1$larvae.added-larval.data.M1$month6 #calculate dead
 mean.survive.M6 <- aggregate(Prop.Alive ~ Origin + Secondary, data = survive.M6, FUN= "mean") #calculate mean
 se.survive.M6 <- aggregate(Prop.Alive ~ Origin + Secondary, data = survive.M6, FUN= "std.error") #calculate SEM
+n.survive.M6 <- aggregate(Prop.Alive ~ Origin * Secondary, data = survive.M6, FUN= "length")  #calculate sample size by origin and secondary treatments
 survivorship.M6 <- cbind(mean.survive.M6,se.survive.M6$Prop.Alive) #combine descriptive statistics
 colnames(survivorship.M6) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
-Fig31 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+#descriptive stats
+(survivorship.M6[2,3]-survivorship.M6[1,3])/survivorship.M6[1,3] #percent change between treatments
+(survivorship.M6[4,3]-survivorship.M6[3,3])/survivorship.M6[3,3] #percent change between treatments
+mean.surs.m6 <- aggregate(Prop.Alive ~ Secondary, data = survive.M6, FUN= "mean") #calculate mean by secondary treatment
+(mean.surs.m6[1,2]-mean.surs.m6[2,2])/mean.surs.m6[1,2] #percent change between secondary treatments
+
+Fig28 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
   geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
   scale_colour_manual(values=c("gray", "black"), labels=c("Ambient Parental Envt.", "High Parental Envt.")) + #set line color
   geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
   scale_shape_manual(values=c(1,18), labels=c("Ambient Parental Envt.", "High Parental Envt.")) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("E)") + #plot title
-  annotate("text", x = 0.90, y = 0.19, label = "ef") + #add posthoc letters
-  annotate("text", x = 0.82, y = 0.12, label = "e") + #add posthoc letters
-  annotate("text", x = 2.13, y = 0.06, label = "ef") + #add posthoc letters
-  annotate("text", x = 1.87, y = 0.0005, label = "f") + #add posthoc letters
+  ggtitle("C)") + #plot title
+  annotate("text", x = 0.90, y = 0.19, label = "f") + #add posthoc letters
+  annotate("text", x = 0.82, y = 0.12, label = "f") + #add posthoc letters
+  annotate("text", x = 2.13, y = 0.06, label = "g") + #add posthoc letters
+  annotate("text", x = 1.87, y = 0.0005, label = "fg") + #add posthoc letters
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Survivorship") + #plot y axis label
   ylim(0,1) + #Y axis limits
@@ -1803,36 +1491,19 @@ Fig31 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, col
                                   size = 12, 
                                   hjust = 0)) #set title attributes
 
-Fig31
+Fig28
 
 # #Repeated Measures Survivorship
 All.Survivorship <- rbind(survive.M0, survive.M1, survive.M6) #combine data
-All.Survivorship$Origin.numeric <- as.numeric(All.Survivorship$Origin) #convert factor to numeric
-All.Survivorship$Secondary.numeric <- as.numeric(All.Survivorship$Secondary) #convert factor to numeric
-All.Survivorship$Timepoint.numeric <- as.numeric(All.Survivorship$Timepoint) #convert factor to numeric
-
-# sur.RM <-  lme(sqrt(Alive) ~ Origin*Secondary*Timepoint, random = ~ Timepoint|Chamber, data=All.Survivorship) #repeated measures ANOVA with random intercept but not slope 
-# summary(sur.RM) #view summary
-# anova(sur.RM) #view ANOVA table
-# sur.resid <-resid(sur.RM) #extract residuals
-# sur.shapiro <- shapiro.test(sur.resid) #runs a normality test using shapiro-wilk test on the residuals
-# sur.shapiro #view results
-# sur.qqnorm <- qqnorm(sur.resid) # normal quantile plot
-# sur.qqline <- qqline(sur.resid) # adding a qline of comparison
-# hist(sur.resid) #plot histogram of residuals
-# boxplot(sur.resid~ All.Survivorship$Origin * All.Survivorship$Secondary* All.Survivorship$Timepoint, ylab = "residuals", las = 2, par(mar = c(12, 5, 4, 2)+ 0.1)) #view Origin variability
-# sur.RM.posthoc <- lsmeans(sur.RM, specs=c("Timepoint","Origin","Secondary")) #calculate MS means
-# sur.RM.posthoc #view results
-# sur.RM.posthoc.p <- contrast(sur.RM.posthoc, method="pairwise", by=c("Timepoint")) #contrast treatment groups within a species at each time point
-# sur.RM.posthoc.p #view results
-# sur.RM.posthoc.lett <- cld(sur.RM.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
-# sur.RM.posthoc.lett #view results
 
 #Binomial GLM
 # Wald-test with H0 = 0
-sur.GLM <-  glmer(cbind(Alive, Dead) ~ Origin*Secondary*Timepoint +(Timepoint|Chamber), data=All.Survivorship, family="binomial") #repeated measures ANOVA with random intercept but not slope 
+sur.GLM <-  glmer(cbind(Alive, Dead) ~ Origin*Secondary*Timepoint +(1|Chamber/Timepoint), data=All.Survivorship, family="binomial", na.action = "na.fail") #repeated measures ANOVA
 summary(sur.GLM) #view summary
+dredge(sur.GLM) #describe model selection
+Sur.Results <- summary(sur.GLM) #view summary
 anova(sur.GLM) #view ANOVA table
+dispersion_glmer(sur.GLM) #check for over dispersion
 sur.resid <-resid(sur.GLM) #extract residuals
 sur.shapiro <- shapiro.test(sur.resid) #runs a normality test using shapiro-wilk test on the residuals
 sur.shapiro #view results
@@ -1847,7 +1518,7 @@ sur.GLM.posthoc.p #view results
 sur.GLM.posthoc.lett <- cld(sur.GLM.posthoc, alpha=.05, Letters=letters) #identify posthoc letter differences
 sur.GLM.posthoc.lett #view results
 
-##### INITIAL SETTLEMENT #####
+##### SETTLEMENT #####
 #Timepoint 1 only         
 settlement.data <- larval.data.M0
 settle <- (settlement.data$Plastic + settlement.data$Top.Tile + settlement.data$Bottom.Tile +  settlement.data$Edge)/(settlement.data$larvae.added)
@@ -1857,10 +1528,17 @@ settlement$Settle <- (settlement.data$Plastic + settlement.data$Top.Tile + settl
 settlement$Not.Settle <- settlement.data$larvae.added-(settlement.data$Plastic + settlement.data$Top.Tile + settlement.data$Bottom.Tile +  settlement.data$Edge) #calculate not settled
 mean.settled <- aggregate(Prop.Settled ~ Origin + Secondary, data = settlement, FUN= "mean") #calculate mean
 se.settled <- aggregate(Prop.Settled ~ Origin + Secondary, data = settlement, FUN= "std.error") #calculate se
+n.settled <- aggregate(Prop.Settled ~ Origin + Secondary, data = settlement, FUN= "length") #calculate se
 settlement.data <- cbind(mean.settled, se.settled$Prop.Settled) #make dataframe
 colnames(settlement.data) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
-Fig32 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+#descriptive stats
+(settlement.data[1,3]-settlement.data[2,3])/settlement.data[1,3] #percent change between treatments
+(settlement.data[3,3]-settlement.data[4,3])/settlement.data[3,3] #percent change between treatments
+mean.sets <- aggregate(Prop.Settled ~ Secondary, data = settlement, FUN= "mean") #calculate mean by secondary treatment
+(mean.surs[1,2]-mean.surs[2,2])/mean.surs[1,2] #percent change between secondary treatments
+
+Fig29 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
   geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
   scale_colour_manual(values=c("gray", "black")) + #set line color
   geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
@@ -1871,7 +1549,7 @@ Fig32 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, col
   annotate("text", x = 0.8, y = 0.68, label = "ab") +
   annotate("text", x = 2.25, y = 0.56, label = "bc") +
   annotate("text", x = 2.2, y = 0.49, label = "c") +
-  ggtitle("B)") + #plot title
+  ggtitle("D)") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Settlement") + #plot y axis label
   ylim(0,1) + #Y axis limits
@@ -1892,13 +1570,16 @@ Fig32 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, col
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
-Fig32
+Fig29
 
 #Binomial GLM
 # Wald-test with H0 = 0
-set.GLM <-  glmer(cbind(Settle, Not.Settle) ~ Origin*Secondary +(1|Chamber), data=settlement, family="binomial") #repeated measures ANOVA with random intercept but not slope 
+set.GLM <-  glmer(cbind(Settle, Not.Settle) ~ Origin*Secondary +(1|Chamber), data=settlement, family="binomial", na.action = "na.fail") #repeated measures ANOVA with random intercept but not slope 
 summary(set.GLM) #view summary
+dredge(set.GLM) #describe model selection
+Set.Results <- summary(set.GLM) #view summary
 anova(set.GLM) #view ANOVA table
+dispersion_glmer(set.GLM) #check for over dispersion
 set.resid <-resid(set.GLM) #extract residuals
 set.shapiro <- shapiro.test(set.resid) #runs a normality test using shapiro-wilk test on the residuals
 set.shapiro #view results
@@ -1931,21 +1612,23 @@ growth$growth.rate.M6 <- (growth$Polyp.Num.M6-growth$Polyp.Num.M1)/(as.numeric(g
 
 m1.mean.growth <- aggregate(growth.rate.M1 ~ Origin + Secondary, data = growth, FUN= "mean") #calculate mean by origin and secondary treatments
 m1.se.growth <- aggregate(growth.rate.M1 ~ Origin + Secondary, data = growth, FUN= "std.error") #calculate se by origin and secondary treatments
+m1.n.growth <- aggregate(growth.rate.M1 ~ Origin + Secondary, data = growth, FUN= "length") #calculate se by origin and secondary treatments
 m1.growth <- cbind(m1.mean.growth,m1.se.growth$growth.rate.M1) #combine data
 colnames(m1.growth) <- c("Origin", "Secondary", "mean", "se") #rename columns
 m6.mean.growth <- aggregate(growth.rate.M6 ~ Origin + Secondary, data = growth, FUN= "mean") #calculate mean by origin and secondary treatments
 m6.se.growth <- aggregate(growth.rate.M6 ~ Origin + Secondary, data = growth, FUN= "std.error") #calculate se by origin and secondary treatments
+m6.n.growth <- aggregate(growth.rate.M6 ~ Origin + Secondary, data = growth, FUN= "length") #calculate se by origin and secondary treatments
 m6.growth <- cbind(m6.mean.growth,m6.se.growth$growth.rate.M6) #combine data
 colnames(m6.growth) <- c("Origin", "Secondary", "mean", "se") #rename columns
 
-Fig33 <- ggplot(data=m1.growth, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+Fig30 <- ggplot(data=m1.growth, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
   geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
   scale_colour_manual(values=c("gray", "black")) + #set line color
   geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("D)") + #plot title
+  ggtitle("E)") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
   ylim(0,0.1) + #Y axis limits
@@ -1967,9 +1650,9 @@ Fig33 <- ggplot(data=m1.growth, aes(x=factor(Secondary), y=mean, group=Origin, c
                                   size = 12, 
                                   hjust = 0)) #set title attributes
 
-Fig33
+Fig30
 
-Fig34 <- ggplot(data=m6.growth, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+Fig31 <- ggplot(data=m6.growth, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
   geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
   scale_colour_manual(values=c("gray", "black")) + #set line color
   geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
@@ -1998,7 +1681,7 @@ Fig34 <- ggplot(data=m6.growth, aes(x=factor(Secondary), y=mean, group=Origin, c
                                   size = 12, 
                                   hjust = 0)) #set title attributes
 
-Fig34
+Fig31
 
 #Repeated Measures growth
 grow.M1<- cbind.data.frame(growth$Chamber.num, growth$Origin, growth$Secondary, growth$growth.rate.M1) #combine data
@@ -2010,9 +1693,11 @@ colnames(grow.M6) <- c( "Chamber.num", "Origin", "Secondary", "growth.rate", "Ti
 All.Growth <- rbind(grow.M1, grow.M6) #combine data
 All.Growth <- na.omit(All.Growth) #remove NA rows
 
-Growth.RM <- lme(log10(growth.rate+1) ~ Origin*Secondary*Timepoint, random = ~ Timepoint|Chamber.num, data=All.Growth) #repeated measures ANOVA with random intercept but not slope 
+Growth.RM <- lme(log10(growth.rate+1) ~ Origin*Secondary*Timepoint, random = ~ 1|Chamber.num/Timepoint, data=All.Growth, na.action = "na.fail") #repeated measures ANOVA
 summary(Growth.RM) #view results
+Grow.Results <- summary(Growth.RM) #view results
 anova(Growth.RM) #view results
+dredge(Growth.RM) #describe model selection
 gro.resid <-resid(Growth.RM) #extract residuals
 gro.shapiro <- shapiro.test(gro.resid) #runs a normality test using shapiro-wilk test on the residuals
 gro.shapiro #view results
@@ -2046,14 +1731,19 @@ m1.growth.bt$lower <- m1.growth$mean - m1.growth$se #lower sem value
 m1.growth.bt$upper.bt <- 10^(m1.growth.bt$upper)-1 #backtransform
 m1.growth.bt$lower.bt <- 10^(m1.growth.bt$lower)-1 #backtransform
 
-Fig35 <- ggplot(data=m1.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+#descriptive stats
+g1 <-m1.growth.bt[2,4]/m1.growth.bt[1,4] #fold change between treatments
+g2 <-m1.growth.bt[4,4]/m1.growth.bt[3,4] #fold change between treatments
+mean(g1,g2)
+
+Fig32 <- ggplot(data=m1.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
   geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
   scale_colour_manual(values=c("gray", "black")) + #set line color
   geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=lower.bt, ymax=upper.bt), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("D)") + #plot title
+  ggtitle("E)") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
   ylim(0,0.1) + #Y axis limits
@@ -2075,7 +1765,7 @@ Fig35 <- ggplot(data=m1.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin
                                   size = 12, 
                                   hjust = 0)) #set title attributes
 
-Fig35
+Fig32
 
 #backtransform means and asymetrical error
 m6.growth.bt <- m6.growth #assign data
@@ -2085,7 +1775,7 @@ m6.growth.bt$lower <- m6.growth$mean - m6.growth$se #lower sem value
 m6.growth.bt$upper.bt <- 10^(m6.growth.bt$upper)-1 #backtransform
 m6.growth.bt$lower.bt <- 10^(m6.growth.bt$lower)-1 #backtransform
 
-Fig36 <- ggplot(data=m6.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
+Fig33 <- ggplot(data=m6.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin, colour=Origin, shape=Origin)) + #plot data
   geom_line(size=0.7, position=position_dodge(.1)) + #plot lines
   scale_colour_manual(values=c("gray", "black")) + #set line color
   geom_point(size=4, position=position_dodge(.1), colour="black") + #set point characteristics
@@ -2114,7 +1804,7 @@ Fig36 <- ggplot(data=m6.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin
                                   size = 12, 
                                   hjust = 0)) #set title attributes
 
-Fig36
+Fig33
 
 #####ALL FIGURES, TABLES, AND STATISTICAL RESULTS#####
 setwd(file.path(mainDir, 'Output'))
@@ -2125,46 +1815,23 @@ inset <- viewport(width = 0.22, height = 0.5, x = 0.86, y = 0.65)  # the inset i
 grid.newpage()
 vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
 pushViewport(viewport(layout = grid.layout(1, 3)))
-print(Fig25, vp = vplayout(1, 1))
-print(Fig26, vp = vplayout(1, 2))
-print(Fig27, vp = vplayout(1, 3))
-print(Fig28, vp = inset)
+print(Fig22, vp = vplayout(1, 1))
+print(Fig23, vp = vplayout(1, 2))
+print(Fig24, vp = vplayout(1, 3))
 dev.off()
 
-
-pdf("Fig3.Larval.Performance.pdf", width = 11, height = 6)
-grid.newpage()
-vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
-pushViewport(viewport(layout = grid.layout(2, 3)))
-print(Fig29, vp = vplayout(1, 1))
-print(Fig30, vp = vplayout(1, 2))
-print(Fig31, vp = vplayout(1, 3))
-print(Fig32, vp = vplayout(2, 1))
-print(Fig33, vp = vplayout(2, 2))
-print(Fig34, vp = vplayout(2, 3))
-dev.off()
-
-Larval.Perform <- arrangeGrob(Fig29, Fig30, Fig31,
-                              Fig32, Fig33, Fig34, ncol=3)
+Larval.Perform <- arrangeGrob(Fig26, Fig27, Fig28,
+                              Fig29, Fig32, Fig33, ncol=3)
 ggsave(file="Fig3.Larval.Performance.pdf", Larval.Perform, width =12, height = 6, units = c("in"))
 
+FigureS1.Physical <- grid.arrange(arrangeGrob(Fig2, Fig5, Fig9, Fig13, left="TEMPERATURE", ncol=4),
+                                  arrangeGrob(Fig3, Fig7, Fig11, Fig15, left="IRRADIANCE", ncol=4),
+                                  arrangeGrob(FigMT, Fig17, Fig19, Fig21, left="pH", ncol=4), ncol=1)
+ggsave(file="FigS1.Physical_Experimental_Conditions.pdf", FigureS1.Physical, width =11, height = 8.5, units = c("in"))
 
-
-
-FigureS1.Physical <- arrangeGrob(Fig2, Fig3,
-                                Fig5, Fig7, 
-                                Fig9, Fig11,
-                                Fig13, Fig15, ncol=2)
-ggsave(file="FigS1.Physical_Experimental_Conditions.pdf", FigureS1.Physical, width =8.5, height = 11, units = c("in"))
-
-FigureS2.Chemical <- arrangeGrob(Fig17, Fig18,
-                                Fig20, Fig21, 
-                                Fig23, Fig24, ncol=2)
-ggsave(file="FigS2.Chemical_Experimental_Conditions.pdf", FigureS2.Chemical, width =8.5, height = 11, units = c("in"))
-
-write.table(adult.chem.table, "Seawater_chemistry_table_Output_Adult.csv", sep=",", row.names = FALSE)
-write.table(M1.chem.table, "Seawater_chemistry_table_Output_M1.csv", sep=",", row.names = FALSE)
-write.table(M6.chem.table, "Seawater_chemistry_table_Output_M6.csv", sep=",", row.names = FALSE)
+# write.table(adult.chem.table, "Seawater_chemistry_table_Output_Adult.csv", sep=",", row.names = FALSE)
+# write.table(M1.chem.table, "Seawater_chemistry_table_Output_M1.csv", sep=",", row.names = FALSE)
+# write.table(M6.chem.table, "Seawater_chemistry_table_Output_M6.csv", sep=",", row.names = FALSE)
 
 tt2 <- ttheme_minimal()
 title1 <- "A) Adult Exposure"
@@ -2183,9 +1850,25 @@ SW.Chem.Tables <- grid.arrange(
   nrow=6)
 ggsave(file="SW.Chemistry.Table.pdf", SW.Chem.Tables, width = 11, height = 6)
 
-#Capture statistical results to file
-capture.output(june.ks, july.ks, august.ks, summary(release.lm), summary(sur.GLM), summary(set.GLM), summary(Growth.RM), file="HI_Pdam_Parental_Stat_Results.txt")
+### Generate Stats Table
+survivorship <- as.data.frame(Sur.Results$coefficients)
+survivorship <-round(survivorship[,],3)
+survivorship
+settlement <- as.data.frame(Set.Results$coefficients)
+settlement <-round(settlement[,],3)
+settlement
+growth <- anova(Growth.RM)
+growth <-round(growth[,],3)
+growth
 
+# pdf("table2.pdf", width = 11, height = 6, nrow=3)
+# sur.table <- grid.table(survivorship)
+# set.table <- grid.table(settlement)
+# gro.table <- grid.table(growth)
+# dev.off()
+
+#Capture statistical results to file
+capture.output(june.ks, july.ks, august.ks, survivorship, settlement, growth,  file="HI_Pdam_Parental_Stat_Results.txt")
 
 setwd(file.path(mainDir, 'Data'))
 
