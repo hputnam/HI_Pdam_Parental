@@ -16,7 +16,7 @@ This repository includes data and analysis scripts to accompany: Nurtured by nat
 
 **Contents:** RAnalysis file containing three folders (Scripts, Data, Output) and a README.md file.
 
-**Scripts:** HI_Pdam_Parental_Effects.R: A R script that imports all data and runs all analyses for the maniscript and generates all figures and tables 
+**Scripts:** HI_Pdam_Parental_Effects.R: R script that imports all data and runs all analyses for the maniscript and generates all figures and tables 
 
 **Data:**  
   

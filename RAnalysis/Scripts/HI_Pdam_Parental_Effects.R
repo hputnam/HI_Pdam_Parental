@@ -3,7 +3,7 @@
 #Title: 
 #Contact: Hollie Putnam hollieputnam@gmail.com
 #Supported by: NSF Ocean Sciencs Postdoctoral Research Fellowship (NSF OCE PRF-1323822) and NSF EPSCOR (NSF EPS-0903833)
-#last modified 20170702
+#last modified 20171107
 #See Readme file for details on data files and metadata
 
 rm(list=ls()) # removes all prior objects
@@ -52,8 +52,9 @@ library(MuMIn) #version: 1.15.6 Date/Publication: 2016-01-07 Depends: R (>= 3.0.
 #Month6_Tank_Temp.csv
 #~/MyProjects/HI_Pdam_Parental/RAnalysis/Data/pH_Calibration_Files/
 #~/MyProjects/HI_Pdam_Parental/RAnalysis/Data/TA/
-#Daily_Temp_pH_Sal.csv
 #TA_mass_data.csv
+#RM_Release_Data.csv
+#20140701_20140731_Tides_Kaneohe.txt
 
 #############################################################
 setwd("~/MyProjects/HI_Pdam_Parental/RAnalysis/Data") #set working directory
@@ -93,7 +94,7 @@ T4.lm <- coef(lm(Tank1 ~ Tank4, data=Cal.T.data)) #extract model coefficients
 T5.lm <- coef(lm(Tank1 ~ Tank5, data=Cal.T.data)) #extract model coefficients
 
 ##### FIELD DATA #####
-##Data available in Putnam et al 2016 Evolutionary Applications
+##Data available in Putnam et al 2016 Evolutionary Applications and plotted there. Also provided here for viewing.
 ##Field Temperature Data (28March14 - 01April14)
 ##load field collection/acclimation temp data
 # Field.data <- read.csv("Field_Temp.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
@@ -110,7 +111,7 @@ T5.lm <- coef(lm(Tank1 ~ Tank5, data=Cal.T.data)) #extract model coefficients
 # colnames(field.temp.means) <- c("Time", "mean", "se")  #rename columns to describe contents
 # 
 # #Plot average diurnal cycle of temp data
-# Fig1 <- ggplot(field.temp.means) + #Plot average diurnal cycle of temperature data
+# FigFieldTemp <- ggplot(field.temp.means) + #Plot average diurnal cycle of temperature data
 #   geom_point(aes(x = Time, y = mean), colour="black") + #Plot points using time as the x axis, light as the Y axis and black dots
 #   geom_errorbar(aes(x=Time, ymax=mean+se, ymin=mean-se), position=position_dodge(0.9), data=field.temp.means) + #set values for standard error bars and offset on the X axis for clarity
 #   scale_x_discrete(breaks=c("0:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00","13:00", "14:00", "15:00", "16:00", "17:00", "18:00","19:00", "20:00", "21:00", "22:00", "23:00")) + #set discrete breaks on the X axis
@@ -126,7 +127,7 @@ T5.lm <- coef(lm(Tank1 ~ Tank5, data=Cal.T.data)) #extract model coefficients
 #         panel.grid.minor = element_blank(), #Set the minor gridlines
 #         plot.background=element_blank(), #Set the plot background
 #         plot.title=element_text(hjust=0)) #Justify the title to the top left
-# Fig1 #View figure
+# FigFieldTemp #View figure
 
 ##### TANK ACCLIMATION DATA #####
 Acclim.data <- read.csv("Acclimation_Data.csv", header=TRUE, sep=",", na.strings="NA") #load data with a header, separated by commas, with NA as NA
@@ -518,7 +519,7 @@ colnames(M1.tank.light.means) <- c("Time", "Tank4.mean", "Tank4.se", "Tank5.mean
 range(na.omit(M1.tank.light.means$Tank4.mean)) #range of average ambient light levels
 range(na.omit(M1.tank.light.means$Tank5.mean)) #minimum of average high light levels
 
-Fig11 <- ggplot(M1.tank.light.means, aes(Time)) + # plot mean temp by tank
+Fig11 <- ggplot(M1.tank.light.means, aes(Time)) + # plot mean light by tank
   geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
   geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=M1.tank.light.means) + #set values for standard error bars and offset on the X axis for clarity
   geom_point(aes(y = Tank5.mean, colour="High")) + #plot points
@@ -687,7 +688,7 @@ colnames(M6.tank.light.means) <- c("Time", "Tank4.mean", "Tank4.se", "Tank5.mean
 range(na.omit(M6.tank.light.means$Tank4.mean)) #range of average ambient light levels
 range(na.omit(M6.tank.light.means$Tank5.mean)) #minimum of average high light levels
 
-Fig15 <- ggplot(M6.tank.light.means, aes(Time)) + # plot mean temp by tank
+Fig15 <- ggplot(M6.tank.light.means, aes(Time)) + # plot mean light by tank
   geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
   geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=M6.tank.light.means) + #set values for standard error bars and offset on the X axis for clarity
   geom_point(aes(y = Tank5.mean, colour="High")) + #plot points
@@ -843,7 +844,7 @@ carb.ouptput$DIC <- carb.ouptput$DIC*1000000 #convert to µmol kg-1
 carb.ouptput <- carb.ouptput[,-c(1,4,5,8,10:13,19)] #subset variables of interest
 carb.ouptput <- cbind(SW.chem$Date,  SW.chem$Tank,  SW.chem$Treatment, SW.chem$Period1,SW.chem$Period2, SW.chem$Period3, carb.ouptput) #combine the sample information with the seacarb output
 colnames(carb.ouptput) <- c("Date",  "Tank",  "Treatment",	"Period1", "Period2", "Period3",	"Salinity",	"Temperature", "pH",	"CO2",	"pCO2","HCO3",	"CO3",	"DIC", "TA",	"Aragonite.Sat") #Rename columns to describe contents
-write.table(carb.ouptput, "Seawater_chemistry_table_Output_All.csv", sep=",", row.names = FALSE) #save data
+write.table(carb.ouptput, "~/MyProjects/HI_Pdam_Parental/RAnalysis/Output/Seawater_chemistry_table_Output_All.csv", sep=",", row.names = FALSE) #save data
 
 carb.ouptput.Acc <- subset(carb.ouptput, Period1 == "Acc") #subset data
 carb.ouptput.Adult <- subset(carb.ouptput, Period1 == "Adult") #subset data
