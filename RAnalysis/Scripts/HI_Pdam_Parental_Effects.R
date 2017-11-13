@@ -3,14 +3,14 @@
 #Title: 
 #Contact: Hollie Putnam hollieputnam@gmail.com
 #Supported by: NSF Ocean Sciencs Postdoctoral Research Fellowship (NSF OCE PRF-1323822) and NSF EPSCOR (NSF EPS-0903833)
-#last modified 20171107
+#last modified 20171113
 #See Readme file for details on data files and metadata
 
 rm(list=ls()) # removes all prior objects
 
-#R Version:
-#RStudio Version:
-#Read in required libraries
+#R Version: R version 3.3.1
+#RStudio Version: 1.0.44
+######Read in required libraries#####
 library(car) #version 2.1-4 Date: 2016-11-30 Depends: R (>= 3.2.0) Imports:MASS, mgcv, nnet, pbkrtest (>= 0.3-2), quantreg, grDevices, utils, stats, graphics, Rcpp
 library(ggplot2) #version 2.2.1 Date/Publication: 2016-12-30 Depends: R (>= 3.1) Imports: digest, grid, gtable (>= 0.1.1), MASS, plyr (>= 1.7.1),reshape2, scales (>= 0.4.1), stats, tibble, lazyeval
 library(gridExtra) #version: 2.2.1 Date/Publication: 2016-02-29 Depends: R(>= 2.5.0) Imports: gtable, grid, grDevices, graphics, utils
@@ -154,20 +154,22 @@ colnames(temp.means) <- c("Time", "mean", "se")  #rename columns to describe con
 range(na.omit(temp.means$mean)) #range of average temp levels
 
 Fig2 <- ggplot(temp.means) + #Plot average diurnal cycle of temperature data
-  geom_point(aes(x = Time, y = mean), colour="black") + #Plot points using time as the x axis, light as the Y axis and black dots
-  geom_errorbar(aes(x=Time, ymax=mean+se, ymin=mean-se), position=position_dodge(0.9), data=temp.means) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(x = Time, y = mean), colour="black", cex=0.8) + #Plot points using time as the x axis, light as the Y axis and black dots
+  geom_errorbar(aes(x=Time, ymax=mean+se, ymin=mean-se), position=position_dodge(0.9), data=temp.means, col="black", width=0) + #set values for standard error bars and offset on the X axis for clarity
   scale_x_discrete(breaks=c("01:00", "06:00", "12:00", "18:00", "23:00")) + #set discrete breaks on the X axis
-  ggtitle("ACCLIMATION\nA)") + #Label the graph with the main title
+  ggtitle("ACCLIMATION\n(a)") + #Label the graph with the main title
   ylim(23.5,29) + #Set Y axis limits
   xlab("Time") + #Label the X Axis
   ylab("Temperature (°C)") + #Label the Y Axis
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(), #Set the plot background
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title=element_text(hjust=0)) #Justify the title to the top left
 Fig2 #View figure
 
@@ -193,20 +195,22 @@ colnames(light.means) <- c("Time", "mean", "se")  #rename columns to describe co
 range(na.omit(light.means$mean)) #range of average light levels
 
 Fig3 <- ggplot(light.means) + #Plot average diurnal cycle of light data
-  geom_point(aes(x = Time, y = mean), colour="black") + #Plot points using time as the x axis, light as the Y axis and black points
-  geom_errorbar(aes(x=Time, ymax=mean+se, ymin=mean-se), data=light.means) + #set values for standard error bars
+  geom_point(aes(x = Time, y = mean), colour="black", cex=0.8) + #Plot points using time as the x axis, light as the Y axis and black points
+  geom_errorbar(aes(x=Time, ymax=mean+se, ymin=mean-se), data=light.means, col="black", width=0) + #set values for standard error bars
   scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
   ylim(0,300) + #set Y axis limits
-  ggtitle("E)") + #Label the graph with the main title
+  ggtitle("(e)") + #Label the graph with the main title
   xlab("Time") + #Label the X Axis
   ylab(bquote('Irradiance ('*mu~'mol' ~photons ~ m^-2~s^-1*')')) + #Label the Y Axis
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(), #Set the plot background
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title=element_text(hjust=0)) #Justify the title to the top left
 Fig3 #View figure
 
@@ -229,18 +233,18 @@ range(na.omit(tank.tempdata$Tank5)) #range of average high temp levels
 Fig4 <- ggplot(tank.tempdata, aes(Date.Time)) + #plot tank temperature data
   geom_line(aes(y = Tank4, colour="Ambient")) + #plot Temperature data as a line on the Y axis with date as the X axis 
   geom_line(aes(y = Tank5, colour="High")) + #plot Temperature data as a line on the Y axis with date as the X axis 
-  scale_colour_manual("Treatment", values = c("blue","red")) + #add colors for treatments
+  scale_colour_manual("Treatment", values = c("grey","black")) + #add colors for treatments
   xlab("Date") + #Label the X Axis
   ylab("Temperature °C") + #Label the Y Axis
   ggtitle("") + #label the main title
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
+        plot.background=element_blank(), #Set the plot background
         plot.title=element_text(hjust=0)) #Justify the title to the top left
 Fig4 #View figure
 
@@ -265,25 +269,26 @@ range(na.omit(tank.temp.means$Tank4.mean)) #range of average ambient temp levels
 range(na.omit(tank.temp.means$Tank5.mean)) #range of average high temp levels
 
 Fig5 <- ggplot(tank.temp.means, aes(Time)) + # plot mean temp by tank
-  geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=tank.temp.means) + #set values for standard error bars and offset on the X axis for clarity
-  geom_point(aes(y = Tank5.mean, colour="High")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=tank.temp.means) + #set values for standard error bars and offset on the X axis for clarity
-  scale_colour_manual("Treatment", values = c("blue","red")) +
+  geom_point(aes(y = Tank4.mean, colour="Ambient"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=tank.temp.means, col="darkgrey", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(y = Tank5.mean, colour="High"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=tank.temp.means, col="black", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  scale_colour_manual("Treatment", values = c("grey","black")) +
   scale_x_discrete(breaks=c("01:00", "06:00", "12:00", "18:00", "23:00")) + #set discrete breaks on the X axis
-  ggtitle("ADULT EXPOSURE\nB)") + #Label graphic title
+  ggtitle("ADULT EXPOSURE\n(b)") + #Label graphic title
   ylim(23.5,29) + #Set Y axis limits
   xlab("Time") + #Label the X Axis
   ylab("Temperature (°C)") + #Label the Y Axis
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
+        plot.background=element_blank(), #Set the plot background
         plot.title=element_text(hjust=0), #Justify the title to the top left
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         legend.position='none') #remove legend background
 Fig5 #View figure
 
@@ -311,7 +316,7 @@ Tank5.light.N <- sum(!is.na(tank.lightdata$Tank5)) #Count sample size
 Fig6 <- ggplot(tank.lightdata, aes(Date.Time)) + #plot tank light data
   geom_line(aes(y = Tank4, colour="Ambient")) + #plot light data as a line on the Y axis with date as the X axis 
   geom_line(aes(y = Tank5, colour="High")) + #plot light data as a line on the Y axis with date as the X axis 
-  scale_colour_manual("Treatment", values = c("blue","red")) + #add colors for treatments
+  scale_colour_manual("Treatment", values = c("grey","black")) + #add colors for treatments
   xlab("Date") + #Label the X Axis
   ylab(bquote('Irradiance ('*mu~'mol' ~photons ~ m^-2~s^-1*')')) + #Label the Y Axis
   ggtitle("") + #label the main title
@@ -351,25 +356,26 @@ range(na.omit(tank.light.means$Tank4.mean)) #range of average ambient light leve
 range(na.omit(tank.light.means$Tank5.mean)) #range of average high light levels
 
 Fig7 <- ggplot(tank.light.means, aes(Time)) + # plot mean temp by tank
-  geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=tank.light.means) + #set values for standard error bars and offset on the X axis for clarity
-  geom_point(aes(y = Tank5.mean, colour="High")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=tank.light.means) + #set values for standard error bars and offset on the X axis for clarity
-  scale_colour_manual("Treatment", values = c("blue","red")) +
+  geom_point(aes(y = Tank4.mean, colour="Ambient"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=tank.light.means, col="darkgrey", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(y = Tank5.mean, colour="High"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=tank.light.means, col="black", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  scale_colour_manual("Treatment", values = c("grey","black")) +
   scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
   ylim(0,300) + #set Y axis limits
-  ggtitle("F)") + #Label graphic title
+  ggtitle("(f)") + #Label graphic title
   xlab("Time") + #Label the X Axis
   ylab(bquote('Irradiance ('*mu~'mol' ~photons ~ m^-2~s^-1*')')) + #Label the Y Axis
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
+        plot.background=element_blank(), #Set the plot background
         plot.title=element_text(hjust=0), #Justify the title to the top left
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         legend.position='none') #remove legend background
 Fig7 #View figure
 
@@ -386,7 +392,7 @@ Tank5.M1.temp.N <- sum(!is.na(M1.tank.tempdata$Tank5)) #Count sample size
 Fig8 <- ggplot(M1.tank.tempdata, aes(Date.Time)) + #plot tank temperature data
   geom_line(aes(y = Tank4, colour="Ambient")) + #plot Temperature data as a line on the Y axis with date as the X axis 
   geom_line(aes(y = Tank5, colour="High")) + #plot Temperature data as a line on the Y axis with date as the X axis 
-  scale_colour_manual("Treatment", values = c("blue","red")) + #add colors for treatments
+  scale_colour_manual("Treatment", values = c("grey","black")) + #add colors for treatments
   xlab("Date") + #Label the X Axis
   ylab("Temperature °C") + #Label the Y Axis
   ggtitle("") + #label the main title
@@ -420,27 +426,27 @@ colnames(M1.tank.temp.means) <- c("Time", "Tank4.mean", "Tank4.se", "Tank5.mean"
 range(na.omit(M1.tank.temp.means$Tank4.mean)) #range of average amb temp levels
 range(na.omit(M1.tank.temp.means$Tank5.mean)) #range of average high temp levels
 
-
 Fig9 <- ggplot(M1.tank.temp.means, aes(Time)) + # plot mean temp by tank
-  geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=M1.tank.temp.means) + #set values for standard error bars and offset on the X axis for clarity
-  geom_point(aes(y = Tank5.mean, colour="High")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=M1.tank.temp.means) + #set values for standard error bars and offset on the X axis for clarity
-  scale_colour_manual("Treatment", values = c("blue","red")) +
+  geom_point(aes(y = Tank4.mean, colour="Ambient"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=M1.tank.temp.means, col="darkgrey", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(y = Tank5.mean, colour="High"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=M1.tank.temp.means, col="black", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  scale_colour_manual("Treatment", values = c("grey","black")) +
   scale_x_discrete(breaks=c("01:00", "06:00", "12:00", "18:00", "23:00")) + #set discrete breaks on the X axis
-  ggtitle("LARVAL MONTH 1\nC)") + #Label graphic title
+  ggtitle("LARVAL MONTH 1\n(c)") + #Label graphic title
   ylim(23.5,29) + #Set Y axis limits
   xlab("Time") + #Label the X Axis
   ylab("Temperature (°C)") + #Label the Y Axis
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
+        plot.background=element_blank(), #Set the plot background
         plot.title=element_text(hjust=0), #Justify the title to the top left
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         legend.position='none') #remove legend background
 Fig9 #View figure
 
@@ -460,7 +466,7 @@ Tank5.M1.light.N <- sum(!is.na(M1.tank.lightdata$Tank5)) #Count sample size
 Fig10 <- ggplot(M1.tank.lightdata, aes(Date.Time)) + #plot tank light data
   geom_line(aes(y = Tank4, colour="Ambient")) + #plot light data as a line on the Y axis with date as the X axis 
   geom_line(aes(y = Tank5, colour="High")) + #plot light data as a line on the Y axis with date as the X axis 
-  scale_colour_manual("Treatment", values = c("blue","red")) + #add colors for treatments
+  scale_colour_manual("Treatment", values = c("grey","black")) + #add colors for treatments
   xlab("Date") + #Label the X Axis
   ylab(bquote('Irradiance ('*mu~'mol' ~photons ~ m^-2~s^-1*')')) + #Label the Y Axis
   ggtitle("") + #label the main title
@@ -520,25 +526,26 @@ range(na.omit(M1.tank.light.means$Tank4.mean)) #range of average ambient light l
 range(na.omit(M1.tank.light.means$Tank5.mean)) #minimum of average high light levels
 
 Fig11 <- ggplot(M1.tank.light.means, aes(Time)) + # plot mean light by tank
-  geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=M1.tank.light.means) + #set values for standard error bars and offset on the X axis for clarity
-  geom_point(aes(y = Tank5.mean, colour="High")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=M1.tank.light.means) + #set values for standard error bars and offset on the X axis for clarity
-  scale_colour_manual("Treatment", values = c("blue","red")) +
+  geom_point(aes(y = Tank4.mean, colour="Ambient"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=M1.tank.light.means, col="darkgrey", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(y = Tank5.mean, colour="High"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=M1.tank.light.means, col="black", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  scale_colour_manual("Treatment", values = c("grey","black")) +
   scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
   ylim(0,300) + #set Y axis limits
-  ggtitle("G)") + #Label graphic title
+  ggtitle("(g)") + #Label graphic title
   xlab("Time") + #Label the X Axis
   ylab(bquote('Irradiance ('*mu~'mol' ~photons ~ m^-2~s^-1*')')) + #Label the Y Axis
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
+        plot.background=element_blank(), #Set the plot background
         plot.title=element_text(hjust=0), #Justify the title to the top left
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         legend.position='none') #remove legend background
 Fig11 #View figure
 
@@ -555,7 +562,7 @@ Tank5.M6.temp.N <- sum(!is.na(M6.tank.tempdata$Tank5)) #Count sample size
 Fig12 <- ggplot(M6.tank.tempdata, aes(Date.Time)) + #plot tank temperature data
   geom_line(aes(y = Tank4, colour="Ambient")) + #plot Temperature data as a line on the Y axis with date as the X axis 
   geom_line(aes(y = Tank5, colour="High")) + #plot Temperature data as a line on the Y axis with date as the X axis 
-  scale_colour_manual("Treatment", values = c("blue","red")) + #add colors for treatments
+  scale_colour_manual("Treatment", values = c("grey","black")) + #add colors for treatments
   xlab("Date") + #Label the X Axis
   ylab("Temperature °C") + #Label the Y Axis
   ggtitle("") + #label the main title
@@ -591,25 +598,26 @@ range(na.omit(M6.tank.temp.means$Tank4.mean)) #range of average amb temp levels
 range(na.omit(M6.tank.temp.means$Tank5.mean)) #range of average high temp levels
 
 Fig13 <- ggplot(M6.tank.temp.means, aes(Time)) + # plot mean temp by tank
-  geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=M6.tank.temp.means) + #set values for standard error bars and offset on the X axis for clarity
-  geom_point(aes(y = Tank5.mean, colour="High")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=M6.tank.temp.means) + #set values for standard error bars and offset on the X axis for clarity
-  scale_colour_manual("Treatment", values = c("blue","red")) +
+  geom_point(aes(y = Tank4.mean, colour="Ambient"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=M6.tank.temp.means, col="darkgrey", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(y = Tank5.mean, colour="High"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=M6.tank.temp.means, col="black", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  scale_colour_manual("Treatment", values = c("grey","black")) +
   scale_x_discrete(breaks=c("01:00", "06:00", "12:00", "18:00", "23:00")) + #set discrete breaks on the X axis
-  ggtitle("LARVAL MONTH 6\nD)") + #Label graphic title
+  ggtitle("LARVAL MONTH 6\n(d)") + #Label graphic title
   ylim(23.5,29) + #Set Y axis limits
   xlab("Time") + #Label the X Axis
   ylab("Temperature (°C)") + #Label the Y Axis
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
+        plot.background=element_blank(), #Set the plot background
         plot.title=element_text(hjust=0), #Justify the title to the top left
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         legend.position='none') #remove legend background
 Fig13 #View figure
 
@@ -629,7 +637,7 @@ Tank5.M6.light.N <- sum(!is.na(M6.tank.lightdata$Tank5)) #Count sample size
 Fig14 <- ggplot(M6.tank.lightdata, aes(Date.Time)) + #plot tank light data
   geom_line(aes(y = Tank4, colour="Ambient")) + #plot light data as a line on the Y axis with date as the X axis 
   geom_line(aes(y = Tank5, colour="High")) + #plot light data as a line on the Y axis with date as the X axis 
-  scale_colour_manual("Treatment", values = c("blue","red")) + #add colors for treatments
+  scale_colour_manual("Treatment", values = c("grey","black")) + #add colors for treatments
   xlab("Date") + #Label the X Axis
   ylab(bquote('Irradiance ('*mu~'mol' ~photons ~ m^-2~s^-1*')')) + #Label the Y Axis
   ggtitle("") + #label the main title
@@ -689,25 +697,26 @@ range(na.omit(M6.tank.light.means$Tank4.mean)) #range of average ambient light l
 range(na.omit(M6.tank.light.means$Tank5.mean)) #minimum of average high light levels
 
 Fig15 <- ggplot(M6.tank.light.means, aes(Time)) + # plot mean light by tank
-  geom_point(aes(y = Tank4.mean, colour="Ambient")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=M6.tank.light.means) + #set values for standard error bars and offset on the X axis for clarity
-  geom_point(aes(y = Tank5.mean, colour="High")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=M6.tank.light.means) + #set values for standard error bars and offset on the X axis for clarity
-  scale_colour_manual("Treatment", values = c("blue","red")) +
+  geom_point(aes(y = Tank4.mean, colour="Ambient"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=Tank4.mean+Tank4.se, ymin=Tank4.mean-Tank4.se), position=position_dodge(0.9), data=M6.tank.light.means, col="darkgrey", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(y = Tank5.mean, colour="High"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=M6.tank.light.means, col="black", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  scale_colour_manual("Treatment", values = c("grey","black")) +
   scale_x_discrete(breaks=c("0:00", "06:00", "12:00", "18:00")) + #set discrete breaks on the X axis
   ylim(0,300) + #set Y axis limits
-  ggtitle("H)") + #Label graphic title
+  ggtitle("(h)") + #Label graphic title
   xlab("Time") + #Label the X Axis
   ylab(bquote('Irradiance ('*mu~'mol' ~photons ~ m^-2~s^-1*')')) + #Label the Y Axis
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
+        plot.background=element_blank(), #Set the plot background
         plot.title=element_text(hjust=0), #Justify the title to the top left
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         legend.position='none') #remove legend background
 Fig15 #View figure
 
@@ -822,7 +831,7 @@ Refs #view data
 CRM.res <- mean(Refs$Per.Off, na.rm=T) #calculate the average % difference of TA from CRM values over the course of the experiment
 CRM.res #view the resolution of TA assay according to tests againsts Dickson CRMs
 
-#####SEAWATER CHEMISTRY ANALYSIS FOR DISCRETE MEASUREMENTS#####
+##### SEAWATER CHEMISTRY ANALYSIS FOR DISCRETE MEASUREMENTS#####
 #Seawater chemistry table from simultaneous TA, pH, temperature and salinity measurements
 #merge calculated pH and daily measures with TA data and run seacarb
 SW.chem$Sample.ID <- paste(SW.chem$Date, SW.chem$Tank, sep='_') #generate new row with concatenated sample id
@@ -935,7 +944,7 @@ M6.chem.table$CO3 <- paste(round(M6.carb.table$mean.CO3, digits=0), round(M6.car
 M6.chem.table$DIC <- paste(round(M6.carb.table$mean.DIC, digits=0), round(M6.carb.table$sem.DIC, digits=0), sep=' ± ') #add combined mean and sem with ± separating them
 M6.chem.table$Arag.Sat <- paste(round(M6.carb.table$mean.Aragonite.Sat, digits=1), round(M6.carb.table$sem.Aragonite.Sat, digits=1), sep=' ± ') #add combined mean and sem with ± separating them
 
-#####CONTINUOUS pH MEASUREMENTS#####
+##### CONTINUOUS pH MEASUREMENTS#####
 #Tank NBS pH Data for Adult Exposure Experimental Period (06May14 - 17Aug14)
 # read in NBS pH data from Aquacontrollers, frequency 15min
 setwd(file.path(mainDir, 'Data')) #set working directory
@@ -975,25 +984,26 @@ quarts <- as.data.frame(seq(ISOdatetime(2001,2,3,0,0,0), ISOdatetime(2001,2,4,0,
 tank.pH.means$Time <- quarts[1:96,] #remove last line
 
 Fig17 <- ggplot(tank.pH.means, aes(Time)) + # plot mean pH by tank
-  geom_point(aes(x =Time, y = pH.Amb.NBS.mean, colour="Ambient")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=pH.Amb.NBS.mean+pH.Amb.NBS.se, ymin=pH.Amb.NBS.mean-pH.Amb.NBS.se), position=position_dodge(0.9), data=tank.pH.means) + #set values for standard error bars and offset on the X axis for clarity
-  geom_point(aes(x = Time, y = pH.High.NBS.mean, colour="High")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=pH.High.NBS.mean+pH.High.NBS.se, ymin=pH.High.NBS.mean-pH.High.NBS.se), position=position_dodge(0.9), data=tank.pH.means) + #set values for standard error bars and offset on the X axis for clarity
-  scale_colour_manual("Treatment", values = c("blue","red")) +
+  geom_point(aes(x =Time, y = pH.Amb.NBS.mean, colour="Ambient"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=pH.Amb.NBS.mean+pH.Amb.NBS.se, ymin=pH.Amb.NBS.mean-pH.Amb.NBS.se), position=position_dodge(0.9), data=tank.pH.means, col="darkgrey", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(x = Time, y = pH.High.NBS.mean, colour="High"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=pH.High.NBS.mean+pH.High.NBS.se, ymin=pH.High.NBS.mean-pH.High.NBS.se), position=position_dodge(0.9), data=tank.pH.means, col="black", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  scale_colour_manual("Treatment", values = c("grey","black")) +
   scale_x_datetime(date_labels="%H %M") + #label hours and min
   scale_y_continuous(name="pH (NBS Scale)", breaks=c( 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 8.0, 8.1), limits=c(7.35, 8.1)) + #set Y axis ticks
-  ggtitle("J)") + #Label graph
+  ggtitle("(j)") + #Label graph
   xlab("Time") + #Label the X Axis
   ylab("pH (NBS Scale)") + #Label the Y Axis
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
+        plot.background=element_blank(), #Set the plot background
         plot.title=element_text(hjust=0), #Justify the title to the top left
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         legend.position='none') #remove legend background
 Fig17 #View figure
 
@@ -1034,25 +1044,26 @@ colnames(tank.pH.means.M1) <- c("Time", "pH.Amb.NBS.mean", "pH.Amb.NBS.se", "pH.
 tank.pH.means.M1$Time <- quarts[1:96,]
 
 Fig19 <- ggplot(tank.pH.means.M1, aes(Time)) + # plot mean pH by tank
-  geom_point(aes(x =Time, y = pH.Amb.NBS.mean, colour="Ambient")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=pH.Amb.NBS.mean+pH.Amb.NBS.se, ymin=pH.Amb.NBS.mean-pH.Amb.NBS.se), position=position_dodge(0.9), data=tank.pH.means.M1) + #set values for standard error bars and offset on the X axis for clarity
-  geom_point(aes(x = Time, y = pH.High.NBS.mean, colour="High")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=pH.High.NBS.mean+pH.High.NBS.se, ymin=pH.High.NBS.mean-pH.High.NBS.se), position=position_dodge(0.9), data=tank.pH.means.M1) + #set values for standard error bars and offset on the X axis for clarity
-  scale_colour_manual("Treatment", values = c("blue","red")) +
+  geom_point(aes(x =Time, y = pH.Amb.NBS.mean, colour="Ambient"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=pH.Amb.NBS.mean+pH.Amb.NBS.se, ymin=pH.Amb.NBS.mean-pH.Amb.NBS.se), position=position_dodge(0.9), data=tank.pH.means.M1, col="darkgrey", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(x = Time, y = pH.High.NBS.mean, colour="High"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=pH.High.NBS.mean+pH.High.NBS.se, ymin=pH.High.NBS.mean-pH.High.NBS.se), position=position_dodge(0.9), data=tank.pH.means.M1, col="black", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  scale_colour_manual("Treatment", values = c("grey","black")) +
   scale_x_datetime(date_labels="%H %M") + #label hours and min
   scale_y_continuous(name="pH (NBS Scale)", breaks=c( 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 8.0, 8.1), limits=c(7.35, 8.1)) + #set Y axis ticks
-  ggtitle("K)") + #Label graph
+  ggtitle("(k)") + #Label graph
   xlab("Time") + #Label the X Axis
   ylab("pH (NBS Scale)") + #Label the Y Axis
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
+        plot.background=element_blank(), #Set the plot background
         plot.title=element_text(hjust=0), #Justify the title to the top left
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         legend.position='none') #remove legend background
 Fig19 #View figure
 
@@ -1093,25 +1104,26 @@ colnames(tank.pH.means.M6) <- c("Time", "pH.Amb.NBS.mean", "pH.Amb.NBS.se", "pH.
 tank.pH.means.M6$Time <- quarts[1:96,]
 
 Fig21 <- ggplot(tank.pH.means.M6, aes(Time)) + # plot mean pH by tank
-  geom_point(aes(x =Time, y = pH.Amb.NBS.mean, colour="Ambient")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=pH.Amb.NBS.mean+pH.Amb.NBS.se, ymin=pH.Amb.NBS.mean-pH.Amb.NBS.se), position=position_dodge(0.9), data=tank.pH.means.M6) + #set values for standard error bars and offset on the X axis for clarity
-  geom_point(aes(x = Time, y = pH.High.NBS.mean, colour="High")) + #plot points
-  geom_errorbar(aes(x=Time, ymax=pH.High.NBS.mean+pH.High.NBS.se, ymin=pH.High.NBS.mean-pH.High.NBS.se), position=position_dodge(0.9), data=tank.pH.means.M6) + #set values for standard error bars and offset on the X axis for clarity
-  scale_colour_manual("Treatment", values = c("blue","red")) +
+  geom_point(aes(x =Time, y = pH.Amb.NBS.mean, colour="Ambient"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=pH.Amb.NBS.mean+pH.Amb.NBS.se, ymin=pH.Amb.NBS.mean-pH.Amb.NBS.se), position=position_dodge(0.9), data=tank.pH.means.M6, col="darkgrey", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  geom_point(aes(x = Time, y = pH.High.NBS.mean, colour="High"), cex=0.8) + #plot points
+  geom_errorbar(aes(x=Time, ymax=pH.High.NBS.mean+pH.High.NBS.se, ymin=pH.High.NBS.mean-pH.High.NBS.se), position=position_dodge(0.9), data=tank.pH.means.M6, col="black", width=0) + #set values for standard error bars and offset on the X axis for clarity
+  scale_colour_manual("Treatment", values = c("grey","black")) +
   scale_x_datetime(date_labels="%H %M") + #label hours and min on the X axis
   scale_y_continuous(name="pH (NBS Scale)", breaks=c( 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 8.0, 8.1), limits=c(7.35, 8.1)) + #set Y axis ticks 
-  ggtitle("L)") + #Label graph
+  ggtitle("(l)") + #Label graph
   xlab("Time") + #Label the X Axis
   ylab("pH (NBS Scale)") + #Label the Y Axis
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
+        plot.background=element_blank(), #Set the plot background
         plot.title=element_text(hjust=0), #Justify the title to the top left
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         legend.position='none') #remove legend background
 Fig21 #View figure
 
@@ -1121,18 +1133,19 @@ FigMT <- ggplot(tank.pH.means.M6, aes(Time)) + # plot mean pH by tank
   scale_colour_manual("Treatment", values = c("white","white")) +
   scale_x_datetime(date_labels="%H %M") + #label hours and min on the X axis
   scale_y_continuous(name="pH (NBS Scale)", breaks=c( 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 8.0, 8.1), limits=c(7.35, 8.1)) + #set Y axis ticks 
-  ggtitle("I) ") + #Label graph
+  ggtitle("(i) ") + #Label graph
   xlab("Time") + #Label the X Axis
   ylab("pH (NBS Scale)") + #Label the Y Axis
   theme_bw() + #Set the background color
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), #Set the text angle
-        axis.line = element_line(color = 'black'), #Set the axes color
-        panel.border = element_blank(), #Set the border
+  theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background =element_blank(), #Set the plot background
-        legend.key = element_blank(), #Set plot legend key
+        plot.background=element_blank(), #Set the plot background
         plot.title=element_text(hjust=0), #Justify the title to the top left
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         legend.position='none') #remove legend background
 FigMT
 
@@ -1154,24 +1167,26 @@ Fig22 <- ggplot(june.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot m
                 width=0, size = 0.4,                   # Width of the error bars
                 position=position_dodge(.9)) + #set bar position
   ylim(0,400) + #set y limits
-  ggtitle("A) June") + #plot title
+  ggtitle("(a) June") + #plot title
   xlab("Lunar Day") + #x axis title
-  ylab("Number of Planulae Released") + #y axis title
+  ylab("Number of planulae released") + #y axis title
   theme_bw() + #theme black and white 
   guides(fill = guide_legend(keywidth = 0.5, keyheight = 0.5))+ #legend guides
   theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         axis.text=element_text(size=16), #set text size
         axis.title=element_text(size=18,face="bold"), #set axis title text size
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
-        panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=90), #Set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
         legend.key = element_blank(),  #remove legend background
-        legend.position=c(0.15,0.85),  #set legend location
+        legend.position=c(0.2,0.85),  #set legend location
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
@@ -1198,25 +1213,27 @@ Fig23 <- ggplot(july.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot m
                 width=0, size = 0.4,                   # Width of the error bars
                 position=position_dodge(.9)) + #set bar position
   ylim(0,400) + #set y limits
-  ggtitle("B) July") + #plot title
+  ggtitle("(b) July") + #plot title
   xlab("Lunar Day") + #x axis title
- # ylab("Number of Planulae Released") + #y axis title
+ # ylab("Number of planulae released") + #y axis title
   theme_bw() + #theme black and white 
   guides(fill = guide_legend(keywidth = 0.5, keyheight = 0.5))+ #legend guides
   theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         axis.text=element_text(size=16), #set text size
         axis.title=element_text(size=18,face="bold"), #set axis title text size
         axis.title.y=element_blank(), #remove Y axis label
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
-        panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=90), #Set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
         legend.key = element_blank(),  #remove legend background
         legend.position="none",  #set legend location
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
                                 size = 12, 
                                 hjust = 0)) #set title attributes
@@ -1243,25 +1260,27 @@ Fig24 <- ggplot(august.larvae, aes(x=Lunar.Day, y=mean, fill=Treatment)) + #plot
                 width=0, size = 0.4,                   # Width of the error bars
                 position=position_dodge(.9)) + #set bar position
   ylim(0,400) + #set y limits
-  ggtitle("C) August") + #plot title
+  ggtitle("(c) August") + #plot title
   xlab("Lunar Day") + #x axis title
-  ylab("Number of Planulae Released") + #y axis title
+  ylab("Number of planulae released") + #y axis title
   theme_bw() + #theme black and white 
   guides(fill = guide_legend(keywidth = 0.5, keyheight = 0.5))+ #legend guides
   theme(axis.line = element_line(color = 'black'), #Set the axes color
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), angle = 90, vjust = 0.5, hjust=1), #set margins on labels
         axis.text=element_text(size=16), #set text size
         axis.title=element_text(size=18,face="bold"), #set axis title text size
         axis.title.y=element_blank(), #remove Y axis label
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
-        panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=90), #Set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
         legend.key = element_blank(),  #remove legend background
         legend.position="none",  #set legend location
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
@@ -1272,61 +1291,61 @@ august.high <- subset(august.larvae, Treatment=="High") #subset data
 august.ks <-ks.test(august.amb$mean, august.high$mean) #Kolmogorov-Smirnov Test Ho: differences in distribution
 august.ks #view results
 
-## Total release as a function of both treatment and time
-RM.release.data <- read.csv("RM_Release_Data.csv", header=T, sep=",", na.string="NA", as.is=T) #read in data in long format
-all.release.mean <- aggregate(Total.Release ~ Treatment + Time, data=RM.release.data, mean) #calculate mean by treatment and time
-all.release.se <- aggregate(Total.Release ~ Treatment + Time, data=RM.release.data, std.error)  #calculate se by treatment and time
-all.release <- cbind(all.release.mean, all.release.se$Total.Release) #make dataframe
-colnames(all.release) <- c("Treatment", "Time", "mean", "se") #rename columns
-
-Fig25 <- ggplot(all.release, aes(x=Time, y=mean, colour=Treatment, group=Treatment), position=position_dodge(width=0.5)) +  #plot mean as a function of Time
-  geom_errorbar(aes(ymin=all.release$mean - all.release$se, ymax=all.release$mean + all.release$se), #plot error bars
-                colour="black", width=0, size = 0.4, # Width of the error bars
-                position=position_dodge(width=0.5)) + #set bar position
-  geom_point(position=position_dodge(width=0.5), size=2, shape=15) +
-  scale_colour_manual(values = c("gray","black")) + #set point fill color
-  scale_x_discrete(limits=c("June","July","August")) + #label x axis in order
-  ylab(" Total Release") + #y axis label
-  ylim(0,1700) + #y axis limits
-  ggtitle("D) Total") + #plot title
-  theme_bw() + #theme black and white 
-  theme(axis.line = element_line(color = 'black'), #Set the axes color
-        axis.text=element_text(size=10), #set text size
-        axis.title=element_text(size=12,face="bold"), #set axis title text size
-        strip.text.x = element_text(size = 12, colour = "black", face="bold"),
-        panel.border = element_blank(), #Set the border
-        axis.line.x = element_line(color = 'black'), #Set the axes color
-        axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=90), #Set text angle
-        panel.grid.major = element_blank(), #Set the major gridlines
-        panel.grid.minor = element_blank(), #Set the minor gridlines
-        plot.background=element_blank(),  #Set the plot background
-        legend.key = element_blank(),  #remove legend background
-        legend.position="none",  #set legend location
-        plot.title = element_text(face = 'bold', 
-                                  size = 12, 
-                                  hjust = 0)) #set title attributes
-Fig25
-
-#LM release by treatment and time
-RM.release.data #view data
-RM.release.data <- na.omit(RM.release.data) #remove NA
-release.lm <- lm(log10(Total.Release+1) ~ Treatment * Time, data=RM.release.data) #run generalized linear model 
-summary(release.lm) #view summary
-release.resid <-resid(release.lm)
-release.shapiro <- shapiro.test(release.resid) #runs a normality test using shapiro-wilk test on the residuals
-release.shapiro #view results
-release.qqnorm <- qqnorm(release.resid) # normal quantile plot
-release.qqline <- qqline(release.resid) # adding a qline of comparison
-hist(release.resid) #plot histogram of residuals
-plot(release.lm$fitted.values, release.lm$residuals) #plot residuals as a function of fitted data
-
-release.posthoc <- lsmeans(release.lm, specs=c("Time")) #calculate MS means
-release.posthoc #view results
-release.posthoc.p <- contrast(release.posthoc, method="pairwise") #contrast treatment groups within a species at each time point
-release.posthoc.p #view results
-release.posthoc.lett <- cld(release.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
-release.posthoc.lett #view results
+# ## Total release as a function of both treatment and time
+# RM.release.data <- read.csv("RM_Release_Data.csv", header=T, sep=",", na.string="NA", as.is=T) #read in data in long format
+# all.release.mean <- aggregate(Total.Release ~ Treatment + Time, data=RM.release.data, mean) #calculate mean by treatment and time
+# all.release.se <- aggregate(Total.Release ~ Treatment + Time, data=RM.release.data, std.error)  #calculate se by treatment and time
+# all.release <- cbind(all.release.mean, all.release.se$Total.Release) #make dataframe
+# colnames(all.release) <- c("Treatment", "Time", "mean", "se") #rename columns
+# 
+# Fig25 <- ggplot(all.release, aes(x=Time, y=mean, colour=Treatment, group=Treatment), position=position_dodge(width=0.5)) +  #plot mean as a function of Time
+#   geom_errorbar(aes(ymin=all.release$mean - all.release$se, ymax=all.release$mean + all.release$se), #plot error bars
+#                 colour="black", width=0, size = 0.4, # Width of the error bars
+#                 position=position_dodge(width=0.5)) + #set bar position
+#   geom_point(position=position_dodge(width=0.5), size=2, shape=15) +
+#   scale_colour_manual(values = c("gray","black")) + #set point fill color
+#   scale_x_discrete(limits=c("June","July","August")) + #label x axis in order
+#   ylab(" Total Release") + #y axis label
+#   ylim(0,1700) + #y axis limits
+#   ggtitle("D) Total") + #plot title
+#   theme_bw() + #theme black and white 
+#   theme(axis.line = element_line(color = 'black'), #Set the axes color
+#         axis.text=element_text(size=10), #set text size
+#         axis.title=element_text(size=12,face="bold"), #set axis title text size
+#         strip.text.x = element_text(size = 12, colour = "black", face="bold"),
+#         panel.border = element_blank(), #Set the border
+#         axis.line.x = element_line(color = 'black'), #Set the axes color
+#         axis.line.y = element_line(color = 'black'), #Set the axes color
+#         axis.text.x=element_text(angle=90), #Set text angle
+#         panel.grid.major = element_blank(), #Set the major gridlines
+#         panel.grid.minor = element_blank(), #Set the minor gridlines
+#         plot.background=element_blank(),  #Set the plot background
+#         legend.key = element_blank(),  #remove legend background
+#         legend.position="none",  #set legend location
+#         plot.title = element_text(face = 'bold', 
+#                                   size = 12, 
+#                                   hjust = 0)) #set title attributes
+# Fig25
+# 
+# #LM release by treatment and time
+# RM.release.data #view data
+# RM.release.data <- na.omit(RM.release.data) #remove NA
+# release.lm <- lm(log10(Total.Release+1) ~ Treatment * Time, data=RM.release.data) #run generalized linear model 
+# summary(release.lm) #view summary
+# release.resid <-resid(release.lm)
+# release.shapiro <- shapiro.test(release.resid) #runs a normality test using shapiro-wilk test on the residuals
+# release.shapiro #view results
+# release.qqnorm <- qqnorm(release.resid) # normal quantile plot
+# release.qqline <- qqline(release.resid) # adding a qline of comparison
+# hist(release.resid) #plot histogram of residuals
+# plot(release.lm$fitted.values, release.lm$residuals) #plot residuals as a function of fitted data
+# 
+# release.posthoc <- lsmeans(release.lm, specs=c("Time")) #calculate MS means
+# release.posthoc #view results
+# release.posthoc.p <- contrast(release.posthoc, method="pairwise") #contrast treatment groups within a species at each time point
+# release.posthoc.p #view results
+# release.posthoc.lett <- cld(release.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
+# release.posthoc.lett #view results
 
 ##### SURVIVORSHIP #####
 larval.data.M0 <- read.csv("Larval_Data_M0.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
@@ -1355,7 +1374,7 @@ Fig26 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, col
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("A)") + #plot title
+  ggtitle("(a)") + #plot title
   annotate("text", x = 0.87, y = 0.82, label = "a") + #add posthoc letters
   annotate("text", x = 0.85, y = 0.74, label = "ab") + #add posthoc letters
   annotate("text", x = 2.2, y = 0.59, label = "bc") + #add posthoc letters
@@ -1366,17 +1385,20 @@ Fig26 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, col
   theme_bw() + #theme black and white 
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), vjust = 0.5), #set margins on labels
         axis.title=element_text(size=18,face="bold"), #set axis title text size
+        axis.title.x=element_blank(), #remove x axis label
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
-        panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0), #set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
         legend.key = element_blank(),  #remove legend background
         legend.position="none",  #set legend location
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
@@ -1411,7 +1433,7 @@ Fig27 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, col
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("B)") + #plot title
+  ggtitle("(b)") + #plot title
   annotate("text", x = 0.87, y = 0.52, label = "cd") + #add posthoc letters
   annotate("text", x = 0.83, y = 0.42, label = "de") + #add posthoc letters
   annotate("text", x = 2.2, y = 0.37, label = "de") + #add posthoc letters
@@ -1422,17 +1444,20 @@ Fig27 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, col
   theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), vjust = 0.5), #set margins on labels
         axis.title=element_text(size=18,face="bold"), #set axis title text size
+        axis.title.x=element_blank(), #remove x axis label
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
-        panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0), #Set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
         legend.key = element_blank(),  #remove legend background
         legend.position="none",  #set legend location
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
@@ -1466,7 +1491,7 @@ Fig28 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, col
   scale_shape_manual(values=c(1,18), labels=c("Ambient Parental Envt.", "High Parental Envt.")) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("C)") + #plot title
+  ggtitle("(c)") + #plot title
   annotate("text", x = 0.90, y = 0.19, label = "f") + #add posthoc letters
   annotate("text", x = 0.82, y = 0.12, label = "f") + #add posthoc letters
   annotate("text", x = 2.13, y = 0.06, label = "g") + #add posthoc letters
@@ -1477,17 +1502,20 @@ Fig28 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, col
   theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), vjust = 0.5), #set margins on labels
         axis.title=element_text(size=18,face="bold"), #set axis title text size
+        axis.title.x=element_blank(), #remove x axis label
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
-        panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0), #text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
         legend.key = element_blank(),  #remove legend background
-        legend.position=c(0.6,0.8),  #set legend location
+        legend.position=c(0.6,0.7),  #set legend location
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
@@ -1550,24 +1578,26 @@ Fig29 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, col
   annotate("text", x = 0.8, y = 0.68, label = "ab") +
   annotate("text", x = 2.25, y = 0.56, label = "bc") +
   annotate("text", x = 2.2, y = 0.49, label = "c") +
-  ggtitle("D)") + #plot title
+  ggtitle("(d)") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Settlement") + #plot y axis label
   ylim(0,1) + #Y axis limits
   theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), vjust = 0.5), #set margins on labels
         axis.title=element_text(size=18,face="bold"), #set axis title text size
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
-        panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0), #text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
         legend.key = element_blank(),  #remove legend background
         legend.position="none",  #set legend location
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
@@ -1629,24 +1659,26 @@ Fig30 <- ggplot(data=m1.growth, aes(x=factor(Secondary), y=mean, group=Origin, c
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("E)") + #plot title
+  ggtitle("(e)") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
   ylim(0,0.1) + #Y axis limits
   theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), vjust = 0.5), #set margins on labels
         axis.title=element_text(size=18,face="bold"), #set axis title text size
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
-        panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0), #set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
         legend.key = element_blank(),  #remove legend background
         legend.position="none",  #set legend location
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
@@ -1660,24 +1692,26 @@ Fig31 <- ggplot(data=m6.growth, aes(x=factor(Secondary), y=mean, group=Origin, c
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") +  #set error bar characteristics 
-  ggtitle("F)") +  #plot title
+  ggtitle("(f)") +  #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
   ylim(0,0.1) + #Y axis limits
   theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), vjust = 0.5), #set margins on labels
         axis.title=element_text(size=18,face="bold"), #set axis title text size
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
-        panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0), #set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
         legend.key = element_blank(),  #remove legend background
         legend.position="none",  #set legend location
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
@@ -1744,24 +1778,26 @@ Fig32 <- ggplot(data=m1.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=lower.bt, ymax=upper.bt), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("E)") + #plot title
+  ggtitle("(e)") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
   ylim(0,0.1) + #Y axis limits
   theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), vjust = 0.5), #set margins on labels
         axis.title=element_text(size=18,face="bold"), #set axis title text size
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
-        panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0), #set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
         legend.key = element_blank(),  #remove legend background
         legend.position="none",  #set legend location
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
@@ -1783,24 +1819,26 @@ Fig33 <- ggplot(data=m6.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=lower.bt, ymax=upper.bt), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") +  #set error bar characteristics 
-  ggtitle("F)") +  #plot title
+  ggtitle("(f)") +  #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
   ylim(0,0.1) + #Y axis limits
   theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
+        axis.ticks.length=unit(-0.2, "cm"), #turn ticks inward
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), #set margins on labels
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"), vjust = 0.5), #set margins on labels
         axis.title=element_text(size=18,face="bold"), #set axis title text size
         strip.text.x = element_text(size = 16, colour = "black", face="bold"),
-        panel.border = element_blank(), #Set the border
         axis.line.x = element_line(color = 'black'), #Set the axes color
         axis.line.y = element_line(color = 'black'), #Set the axes color
-        axis.text.x=element_text(angle=0), #set text angle
         panel.grid.major = element_blank(), #Set the major gridlines
         panel.grid.minor = element_blank(), #Set the minor gridlines
         plot.background=element_blank(),  #Set the plot background
         legend.key = element_blank(),  #remove legend background
         legend.position="none",  #set legend location
+        panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
                                   size = 12, 
                                   hjust = 0)) #set title attributes
