@@ -1374,7 +1374,7 @@ Fig26 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, col
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("(a)") + #plot title
+  ggtitle("(a) CHAMBER") + #plot title
   annotate("text", x = 0.87, y = 0.82, label = "a") + #add posthoc letters
   annotate("text", x = 0.85, y = 0.74, label = "ab") + #add posthoc letters
   annotate("text", x = 2.2, y = 0.59, label = "bc") + #add posthoc letters
@@ -1433,7 +1433,7 @@ Fig27 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, col
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("(b)") + #plot title
+  ggtitle("(b) MONTH 1") + #plot title
   annotate("text", x = 0.87, y = 0.52, label = "cd") + #add posthoc letters
   annotate("text", x = 0.83, y = 0.42, label = "de") + #add posthoc letters
   annotate("text", x = 2.2, y = 0.37, label = "de") + #add posthoc letters
@@ -1491,7 +1491,7 @@ Fig28 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, col
   scale_shape_manual(values=c(1,18), labels=c("Ambient Parental Envt.", "High Parental Envt.")) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("(c)") + #plot title
+  ggtitle("(c) MONTH 6") + #plot title
   annotate("text", x = 0.90, y = 0.19, label = "f") + #add posthoc letters
   annotate("text", x = 0.82, y = 0.12, label = "f") + #add posthoc letters
   annotate("text", x = 2.13, y = 0.06, label = "g") + #add posthoc letters
@@ -1522,16 +1522,17 @@ Fig28 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, col
 
 Fig28
 
-# #Repeated Measures Survivorship
+# #Repeated Measures Survivorship Origin = Fixed, Secondary = Fixed, Timepoint = Fixed, Chamber = Random repeated measure
 All.Survivorship <- rbind(survive.M0, survive.M1, survive.M6) #combine data
 
 #Binomial GLM
 # Wald-test with H0 = 0
 sur.GLM <-  glmer(cbind(Alive, Dead) ~ Origin*Secondary*Timepoint +(1|Chamber/Timepoint), data=All.Survivorship, family="binomial", na.action = "na.fail") #repeated measures ANOVA
 summary(sur.GLM) #view summary
-dredge(sur.GLM) #describe model selection
-Sur.Results <- summary(sur.GLM) #view summary
-anova(sur.GLM) #view ANOVA table
+sur.mods <- dredge(sur.GLM) #describe model selection
+sur.GLM <-  glmer(cbind(Alive, Dead) ~ Origin+Secondary+Timepoint + Secondary*Timepoint +(1|Chamber/Timepoint), data=All.Survivorship, family="binomial", na.action = "na.fail") #select best model for repeated measures ANOVA
+Anova(sur.GLM) #view ANOVA table
+Sur.Results <- Anova(sur.GLM) #view summary
 dispersion_glmer(sur.GLM) #check for over dispersion
 sur.resid <-resid(sur.GLM) #extract residuals
 sur.shapiro <- shapiro.test(sur.resid) #runs a normality test using shapiro-wilk test on the residuals
@@ -1540,12 +1541,11 @@ sur.qqnorm <- qqnorm(sur.resid) # normal quantile plot
 sur.qqline <- qqline(sur.resid) # adding a qline of comparison
 hist(sur.resid) #plot histogram of residuals
 boxplot(sur.resid~ All.Survivorship$Origin * All.Survivorship$Secondary* All.Survivorship$Timepoint, ylab = "residuals", las = 2, par(mar = c(12, 5, 4, 2)+ 0.1)) #view Origin variability
-sur.GLM.posthoc <- lsmeans(sur.GLM, specs=c("Timepoint","Origin","Secondary")) #calculate MS means
-sur.GLM.posthoc #view results
-sur.GLM.posthoc.p <- contrast(sur.GLM.posthoc, method="pairwise", by=c("Timepoint")) #contrast treatment groups within a species at each time point
-sur.GLM.posthoc.p #view results
-sur.GLM.posthoc.lett <- cld(sur.GLM.posthoc, alpha=.05, Letters=letters) #identify posthoc letter differences
-sur.GLM.posthoc.lett #view results
+
+#posthoc results
+sur.GLM.posthoc <- summary(glht(sur.GLM, lsm(pairwise~Origin+Secondary+Timepoint)))
+sur.GLM.posthoc 
+
 
 ##### SETTLEMENT #####
 #Timepoint 1 only         
@@ -1578,7 +1578,7 @@ Fig29 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, col
   annotate("text", x = 0.8, y = 0.68, label = "ab") +
   annotate("text", x = 2.25, y = 0.56, label = "bc") +
   annotate("text", x = 2.2, y = 0.49, label = "c") +
-  ggtitle("(d)") + #plot title
+  ggtitle("(d) CHAMBER") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Settlement") + #plot y axis label
   ylim(0,1) + #Y axis limits
@@ -1607,9 +1607,10 @@ Fig29
 # Wald-test with H0 = 0
 set.GLM <-  glmer(cbind(Settle, Not.Settle) ~ Origin*Secondary +(1|Chamber), data=settlement, family="binomial", na.action = "na.fail") #repeated measures ANOVA with random intercept but not slope 
 summary(set.GLM) #view summary
-dredge(set.GLM) #describe model selection
-Set.Results <- summary(set.GLM) #view summary
-anova(set.GLM) #view ANOVA table
+set.mods <- dredge(set.GLM) #describe model selection
+set.GLM <-  glmer(cbind(Settle, Not.Settle) ~ Origin+Secondary +(1|Chamber), data=settlement, family="binomial", na.action = "na.fail") #repeated measures ANOVA with random intercept but not slope 
+Set.Results <- Anova(set.GLM) #view summary
+Set.Results#view ANOVA table
 dispersion_glmer(set.GLM) #check for over dispersion
 set.resid <-resid(set.GLM) #extract residuals
 set.shapiro <- shapiro.test(set.resid) #runs a normality test using shapiro-wilk test on the residuals
@@ -1618,12 +1619,10 @@ sur.qqnorm <- qqnorm(set.resid) # normal quantile plot
 sur.qqline <- qqline(set.resid) # adding a qline of comparison
 hist(set.resid) #plot histogram of residuals
 boxplot(set.resid~ settlement$Origin * settlement$Secondary, ylab = "residuals", las = 2, par(mar = c(12, 5, 4, 2)+ 0.1)) #view Origin variability
-set.GLM.posthoc <- lsmeans(set.GLM, specs=c("Origin","Secondary")) #calculate MS means
-set.GLM.posthoc #view results
-set.GLM.posthoc.p <- contrast(set.GLM.posthoc, method="pairwise") #contrast treatment groups within a species at each time point
-set.GLM.posthoc.p #view results
-set.GLM.posthoc.lett <- cld(set.GLM.posthoc, alpha=.05, Letters=letters) #identify posthoc letter differences
-set.GLM.posthoc.lett #view results
+
+#posthoc results
+set.GLM.posthoc <- summary(glht(set.GLM, lsm(pairwise~Origin+Secondary)))
+set.GLM.posthoc 
 
 ##### GROWTH #####
 data.M1 <- read.csv("Month1_Larval_Size.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
@@ -1659,7 +1658,7 @@ Fig30 <- ggplot(data=m1.growth, aes(x=factor(Secondary), y=mean, group=Origin, c
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("(e)") + #plot title
+  ggtitle("(e) MONTH 1") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
   ylim(0,0.1) + #Y axis limits
@@ -1692,10 +1691,10 @@ Fig31 <- ggplot(data=m6.growth, aes(x=factor(Secondary), y=mean, group=Origin, c
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") +  #set error bar characteristics 
-  ggtitle("(f)") +  #plot title
+  ggtitle("(f) MONTH 6") +  #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
-  ylim(0,0.1) + #Y axis limits
+  ylim(0,0.025) + #Y axis limits
   theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
         axis.text=element_text(size=16), #set text size
@@ -1730,9 +1729,12 @@ All.Growth <- na.omit(All.Growth) #remove NA rows
 
 Growth.RM <- lme(log10(growth.rate+1) ~ Origin*Secondary*Timepoint, random = ~ 1|Chamber.num/Timepoint, data=All.Growth, na.action = "na.fail") #repeated measures ANOVA
 summary(Growth.RM) #view results
-Grow.Results <- summary(Growth.RM) #view results
+Grow.Results <- anova(Growth.RM) #view results
 anova(Growth.RM) #view results
-dredge(Growth.RM) #describe model selection
+grow.mods <- dredge(Growth.RM) #describe model selection
+Growth.RM <- lme(log10(growth.rate+1) ~ Origin+Timepoint, random = ~ 1|Chamber.num/Timepoint, data=All.Growth, na.action = "na.fail") #repeated measures ANOVA
+Grow.Results <- anova(Growth.RM) #view results
+anova(Growth.RM) #view results
 gro.resid <-resid(Growth.RM) #extract residuals
 gro.shapiro <- shapiro.test(gro.resid) #runs a normality test using shapiro-wilk test on the residuals
 gro.shapiro #view results
@@ -1741,12 +1743,9 @@ gro.qqline <- qqline(gro.resid) # adding a qline of comparison
 hist(gro.resid) #plot histogram of residuals
 boxplot(gro.resid~ All.Growth$Origin * All.Growth$Secondary* All.Growth$Timepoint, ylab = "residuals", las = 2, par(mar = c(12, 5, 4, 2)+ 0.1)) #view Origin variability
 
-Growth.posthoc <- lsmeans(Growth.RM , specs=c("Timepoint","Origin","Secondary")) #calculate MS means
-Growth.posthoc #view results
-Growth.posthoc.p <- contrast(Growth.posthoc, method="pairwise", by=c("Timepoint")) #contrast treatment groups within a species at each time point
-Growth.posthoc.p #view results
-Growth.posthoc.lett <- cld(Growth.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
-Growth.posthoc.lett #view results
+#posthoc results
+Growth.RM.posthoc <- summary(glht(Growth.RM, lsm(pairwise~Origin+Timepoint)))
+Growth.RM.posthoc 
 
 #transform and calculate descriptive stats
 All.Growth$logged <- log10(All.Growth$growth.rate +1)
@@ -1778,7 +1777,7 @@ Fig32 <- ggplot(data=m1.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=lower.bt, ymax=upper.bt), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  ggtitle("(e)") + #plot title
+  ggtitle("(e) MONTH 1") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
   ylim(0,0.1) + #Y axis limits
@@ -1819,7 +1818,7 @@ Fig33 <- ggplot(data=m6.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=lower.bt, ymax=upper.bt), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") +  #set error bar characteristics 
-  ggtitle("(f)") +  #plot title
+  ggtitle("(f) MONTH 6") +  #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
   ylim(0,0.1) + #Y axis limits
@@ -1890,10 +1889,10 @@ SW.Chem.Tables <- grid.arrange(
 ggsave(file="SW.Chemistry.Table.pdf", SW.Chem.Tables, width = 11, height = 6)
 
 ### Generate Stats Table
-survivorship <- as.data.frame(Sur.Results$coefficients)
+survivorship <- as.data.frame(Sur.Results)
 survivorship <-round(survivorship[,],3)
 survivorship
-settlement <- as.data.frame(Set.Results$coefficients)
+settlement <- as.data.frame(Set.Results)
 settlement <-round(settlement[,],3)
 settlement
 growth <- anova(Growth.RM)
@@ -1907,7 +1906,7 @@ growth
 # dev.off()
 
 #Capture statistical results to file
-capture.output(june.ks, july.ks, august.ks, survivorship, settlement, growth,  file="HI_Pdam_Parental_Stat_Results.txt")
+capture.output(june.ks, july.ks, august.ks, sur.mods, survivorship, set.mods, settlement, grow.mods, growth,  file="HI_Pdam_Parental_Stat_Results.txt")
 
 setwd(file.path(mainDir, 'Data'))
 
