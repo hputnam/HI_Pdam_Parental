@@ -2,7 +2,7 @@
 
 #Adult preconditioning to ocean acidification induces positive offspring response  
 
-This repository includes data and analysis scripts to accompany: Nurtured by nature: Considering the role of environmental and parental legacies in coral persistence 
+This repository includes data and analysis scripts to accompany: Nurtured by nature: Considering the role of environmental and parental legacies in coral ecological performance 
 
 **Authors:** Putnam, Hollie M., Ritson-Willams R, Cruz JA, Davidson JM, Gates RD.   
 
