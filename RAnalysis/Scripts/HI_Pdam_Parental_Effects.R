@@ -1400,7 +1400,7 @@ Fig26 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, col
         legend.position="none",  #set legend location
         panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
-                                  size = 12, 
+                                  size = 18, 
                                   hjust = 0)) #set title attributes
 
 Fig26 #view plot
@@ -1459,7 +1459,7 @@ Fig27 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, col
         legend.position="none",  #set legend location
         panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
-                                  size = 12, 
+                                  size = 18, 
                                   hjust = 0)) #set title attributes
 
 Fig27
@@ -1517,7 +1517,7 @@ Fig28 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, col
         legend.position=c(0.6,0.7),  #set legend location
         panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
-                                  size = 12, 
+                                  size = 18, 
                                   hjust = 0)) #set title attributes
 
 Fig28
@@ -1530,6 +1530,7 @@ All.Survivorship <- rbind(survive.M0, survive.M1, survive.M6) #combine data
 sur.GLM <-  glmer(cbind(Alive, Dead) ~ Origin*Secondary*Timepoint +(1|Chamber/Timepoint), data=All.Survivorship, family="binomial", na.action = "na.fail") #repeated measures ANOVA
 summary(sur.GLM) #view summary
 sur.mods <- dredge(sur.GLM) #describe model selection
+sur.mods 
 sur.GLM <-  glmer(cbind(Alive, Dead) ~ Origin+Secondary+Timepoint + Secondary*Timepoint +(1|Chamber/Timepoint), data=All.Survivorship, family="binomial", na.action = "na.fail") #select best model for repeated measures ANOVA
 Anova(sur.GLM) #view ANOVA table
 Sur.Results <- Anova(sur.GLM) #view summary
@@ -1599,7 +1600,7 @@ Fig29 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, col
         legend.position="none",  #set legend location
         panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
-                                  size = 12, 
+                                  size = 18, 
                                   hjust = 0)) #set title attributes
 Fig29
 
@@ -1679,7 +1680,7 @@ Fig30 <- ggplot(data=m1.growth, aes(x=factor(Secondary), y=mean, group=Origin, c
         legend.position="none",  #set legend location
         panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
-                                  size = 12, 
+                                  size = 18, 
                                   hjust = 0)) #set title attributes
 
 Fig30
@@ -1712,7 +1713,7 @@ Fig31 <- ggplot(data=m6.growth, aes(x=factor(Secondary), y=mean, group=Origin, c
         legend.position="none",  #set legend location
         panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
-                                  size = 12, 
+                                  size = 18, 
                                   hjust = 0)) #set title attributes
 
 Fig31
@@ -1727,12 +1728,13 @@ colnames(grow.M6) <- c( "Chamber.num", "Origin", "Secondary", "growth.rate", "Ti
 All.Growth <- rbind(grow.M1, grow.M6) #combine data
 All.Growth <- na.omit(All.Growth) #remove NA rows
 
-Growth.RM <- lme(log10(growth.rate+1) ~ Origin*Secondary*Timepoint, random = ~ 1|Chamber.num/Timepoint, data=All.Growth, na.action = "na.fail") #repeated measures ANOVA
+Growth.RM <- lme(log10(growth.rate+1) ~ Origin*Secondary*Timepoint, random = ~ 1|Chamber.num/Timepoint, data=All.Growth, na.action = "na.fail", method="ML") #repeated measures ANOVA
 summary(Growth.RM) #view results
 Grow.Results <- anova(Growth.RM) #view results
 anova(Growth.RM) #view results
 grow.mods <- dredge(Growth.RM) #describe model selection
-Growth.RM <- lme(log10(growth.rate+1) ~ Origin+Timepoint, random = ~ 1|Chamber.num/Timepoint, data=All.Growth, na.action = "na.fail") #repeated measures ANOVA
+grow.mods
+Growth.RM <- lme(log10(growth.rate+1) ~ Origin*Timepoint, random = ~ 1|Chamber.num/Timepoint, data=All.Growth, na.action = "na.fail", method="ML") #repeated measures ANOVA
 Grow.Results <- anova(Growth.RM) #view results
 anova(Growth.RM) #view results
 gro.resid <-resid(Growth.RM) #extract residuals
@@ -1744,7 +1746,7 @@ hist(gro.resid) #plot histogram of residuals
 boxplot(gro.resid~ All.Growth$Origin * All.Growth$Secondary* All.Growth$Timepoint, ylab = "residuals", las = 2, par(mar = c(12, 5, 4, 2)+ 0.1)) #view Origin variability
 
 #posthoc results
-Growth.RM.posthoc <- summary(glht(Growth.RM, lsm(pairwise~Origin+Timepoint)))
+Growth.RM.posthoc <- summary(glht(Growth.RM, lsm(pairwise~Origin*Timepoint)))
 Growth.RM.posthoc 
 
 #transform and calculate descriptive stats
@@ -1777,9 +1779,10 @@ Fig32 <- ggplot(data=m1.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=lower.bt, ymax=upper.bt), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
+  annotate("text", x = 2.16, y = 0.06, label = "*", size=10) +
   ggtitle("(e) MONTH 1") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
-  ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
+  ylab(expression(bold(~Growth~~"(polyps "*d^"-1"*")"))) + #plot y axis label
   ylim(0,0.1) + #Y axis limits
   theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
@@ -1798,7 +1801,7 @@ Fig32 <- ggplot(data=m1.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin
         legend.position="none",  #set legend location
         panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
-                                  size = 12, 
+                                  size = 18, 
                                   hjust = 0)) #set title attributes
 
 Fig32
@@ -1820,7 +1823,7 @@ Fig33 <- ggplot(data=m6.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin
                 width=0, position=position_dodge(.1), colour="black") +  #set error bar characteristics 
   ggtitle("(f) MONTH 6") +  #plot title
   xlab("Treatment of Offspring") + #plot x axis label
-  ylab(expression(bold(~Growth~~"(polyps "*d^"1"*")"))) + #plot y axis label
+  ylab(expression(bold(~Growth~~"(polyps "*d^"-1"*")"))) + #plot y axis label
   ylim(0,0.1) + #Y axis limits
   theme_bw() + #theme black and white
   theme(axis.line = element_line(color = 'black'), #Set the axes color
@@ -1839,7 +1842,7 @@ Fig33 <- ggplot(data=m6.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin
         legend.position="none",  #set legend location
         panel.border=element_rect(size=1.25, fill = NA), #set outer border
         plot.title = element_text(face = 'bold', 
-                                  size = 12, 
+                                  size = 18, 
                                   hjust = 0)) #set title attributes
 
 Fig33
