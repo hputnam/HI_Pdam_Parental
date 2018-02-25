@@ -1,9 +1,9 @@
 #Examination of Trans-generational Acclimatization in Pocillopora damicornis exposed to Ocean Acifiication
 #Data published in X
-#Title: 
+#Title: Nurtured by nature: Considering the role of environmental and parental legacies in coral ecological performance
 #Contact: Hollie Putnam hollieputnam@gmail.com
 #Supported by: NSF Ocean Sciencs Postdoctoral Research Fellowship (NSF OCE PRF-1323822) and NSF EPSCOR (NSF EPS-0903833)
-#last modified 20171113
+#last modified 20180220
 #See Readme file for details on data files and metadata
 
 rm(list=ls()) # removes all prior objects
@@ -433,7 +433,7 @@ Fig9 <- ggplot(M1.tank.temp.means, aes(Time)) + # plot mean temp by tank
   geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=M1.tank.temp.means, col="black", width=0) + #set values for standard error bars and offset on the X axis for clarity
   scale_colour_manual("Treatment", values = c("grey","black")) +
   scale_x_discrete(breaks=c("01:00", "06:00", "12:00", "18:00", "23:00")) + #set discrete breaks on the X axis
-  ggtitle("LARVAL MONTH 1\n(c)") + #Label graphic title
+  ggtitle("OFFSPRING MONTH 1\n(c)") + #Label graphic title
   ylim(23.5,29) + #Set Y axis limits
   xlab("Time") + #Label the X Axis
   ylab("Temperature (°C)") + #Label the Y Axis
@@ -604,7 +604,7 @@ Fig13 <- ggplot(M6.tank.temp.means, aes(Time)) + # plot mean temp by tank
   geom_errorbar(aes(x=Time, ymax=Tank5.mean+Tank5.se, ymin=Tank5.mean-Tank5.se), position=position_dodge(0.9), data=M6.tank.temp.means, col="black", width=0) + #set values for standard error bars and offset on the X axis for clarity
   scale_colour_manual("Treatment", values = c("grey","black")) +
   scale_x_discrete(breaks=c("01:00", "06:00", "12:00", "18:00", "23:00")) + #set discrete breaks on the X axis
-  ggtitle("LARVAL MONTH 6\n(d)") + #Label graphic title
+  ggtitle("OFFSPRING MONTH 6\n(d)") + #Label graphic title
   ylim(23.5,29) + #Set Y axis limits
   xlab("Time") + #Label the X Axis
   ylab("Temperature (°C)") + #Label the Y Axis
@@ -1733,7 +1733,7 @@ summary(Growth.RM) #view results
 Grow.Results <- anova(Growth.RM) #view results
 anova(Growth.RM) #view results
 grow.mods <- dredge(Growth.RM) #describe model selection
-grow.mods
+grow.mods #view results
 Growth.RM <- lme(log10(growth.rate+1) ~ Origin*Timepoint, random = ~ 1|Chamber.num/Timepoint, data=All.Growth, na.action = "na.fail", method="ML") #repeated measures ANOVA
 Grow.Results <- anova(Growth.RM) #view results
 anova(Growth.RM) #view results
@@ -1747,7 +1747,7 @@ boxplot(gro.resid~ All.Growth$Origin * All.Growth$Secondary* All.Growth$Timepoin
 
 #posthoc results
 Growth.RM.posthoc <- summary(glht(Growth.RM, lsm(pairwise~Origin*Timepoint)))
-Growth.RM.posthoc 
+Growth.RM.posthoc #view results
 
 #transform and calculate descriptive stats
 All.Growth$logged <- log10(All.Growth$growth.rate +1)
