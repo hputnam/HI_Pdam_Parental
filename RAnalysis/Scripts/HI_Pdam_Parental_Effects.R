@@ -789,9 +789,9 @@ for(i in 1: length(file.names)) {
   mV<-which(Data$Signal<pH3 & Data$Signal>pH35) 
   
   #density of your titrant: specific to each bottle
-  d1<-100*(-0.00000331*mean(Data$Temperature[mV], na.rm=T)^2-0.0001401*mean(Data$Temperature[mV], na.rm=T)+1.02933)/1000
-  d2<-100*(-0.00000350*mean(Data$Temperature[mV], na.rm=T)^2-0.0001319*mean(Data$Temperature[mV], na.rm=T)+1.02907)/1000
-  d3<-100*(-0.00000379*mean(Data$Temperature[mV], na.rm=T)^2-0.00012043*mean(Data$Temperature[mV], na.rm=T)+1.0296876)/1000
+  d1<-(-0.00000331*mean(Data$Temperature[mV], na.rm=T)^2-0.0001401*mean(Data$Temperature[mV], na.rm=T)+1.02933)
+  d2<-(-0.00000350*mean(Data$Temperature[mV], na.rm=T)^2-0.0001319*mean(Data$Temperature[mV], na.rm=T)+1.02907)
+  d3<-(-0.00000379*mean(Data$Temperature[mV], na.rm=T)^2-0.00012043*mean(Data$Temperature[mV], na.rm=T)+1.0296876)
   
 d <- if(Mass[name,4] =="d1") {
     d1                              #if density function = d1 use d1
@@ -813,7 +813,7 @@ d <- if(Mass[name,4] =="d1") {
   #at function is based on code in saecarb package by Steeve Comeau, Heloise Lavigne and Jean-Pierre Gattuso
   TA[i,1]<-name #add sample name to data output
   TA[i,2]<-mass #add mass to data output
-  TA[i,3]<-10000000*at(S=s,T=mean(Data$Temperature[mV], na.rm=T), C=c, d=d, pHTris=NULL, ETris=NULL, weight=mass, E=Data$Signal[mV], volume=Data$Volume[mV]) #add TA to data output
+  TA[i,3]<-1000000*at(S=s,T=mean(Data$Temperature[mV], na.rm=T), C=c, d=d, pHTris=NULL, ETris=NULL, weight=mass, E=Data$Signal[mV], volume=Data$Volume[mV]) #add TA to data output
 }
 
 TA <- data.frame(TA) #make a dataframe from the TA results
@@ -1291,62 +1291,6 @@ august.high <- subset(august.larvae, Treatment=="High") #subset data
 august.ks <-ks.test(august.amb$mean, august.high$mean) #Kolmogorov-Smirnov Test Ho: differences in distribution
 august.ks #view results
 
-# ## Total release as a function of both treatment and time
-# RM.release.data <- read.csv("RM_Release_Data.csv", header=T, sep=",", na.string="NA", as.is=T) #read in data in long format
-# all.release.mean <- aggregate(Total.Release ~ Treatment + Time, data=RM.release.data, mean) #calculate mean by treatment and time
-# all.release.se <- aggregate(Total.Release ~ Treatment + Time, data=RM.release.data, std.error)  #calculate se by treatment and time
-# all.release <- cbind(all.release.mean, all.release.se$Total.Release) #make dataframe
-# colnames(all.release) <- c("Treatment", "Time", "mean", "se") #rename columns
-# 
-# Fig25 <- ggplot(all.release, aes(x=Time, y=mean, colour=Treatment, group=Treatment), position=position_dodge(width=0.5)) +  #plot mean as a function of Time
-#   geom_errorbar(aes(ymin=all.release$mean - all.release$se, ymax=all.release$mean + all.release$se), #plot error bars
-#                 colour="black", width=0, size = 0.4, # Width of the error bars
-#                 position=position_dodge(width=0.5)) + #set bar position
-#   geom_point(position=position_dodge(width=0.5), size=2, shape=15) +
-#   scale_colour_manual(values = c("gray","black")) + #set point fill color
-#   scale_x_discrete(limits=c("June","July","August")) + #label x axis in order
-#   ylab(" Total Release") + #y axis label
-#   ylim(0,1700) + #y axis limits
-#   ggtitle("D) Total") + #plot title
-#   theme_bw() + #theme black and white 
-#   theme(axis.line = element_line(color = 'black'), #Set the axes color
-#         axis.text=element_text(size=10), #set text size
-#         axis.title=element_text(size=12,face="bold"), #set axis title text size
-#         strip.text.x = element_text(size = 12, colour = "black", face="bold"),
-#         panel.border = element_blank(), #Set the border
-#         axis.line.x = element_line(color = 'black'), #Set the axes color
-#         axis.line.y = element_line(color = 'black'), #Set the axes color
-#         axis.text.x=element_text(angle=90), #Set text angle
-#         panel.grid.major = element_blank(), #Set the major gridlines
-#         panel.grid.minor = element_blank(), #Set the minor gridlines
-#         plot.background=element_blank(),  #Set the plot background
-#         legend.key = element_blank(),  #remove legend background
-#         legend.position="none",  #set legend location
-#         plot.title = element_text(face = 'bold', 
-#                                   size = 12, 
-#                                   hjust = 0)) #set title attributes
-# Fig25
-# 
-# #LM release by treatment and time
-# RM.release.data #view data
-# RM.release.data <- na.omit(RM.release.data) #remove NA
-# release.lm <- lm(log10(Total.Release+1) ~ Treatment * Time, data=RM.release.data) #run generalized linear model 
-# summary(release.lm) #view summary
-# release.resid <-resid(release.lm)
-# release.shapiro <- shapiro.test(release.resid) #runs a normality test using shapiro-wilk test on the residuals
-# release.shapiro #view results
-# release.qqnorm <- qqnorm(release.resid) # normal quantile plot
-# release.qqline <- qqline(release.resid) # adding a qline of comparison
-# hist(release.resid) #plot histogram of residuals
-# plot(release.lm$fitted.values, release.lm$residuals) #plot residuals as a function of fitted data
-# 
-# release.posthoc <- lsmeans(release.lm, specs=c("Time")) #calculate MS means
-# release.posthoc #view results
-# release.posthoc.p <- contrast(release.posthoc, method="pairwise") #contrast treatment groups within a species at each time point
-# release.posthoc.p #view results
-# release.posthoc.lett <- cld(release.posthoc , alpha=.05, Letters=letters) #identify posthoc letter differences
-# release.posthoc.lett #view results
-
 ##### SURVIVORSHIP #####
 larval.data.M0 <- read.csv("Larval_Data_M0.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
 proportion.alive.M0 <- (larval.data.M0$Plastic + larval.data.M0$Top.Tile + larval.data.M0$Bottom.Tile +  larval.data.M0$Edge +	larval.data.M0$Swimming)/larval.data.M0$larvae.added #calculate survivorship
@@ -1375,10 +1319,6 @@ Fig26 <- ggplot(data=survivorship.M0, aes(x=Secondary, y=mean, group=Origin, col
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
   ggtitle("(a) CHAMBER") + #plot title
-  annotate("text", x = 0.87, y = 0.82, label = "a") + #add posthoc letters
-  annotate("text", x = 0.85, y = 0.74, label = "ab") + #add posthoc letters
-  annotate("text", x = 2.2, y = 0.59, label = "bc") + #add posthoc letters
-  annotate("text", x = 2.15, y = 0.51, label = "cd") + #add posthoc letters
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Survivorship") + #plot y axis label
   ylim(0,1) + #Y axis limits
@@ -1434,10 +1374,6 @@ Fig27 <- ggplot(data=survivorship.M1, aes(x=Secondary, y=mean, group=Origin, col
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
   ggtitle("(b) MONTH 1") + #plot title
-  annotate("text", x = 0.87, y = 0.52, label = "cd") + #add posthoc letters
-  annotate("text", x = 0.83, y = 0.42, label = "de") + #add posthoc letters
-  annotate("text", x = 2.2, y = 0.37, label = "de") + #add posthoc letters
-  annotate("text", x = 2.15, y = 0.30, label = "e") + #add posthoc letters
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Survivorship") + #plot y axis label
   ylim(0,1) + #Y axis limits
@@ -1492,10 +1428,6 @@ Fig28 <- ggplot(data=survivorship.M6, aes(x=Secondary, y=mean, group=Origin, col
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
   ggtitle("(c) MONTH 6") + #plot title
-  annotate("text", x = 0.90, y = 0.19, label = "f") + #add posthoc letters
-  annotate("text", x = 0.82, y = 0.12, label = "f") + #add posthoc letters
-  annotate("text", x = 2.13, y = 0.06, label = "g") + #add posthoc letters
-  annotate("text", x = 1.87, y = 0.0005, label = "fg") + #add posthoc letters
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Survivorship") + #plot y axis label
   ylim(0,1) + #Y axis limits
@@ -1543,11 +1475,6 @@ sur.qqline <- qqline(sur.resid) # adding a qline of comparison
 hist(sur.resid) #plot histogram of residuals
 boxplot(sur.resid~ All.Survivorship$Origin * All.Survivorship$Secondary* All.Survivorship$Timepoint, ylab = "residuals", las = 2, par(mar = c(12, 5, 4, 2)+ 0.1)) #view Origin variability
 
-#posthoc results
-sur.GLM.posthoc <- summary(glht(sur.GLM, lsm(pairwise~Origin+Secondary+Timepoint)))
-sur.GLM.posthoc 
-
-
 ##### SETTLEMENT #####
 #Timepoint 1 only         
 settlement.data <- larval.data.M0
@@ -1575,10 +1502,6 @@ Fig29 <- ggplot(data=settlement.data, aes(x=Secondary, y=mean, group=Origin, col
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  annotate("text", x = 0.85, y = 0.80, label = "a") +
-  annotate("text", x = 0.8, y = 0.68, label = "ab") +
-  annotate("text", x = 2.25, y = 0.56, label = "bc") +
-  annotate("text", x = 2.2, y = 0.49, label = "c") +
   ggtitle("(d) CHAMBER") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab("Settlement") + #plot y axis label
@@ -1620,10 +1543,6 @@ sur.qqnorm <- qqnorm(set.resid) # normal quantile plot
 sur.qqline <- qqline(set.resid) # adding a qline of comparison
 hist(set.resid) #plot histogram of residuals
 boxplot(set.resid~ settlement$Origin * settlement$Secondary, ylab = "residuals", las = 2, par(mar = c(12, 5, 4, 2)+ 0.1)) #view Origin variability
-
-#posthoc results
-set.GLM.posthoc <- summary(glht(set.GLM, lsm(pairwise~Origin+Secondary)))
-set.GLM.posthoc 
 
 ##### GROWTH #####
 data.M1 <- read.csv("Month1_Larval_Size.csv", header=T, sep=",", na.string="NA", as.is=T) #load data
@@ -1745,10 +1664,6 @@ gro.qqline <- qqline(gro.resid) # adding a qline of comparison
 hist(gro.resid) #plot histogram of residuals
 boxplot(gro.resid~ All.Growth$Origin * All.Growth$Secondary* All.Growth$Timepoint, ylab = "residuals", las = 2, par(mar = c(12, 5, 4, 2)+ 0.1)) #view Origin variability
 
-#posthoc results
-Growth.RM.posthoc <- summary(glht(Growth.RM, lsm(pairwise~Origin*Timepoint)))
-Growth.RM.posthoc #view results
-
 #transform and calculate descriptive stats
 All.Growth$logged <- log10(All.Growth$growth.rate +1)
 mean.growth <- aggregate(logged ~ Origin + Secondary + Timepoint, data = All.Growth, FUN= "mean") #calculate mean by origin and secondary treatments
@@ -1779,7 +1694,6 @@ Fig32 <- ggplot(data=m1.growth.bt, aes(x=factor(Secondary), y=mean, group=Origin
   scale_shape_manual(values=c(1,18)) + #set shapes
   geom_errorbar(aes(ymin=lower.bt, ymax=upper.bt), #plot error bars
                 width=0, position=position_dodge(.1), colour="black") + #set error bar characteristics 
-  annotate("text", x = 2.16, y = 0.06, label = "*", size=10) +
   ggtitle("(e) MONTH 1") + #plot title
   xlab("Treatment of Offspring") + #plot x axis label
   ylab(expression(bold(~Growth~~"(polyps "*d^"-1"*")"))) + #plot y axis label
